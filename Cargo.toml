@@ -1,5 +1,6 @@
 [workspace]
 
 members = [
-    "src-tauri",
+  "src-tauri",
+  "libs/hdt_cat_labels",
 ]
