@@ -8,10 +8,10 @@ Run Dev Frontend
 
 ```console
 # First time install deps
-pnpm install
+npm install
 
 # Run dev server
-pnpm dev
+npm dev
 ```
 
 Run Tauri Dev
@@ -25,7 +25,7 @@ cargo tauri dev
 Build Release Frontend
 
 ```console
-pnpm build
+npm build
 ```
 
 Build exe and bundles

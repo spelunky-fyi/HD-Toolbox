@@ -1,28 +1,64 @@
 <script lang="ts">
+  import Drawer, { AppContent, Content } from "@smui/drawer";
+  import List, { Item, Text } from "@smui/list";
+  import type { TopAppBarComponentDev } from "@smui/top-app-bar";
+  import TopAppBar, {
+    Row,
+    Section,
+    Title,
+    AutoAdjust,
+  } from "@smui/top-app-bar";
+
+  let topAppBar: TopAppBarComponentDev;
 </script>
 
-<main>
-  <h1>HD Toolbox!</h1>
-</main>
+<TopAppBar bind:this={topAppBar} variant="standard" dense>
+  <Row>
+    <Section>
+      <Title>HD Toolbox</Title>
+    </Section>
+    <Section align="end" toolbar />
+  </Row>
+</TopAppBar>
+<AutoAdjust class="top-bar-content" {topAppBar}>
+  <div class="drawer-container">
+    <Drawer>
+      <Content>
+        <List>
+          <Item href="javascript:void(0)">
+            <Text>Home</Text>
+          </Item>
+        </List>
+      </Content>
+    </Drawer>
+    <AppContent class="app-content" />
+  </div>
+</AutoAdjust>
 
 <style>
-  main {
-    text-align: center;
-    padding: 1em;
-    max-width: 240px;
-    margin: 0 auto;
+  :global(.top-bar-content) {
+    height: 100%;
+    box-sizing: border-box;
   }
 
-  h1 {
-    color: #ff3e00;
-    text-transform: uppercase;
-    font-size: 4em;
-    font-weight: 100;
-  }
+  /* These classes are only needed because the
+    drawer is in a container on the page. */
+  .drawer-container {
+    position: relative;
+    display: flex;
+    height: 100%;
 
-  @media (min-width: 640px) {
-    main {
-      max-width: none;
-    }
+    flex-grow: 1;
+    overflow: hidden;
+    z-index: 0;
+  }
+  * :global(.app-content) {
+    overflow: auto;
+    position: relative;
+    flex-direction: column;
+    width: 100%;
+    flex: 0 0 100%; /* Let it fill the entire space horizontally */
+
+    box-sizing: border-box;
   }
 </style>
