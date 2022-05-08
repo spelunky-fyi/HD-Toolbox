@@ -1,5 +1,5 @@
 [package]
-author = "garebear"
+authors = ["garebear"]
 edition = "2021"
 name = "hdt_cat_labels"
 version = "0.0.0"
