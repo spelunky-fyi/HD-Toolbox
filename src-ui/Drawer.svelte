@@ -1,7 +1,15 @@
 <script lang="ts">
+  import { invoke } from "@tauri-apps/api/tauri";
+
   import Drawer, { Content } from "@smui/drawer";
   import List, { Item, Text } from "@smui/list";
   import HDContent from "./Content.svelte";
+
+  function launch_spelunky_hd() {
+    invoke("launch_spelunky_hd")
+      .then((msg) => console.log("Success:", msg))
+      .catch((err) => console.log("Error:", err));
+  }
 </script>
 
 <div class="drawer-container">
@@ -18,7 +26,7 @@
         <div class="play-button">
           <List>
             <hr />
-            <Item href="javascript:void(0)">
+            <Item on:click={launch_spelunky_hd}>
               <Text>Play!</Text>
             </Item>
           </List>

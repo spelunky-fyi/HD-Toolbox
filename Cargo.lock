@@ -1330,6 +1330,7 @@ dependencies = [
  "futures",
  "hyper",
  "hyper-tungstenite",
+ "open",
  "serde",
  "serde_json",
  "static-files",
