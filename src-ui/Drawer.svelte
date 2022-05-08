@@ -1,14 +1,28 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/tauri";
 
-  import Drawer, { Content } from "@smui/drawer";
+  import Drawer, { AppContent, Content } from "@smui/drawer";
   import List, { Item, Text } from "@smui/list";
-  import HDContent from "./Content.svelte";
+
+  import Assets from "./pages/Assets.svelte";
+  import Trackers from "./pages/Trackers.svelte";
+  import LevelViewer from "./pages/LevelViewer.svelte";
 
   function launch_spelunky_hd() {
     invoke("launch_spelunky_hd")
       .then((msg) => console.log("Success:", msg))
       .catch((err) => console.log("Error:", err));
+  }
+
+  let activePageIndex = 0;
+  let pages = [
+    { name: "Assets", component: Assets },
+    { name: "Trackers", component: Trackers },
+    { name: "Level Viewer", component: LevelViewer },
+  ];
+
+  function selectComponent(index: number) {
+    activePageIndex = index;
   }
 </script>
 
@@ -18,23 +32,34 @@
       <div class="drawer-lists">
         <div class="drawer-nav">
           <List>
-            <Item activated={true} href="javascript:void(0)">
-              <Text>Home</Text>
-            </Item>
+            {#each pages as page, idx}
+              <Item
+                activated={activePageIndex === idx}
+                on:click={() => selectComponent(idx)}
+              >
+                <Text>{page.name}</Text>
+              </Item>
+            {/each}
           </List>
         </div>
         <div class="play-button">
           <List>
             <hr />
             <Item on:click={launch_spelunky_hd}>
-              <Text>Play!</Text>
+              <img height="30" alt="Spelunky Logo" src="/images/idol.png" />
+              <span style="padding: 10px;">
+                <Text>Launch Spelunky HD!</Text>
+              </span>
             </Item>
           </List>
         </div>
       </div>
     </Content>
   </Drawer>
-  <HDContent />
+
+  <AppContent class="app-content">
+    <svelte:component this={pages[activePageIndex].component} />
+  </AppContent>
 </div>
 
 <style>
@@ -63,5 +88,13 @@
 
   .play-button {
     width: 100%;
+  }
+
+  * :global(.app-content) {
+    overflow: auto;
+    position: relative;
+    width: 100%;
+
+    box-sizing: border-box;
   }
 </style>

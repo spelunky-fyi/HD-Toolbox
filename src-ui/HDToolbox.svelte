@@ -8,6 +8,23 @@
     AutoAdjust,
   } from "@smui/top-app-bar";
 
+  function disableMenu() {
+    // if (window.location.hostname !== "tauri.localhost") {
+    //   return;
+    // }
+
+    document.addEventListener(
+      "contextmenu",
+      (e) => {
+        e.preventDefault();
+        return false;
+      },
+      { capture: true }
+    );
+  }
+
+  disableMenu();
+
   let topAppBar: TopAppBarComponentDev;
 </script>
 
