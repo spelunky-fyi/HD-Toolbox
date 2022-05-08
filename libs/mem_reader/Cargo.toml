@@ -1,0 +1,21 @@
+[package]
+author = "garebear"
+edition = "2021"
+name = "hdt_mem_reader"
+version = "0.0.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1"
+thiserror = "1"
+winapi = {version = "0.3.9", features = [
+  "handleapi",
+  "memoryapi",
+  "minwinbase",
+  "ntdef",
+  "processthreadsapi",
+  "psapi",
+  "tlhelp32",
+  "winnt",
+]}

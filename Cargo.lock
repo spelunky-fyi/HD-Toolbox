@@ -1341,7 +1341,16 @@ dependencies = [
 
 [[package]]
 name = "hdt_cat_labels"
-version = "0.1.0"
+version = "0.0.0"
+
+[[package]]
+name = "hdt_mem_reader"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "thiserror",
+ "winapi",
+]
 
 [[package]]
 name = "heck"

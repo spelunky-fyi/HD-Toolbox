@@ -2,5 +2,6 @@
 
 members = [
   "src-tauri",
-  "libs/hdt_cat_labels",
+  "libs/cat_labels",
+  "libs/mem_reader",
 ]
