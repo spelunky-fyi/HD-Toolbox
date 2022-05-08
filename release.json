@@ -1,11 +1,11 @@
 {
-    "name": "v0.1.1",
+    "version": "v0.1.1",
     "notes": "Testing Updater",
     "pub_date": "2022-05-08T23:13:06Z",
     "platforms": {
-      "win64": {
+      "windows-x86_64": {
         "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTVTZZL2h5aGFZMEl5alJiNXVOUFhLaGpkbFl6YzFGcGxDMlVuNG5kWU9RRDZQQzMrK3pGKzFtVldJa29xTmxNYm9OQmZ0YWtXNEQ2UnhmbFE4eUN2TVpUcXNVcDlxTUFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjUyMDUxNDU5CWZpbGU6QzpcVXNlcnNcZ2FyeVxSZXBvc1xIRC1Ub29sYm94XHRhcmdldFxyZWxlYXNlXGJ1bmRsZS9tc2kvSEQgVG9vbGJveF8wLjEuMV94NjRfZW4tVVMubXNpLnppcApUQVNGeVdhWnp5SFB1S1VsN3MxMWVNZ0FwSGtlTTU0dzczOWNQNVBNQmZuOVMwMUFWdldrbEFmbGwxeWJBTW9mYm8xNWZCcStydWZ2NmtjSGdhM3pDQT09Cg==",
         "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.1.1/HD.Toolbox_0.1.1_x64_en-US.msi.zip"
       }
     }
-  }
+}
