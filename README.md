@@ -31,27 +31,28 @@ npm build
 Build exe and bundles
 
 ```console
+$Env:TAURI_PRIVATE_KEY = "private-key-for-hd-toolbox"
 cargo tauri build
 ```
 
 ## Potential Functionality
 
-- [] Level Viewer
-- [] Game Launcher
-- [] Overlay + Injector for Science / Practice
-- [] Trackers
-  - [] Category
-  - [] Kill Counter
-- [] Save Management
-  - [] Editor
-  - [] Named Backup / Auto Backup / Restore
-  - [] Stat Viewer
-- [] WAD/WIX Extractor/Packer
-  - [] Skin Selector
-- [] Mod Management
-- [] External Tool Managment
-  - [] RTA Tracker
-  - [] Frozlunky
-- [] Memory Shenanigans
-  - [] Character Unlock Manager
-  - [] Slowlook Fix Tool
+- [ ] Level Viewer
+- [ ] Game Launcher
+- [ ] Overlay + Injector for Science / Practice
+- [ ] Trackers
+  - [ ] Category
+  - [ ] Kill Counter
+- [ ] Save Management
+  - [ ] Editor
+  - [ ] Named Backup / Auto Backup / Restore
+  - [ ] Stat Viewer
+- [ ] WAD/WIX Extractor/Packer
+  - [ ] Skin Selector
+- [ ] Mod Management
+- [ ] External Tool Managment
+  - [ ] RTA Tracker
+  - [ ] Frozlunky
+- [ ] Memory Shenanigans
+  - [ ] Character Unlock Manager
+  - [ ] Slowlook Fix Tool
