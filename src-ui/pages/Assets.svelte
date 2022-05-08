@@ -2,7 +2,7 @@
 </script>
 
 <pre>
-    Assets
+    Assets (Unpack / Pack)
 </pre>
 
 <style>
