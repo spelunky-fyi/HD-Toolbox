@@ -48,7 +48,7 @@
       "endpoints": [
         "https://raw.githubusercontent.com/spelunky-fyi/HD-Toolbox/main/release.json"
       ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQwOTgxNkNBRTE4RkU5OTQKUldTVTZZL2h5aGFZMEhmd3lJcGxXcytDeXhkR1BCSzFZTnRGN1A4bVl6YWdYcTQrTVZDbHkxcUsK"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDVFMjVFNTVCNTUwQzhCQ0QKUldUTml3eFZXK1VsWGkrc0pMcVpwTTNTWHM0UUd4Z0J0U2NiWTQySS9FZFBNN3lLM2pTSm1ObkcK"
     },
     "allowlist": {
       "all": true
