@@ -7,7 +7,7 @@
     "dev": "rollup -c -w",
     "start": "sirv public --no-clear",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "prepare": "npm run smui-theme-light && npm run smui-theme-dark",
+    "prepare": "mkdirp public/build && npm run smui-theme-light && npm run smui-theme-dark",
     "smui-theme-light": "smui-theme compile public/build/smui.css -i src-ui/theme",
     "smui-theme-dark": "smui-theme compile public/build/smui-dark.css -i src-ui/theme/dark"
   },
@@ -22,6 +22,7 @@
     "@smui/top-app-bar": "^6.0.0-beta.16",
     "@tauri-apps/api": "^1.0.0-rc.5",
     "@tsconfig/svelte": "^2.0.1",
+    "mkdirp": "^1.0.4",
     "rollup": "^2.3.4",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-livereload": "^2.0.0",
