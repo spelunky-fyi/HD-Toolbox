@@ -4,9 +4,9 @@
   import Drawer, { AppContent, Content } from "@smui/drawer";
   import List, { Item, Text } from "@smui/list";
 
-  import Assets from "./pages/Assets.svelte";
-  import Trackers from "./pages/Trackers.svelte";
-  import LevelViewer from "./pages/LevelViewer.svelte";
+  import Assets from "@hdt/pages/Assets.svelte";
+  import Trackers from "@hdt/pages/Trackers.svelte";
+  import LevelViewer from "@hdt/pages/level_viewer/LevelViewer.svelte";
 
   function launch_spelunky_hd() {
     invoke("launch_spelunky_hd")

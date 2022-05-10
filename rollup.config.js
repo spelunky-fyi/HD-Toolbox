@@ -6,6 +6,11 @@ import { terser } from "rollup-plugin-terser";
 import sveltePreprocess from "svelte-preprocess";
 import typescript from "@rollup/plugin-typescript";
 import css from "rollup-plugin-css-only";
+import alias from "@rollup/plugin-alias";
+
+const aliases = alias({
+  entries: [{ find: "@hdt", replacement: "src-ui/" }],
+});
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -44,6 +49,7 @@ export default [
       file: "public/build/bundle.js",
     },
     plugins: [
+      aliases,
       svelte({
         preprocess: sveltePreprocess({
           sourceMap: !production,
@@ -98,6 +104,7 @@ export default [
       file: "public/build/trackers/category-bundle.js",
     },
     plugins: [
+      aliases,
       svelte({
         preprocess: sveltePreprocess({ sourceMap: !production }),
         compilerOptions: {

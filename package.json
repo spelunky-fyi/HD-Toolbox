@@ -12,11 +12,13 @@
     "smui-theme-dark": "smui-theme compile public/build/smui-dark.css -i src-ui/theme/dark"
   },
   "devDependencies": {
+    "@rollup/plugin-alias": "^3.1.9",
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-node-resolve": "^11.0.0",
     "@rollup/plugin-typescript": "^8.3.2",
     "@smui/button": "^6.0.0-beta.16",
     "@smui/drawer": "^6.0.0-beta.16",
+    "@smui/layout-grid": "^6.0.0-beta.16",
     "@smui/list": "^6.0.0-beta.16",
     "@smui/paper": "^6.0.0-beta.16",
     "@smui/top-app-bar": "^6.0.0-beta.16",

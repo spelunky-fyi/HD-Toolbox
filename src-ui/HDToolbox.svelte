@@ -1,5 +1,5 @@
 <script lang="ts">
-  import HDDrawer from "./Drawer.svelte";
+  import HDDrawer from "@hdt/Drawer.svelte";
   import type { TopAppBarComponentDev } from "@smui/top-app-bar";
   import TopAppBar, {
     Row,
