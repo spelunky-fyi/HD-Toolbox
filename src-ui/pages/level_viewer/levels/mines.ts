@@ -1,5 +1,5 @@
 export default {
-  levels: [
+  rooms: [
     {
       name: "Entrance",
       rooms: [
