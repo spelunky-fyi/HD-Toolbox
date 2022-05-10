@@ -14,6 +14,7 @@ fn launch_spelunky_hd() -> Result<String, String> {
 
 fn main() -> anyhow::Result<()> {
     tauri::Builder::default()
+        .plugin(tauri_plugin_window_state::Builder::default().build())
         .invoke_handler(tauri::generate_handler![launch_spelunky_hd])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

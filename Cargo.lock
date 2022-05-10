@@ -1336,6 +1336,7 @@ dependencies = [
  "static-files",
  "tauri",
  "tauri-build",
+ "tauri-plugin-window-state",
  "tokio",
  "winapi",
 ]
@@ -3398,6 +3399,16 @@ dependencies = [
  "syn",
  "tauri-codegen",
  "tauri-utils",
+]
+
+[[package]]
+name = "tauri-plugin-window-state"
+version = "0.1.1"
+source = "git+https://github.com/tauri-apps/tauri-plugin-window-state?branch=release#848b615ad436a2a2d907f5ee60260905cf7f55dd"
+dependencies = [
+ "bincode",
+ "serde",
+ "tauri",
 ]
 
 [[package]]
