@@ -1,3 +1,5 @@
+import path from "path";
+
 import svelte from "rollup-plugin-svelte";
 import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
@@ -8,8 +10,12 @@ import typescript from "@rollup/plugin-typescript";
 import css from "rollup-plugin-css-only";
 import alias from "@rollup/plugin-alias";
 
+const projectRootDir = path.resolve(__dirname);
+
 const aliases = alias({
-  entries: [{ find: "@hdt", replacement: "src-ui/" }],
+  entries: [
+    { find: "@hdt", replacement: path.resolve(projectRootDir, "src-ui/") },
+  ],
 });
 
 const production = !process.env.ROLLUP_WATCH;
