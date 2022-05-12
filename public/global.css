@@ -11,10 +11,6 @@ body {
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
 }
 
 a {
@@ -75,9 +71,7 @@ button:focus {
   box-sizing: border-box;
 }
 
-/* .app-content {
-  -moz-user-select: text;
-  -ms-user-select: text;
-  user-select: text;
+textarea.mono {
+  font-family: Consolas, Monaco, Lucida Console, Liberation Mono,
+    DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
 }
-*/

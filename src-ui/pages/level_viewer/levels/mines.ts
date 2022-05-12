@@ -472,7 +472,7 @@ export default {
       ],
     },
     {
-      name: "Coffin",
+      name: "Spider Lair",
       rooms: [
         {
           name: "Spider Lair 1 - A",
@@ -562,14 +562,14 @@ export default {
           data: "11111111111111..111111..22...111.l0002.....000W0.0...00000k0..K00S0000bbbbbbbbbb",
         },
         {
-          name: "Right Facing - Triple Hired Hand",
-          notes: "1/20",
-          data: "11111111111111..111111..22...111.l0002.....000W0.0...00000k0..K0SSS000bbbbbbbbbb",
-        },
-        {
           name: "Right Facing - Double Hired Hand",
           notes: "1/100",
           data: "11111111111111..111111..22...111.l0002.....000W0.0...00000k0..K0S0S000bbbbbbbbbb",
+        },
+        {
+          name: "Right Facing - Triple Hired Hand",
+          notes: "1/20",
+          data: "11111111111111..111111..22...111.l0002.....000W0.0...00000k0..K0SSS000bbbbbbbbbb",
         },
         {
           name: "Right Facing - Shop",
@@ -584,14 +584,14 @@ export default {
           data: "11111111111111..11111...22..11..2000l.110.W0000...0k00000...0000S00K..bbbbbbbbbb",
         },
         {
-          name: "Left Facing - Triple Hired Hand",
-          notes: "1/20",
-          data: "11111111111111..11111...22..11..2000l.110.W0000...0k00000...000SSS0K..bbbbbbbbbb",
-        },
-        {
           name: "Left Facing - Double Hired Hand",
           notes: "1/100",
           data: "11111111111111..11111...22..11..2000l.110.W0000...0k00000...000S0S0K..bbbbbbbbbb",
+        },
+        {
+          name: "Left Facing - Triple Hired Hand",
+          notes: "1/20",
+          data: "11111111111111..11111...22..11..2000l.110.W0000...0k00000...000SSS0K..bbbbbbbbbb",
         },
         {
           name: "Left Facing - Shop",
