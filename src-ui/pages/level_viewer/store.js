@@ -21,6 +21,7 @@ const imageSrcs = [
   { name: "monstersbig2", src: "/images/tiles/monstersbig2.png" },
   { name: "coffin", src: "/images/tiles/coffin.png" },
   { name: "doors", src: "/images/tiles/doors.png" },
+  { name: "water", src: "/images/tiles/water.png" },
 ];
 export const images = {};
 

@@ -12,16 +12,16 @@ import hell from "@hdt/pages/level_viewer/levels/hell";
 import tutorial from "@hdt/pages/level_viewer/levels/tutorial";
 
 export default [
-  { name: "Mines", data: mines },
-  { name: "Jungle", data: jungle },
-  { name: "Worm", data: worm },
-  { name: "Black Market", data: black_market },
-  { name: "Haunted Castle", data: haunted_castle },
-  { name: "Ice Caves", data: ice_caves },
-  { name: "Wet Fur", data: wet_fur },
-  { name: "Mothership", data: mothership },
-  { name: "Temple / CoG", data: temple },
-  { name: "Olmec's Lair", data: olmecs_lair },
-  { name: "Hell / Yama", data: hell },
-  { name: "Tutorial", data: tutorial },
+  { name: "Mines", data: mines, bg: "minebg" },
+  { name: "Jungle", data: jungle, bg: "lushbg" },
+  { name: "Worm", data: worm, bg: "wormbg" },
+  { name: "Black Market", data: black_market, bg: "lushbg" },
+  { name: "Haunted Castle", data: haunted_castle, bg: "lushbg" },
+  { name: "Ice Caves", data: ice_caves, bg: "icebg" },
+  { name: "Wet Fur", data: wet_fur, bg: "icebg" },
+  { name: "Mothership", data: mothership, bg: "mothershipbg" },
+  { name: "Temple / CoG", data: temple, bg: "templebg" },
+  { name: "Olmec's Lair", data: olmecs_lair, bg: "templebg" },
+  { name: "Hell / Yama", data: hell, bg: "hellbg" },
+  { name: "Tutorial", data: tutorial, bg: "minebg" },
 ];

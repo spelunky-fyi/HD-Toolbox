@@ -1,17 +1,63 @@
+import { RoomFlags } from "./enums";
+
+interface ImageSpec {
+  name: string;
+  x: number;
+  y: number;
+  alpha?: number;
+  w?: number;
+  h?: number;
+  offX?: number;
+  offY?: number;
+}
+
+function getTerrainFunc(alpha?: number) {
+  return (ctx): ImageSpec[] => {
+    if (ctx.area == "Jungle") {
+      return [{ name: "alltiles", x: 512, y: 128, alpha: alpha }];
+    }
+
+    // Default to mines
+    return [{ name: "alltiles", x: 0, y: 128, alpha: alpha }];
+  };
+}
+
 export default {
   ".": {
-    images: [{ name: "alltiles", x: 0, y: 128 }],
+    images: getTerrainFunc(),
     label: ".",
   },
   "1": {
-    images: [{ name: "alltiles", x: 0, y: 128 }],
+    images: getTerrainFunc(),
   },
   "2": {
-    images: [{ name: "alltiles", x: 0, y: 128, alpha: 0.5 }],
+    images: getTerrainFunc(0.5),
     label: "50%",
   },
+  "3": {
+    images: function (ctx) {
+      let imgs = getTerrainFunc(0.5)(ctx);
+      imgs[0].w = 32;
+      imgs.push({ name: "water", x: 64 + 32, y: 0, w: 32, offX: 32 });
+      return imgs;
+    },
+    label: "t/w",
+  },
+  q: {
+    images: getTerrainFunc(),
+    label: "q",
+  },
+  T: { label: "Tree" },
   L: {
-    images: [{ name: "alltiles", x: 128, y: 0 }],
+    images: function (ctx) {
+      if (ctx.area == "Jungle") {
+        if (ctx.below == "0" || ctx.below == "") {
+          return [{ name: "alltiles", x: 576, y: 0 }];
+        }
+        return [{ name: "alltiles", x: 960, y: 192 }];
+      }
+      return [{ name: "alltiles", x: 128, y: 0 }];
+    },
   },
   P: {
     images: [{ name: "alltiles", x: 192, y: 0 }],
@@ -37,7 +83,14 @@ export default {
   },
   E: { label: "Treas." },
   v: {
-    images: [{ name: "alltiles", x: 1536, y: 1600 }],
+    images: function (ctx) {
+      // Wood block in mines
+      if (ctx.area == "Mines") {
+        return [{ name: "alltiles", x: 1536, y: 1600 }];
+      }
+
+      return getTerrainFunc(0.5)(ctx);
+    },
     label: "v",
   },
   "=": {
@@ -104,17 +157,30 @@ export default {
     ],
   },
   "9": {
-    images: [
-      {
-        name: "doors",
-        x: 0,
-        y: 0,
-        w: 256,
-        h: 256,
-        offX: -64 - 32,
-        offY: -128 + 44,
-      },
-    ],
+    images: function (ctx) {
+      let x = 0;
+      let y = 0;
+
+      if (ctx.area == "Jungle") {
+        x = 256 * 2;
+      }
+
+      if (ctx.roomFlags.includes(RoomFlags.ENTRANCE)) {
+        x = x + 256;
+      }
+
+      return [
+        {
+          name: "doors",
+          x: x,
+          y: y,
+          w: 256,
+          h: 256,
+          offX: -64 - 32,
+          offY: -128 + 44,
+        },
+      ];
+    },
   },
   // Area specific, needs update for other biomes
   ":": {
@@ -157,4 +223,13 @@ export default {
       return [{ name: "items", x: 1520, y: 240, h: 80, w: 80, scale: 0.8 }];
     },
   },
+  w: {
+    images: function (ctx) {
+      if (!["w", "v"].includes(ctx.above)) {
+        return [{ name: "water", x: 64, y: 128 }];
+      }
+      return [{ name: "water", x: 64, y: 0 }];
+    },
+  },
+  t: { images: [{ name: "alltiles", x: 1536, y: 64 }] },
 };

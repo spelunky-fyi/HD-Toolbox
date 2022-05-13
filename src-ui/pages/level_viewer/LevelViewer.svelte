@@ -10,14 +10,17 @@
   let ctx;
   let unsubscribeImagesLoaded;
   let areaIndex = 0;
-  let typeAndRoomIndex = "0,0";
+  let typeAndRoomIndex = "rooms,0,0";
   let currentRoomType = getCurrentRoomType();
   let currentLevel = getCurrentLevel();
+  let levelChunks = getChunks();
   let usableChunks = [];
   let finalLevelFormat = "".padStart(80, "0");
   let formattedLevel = formatLevelString(currentLevel.data);
   let rectHeight = 64;
   let rectWidth = 64;
+
+  const chunkCodes = ["5", "6", "8", "V"];
 
   function getNameOfChunk(tileCode) {
     switch (tileCode) {
@@ -27,6 +30,8 @@
         return "air";
       case "8":
         return "door";
+      case "V":
+        return "vine";
     }
   }
 
@@ -36,7 +41,7 @@
 
     room.forEach((value, idx) => {
       // Chunk Tile Codes
-      if (!["5", "6", "8"].includes(value)) {
+      if (!chunkCodes.includes(value)) {
         return;
       }
 
@@ -46,7 +51,7 @@
       usableChunks.push({
         index: null,
         type: type_.toUpperCase(),
-        chunks: levels[areaIndex].data.chunks[type_],
+        chunks: levels[areaIndex].data.chunks[type_] ?? [],
       });
     });
 
@@ -54,23 +59,31 @@
   }
 
   function emptyChunk(room, type, idx) {
-    room[idx] = type;
+    room[idx + 0] = type;
     room[idx + 1] = 0;
     room[idx + 2] = 0;
     room[idx + 3] = 0;
     room[idx + 4] = 0;
 
-    room[idx + 10] = 0;
+    room[idx + 10 + 0] = 0;
     room[idx + 10 + 1] = 0;
     room[idx + 10 + 2] = 0;
     room[idx + 10 + 3] = 0;
     room[idx + 10 + 4] = 0;
 
-    room[idx + 20] = 0;
+    room[idx + 20 + 0] = 0;
     room[idx + 20 + 1] = 0;
     room[idx + 20 + 2] = 0;
     room[idx + 20 + 3] = 0;
     room[idx + 20 + 4] = 0;
+
+    if (type === "v") {
+      room[idx + 30 + 0] = 0;
+      room[idx + 30 + 1] = 0;
+      room[idx + 30 + 2] = 0;
+      room[idx + 30 + 3] = 0;
+      room[idx + 30 + 4] = 0;
+    }
   }
 
   function updateChunks() {
@@ -78,7 +91,7 @@
     let chunkIdx = 0;
     room.forEach((value, idx) => {
       // Chunk Tile Codes
-      if (!["5", "6", "8"].includes(value)) {
+      if (!chunkCodes.includes(value)) {
         return;
       }
 
@@ -109,6 +122,14 @@
       room[idx + 20 + 2] = chunk[12];
       room[idx + 20 + 3] = chunk[13];
       room[idx + 20 + 4] = chunk[14];
+
+      if (value == "v") {
+        room[idx + 30 + 0] = chunk[15];
+        room[idx + 30 + 1] = chunk[16];
+        room[idx + 30 + 2] = chunk[17];
+        room[idx + 30 + 3] = chunk[18];
+        room[idx + 30 + 4] = chunk[19];
+      }
       chunkIdx++;
     });
 
@@ -144,7 +165,7 @@
   function formatLevelString(levelStr: string) {
     let out = levelStr;
 
-    if (levelStr.length == 15) {
+    if (levelStr.length == 15 || levelStr.length == 20) {
       out = levelStr.match(/.{5}/g).join("\n");
     } else if (levelStr.length == 80) {
       out = levelStr.match(/.{10}/g).join("\n");
@@ -153,38 +174,66 @@
     return out;
   }
 
+  function getChunks() {
+    let chunks: Array<[string, Array<{ data: string }>]> = Object.entries(
+      levels[areaIndex].data.chunks
+    );
+    return chunks;
+  }
+
   function getCurrentRoomType() {
     let parts = typeAndRoomIndex.split(",");
-    let roomType = parseInt(parts[0], 10);
+    let variant = parts[0];
 
-    return (
-      levels[areaIndex].data.rooms[roomType] ?? {
-        name: "No Room Type...",
-        rooms: [],
-      }
-    );
+    if (variant == "rooms") {
+      let roomType = parseInt(parts[1], 10);
+      return (
+        levels[areaIndex].data[variant][roomType] ?? {
+          name: "No Room Type...",
+          rooms: [],
+        }
+      );
+    }
+
+    return { name: `Chunk ${parts[1]}`, rooms: [] };
   }
 
   function getCurrentLevel() {
     let parts = typeAndRoomIndex.split(",");
-    let roomType = parseInt(parts[0], 10);
-    let room = parseInt(parts[1], 10);
+    let variant = parts[0];
+    let room = parseInt(parts[2], 10);
+
+    if (variant == "rooms") {
+      let roomType = parseInt(parts[1], 10);
+      return (
+        levels[areaIndex].data[variant][roomType]?.rooms[room] ?? {
+          name: "No Rooms...",
+          data: "",
+        }
+      );
+    }
 
     return (
-      levels[areaIndex].data.rooms[roomType]?.rooms[room] ?? {
-        name: "No Rooms...",
+      levels[areaIndex].data[variant][parts[1]][room] ?? {
+        name: "No Chunks...",
         data: "",
       }
     );
   }
 
   function drawRoom() {
-    let pattern = ctx.createPattern(images.minebg, "repeat");
+    let bg = images[levels[areaIndex].bg];
+    let pattern = ctx.createPattern(bg, "repeat");
     ctx.fillStyle = pattern;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     let idx = 0;
     let numColumns = finalLevelFormat.length == 80 ? 10 : 5;
+
+    let rowWidth = 10;
+    if (typeAndRoomIndex.split(",")[0] != "rooms") {
+      rowWidth = 5;
+    }
 
     for (const c of finalLevelFormat) {
       if (c == "0") {
@@ -202,8 +251,11 @@
         let tileImages = tile.images ?? [];
         if (tileImages instanceof Function) {
           tileImages = tileImages({
-            above: finalLevelFormat.charAt(idx - 10),
-            below: finalLevelFormat.charAt(idx + 10),
+            above: finalLevelFormat.charAt(idx - rowWidth),
+            below: finalLevelFormat.charAt(idx + rowWidth),
+            area: levels[areaIndex].name,
+            roomType: currentLevel.type,
+            roomFlags: currentLevel.flags ?? [],
           });
         }
         let label = tile.label;
@@ -238,7 +290,7 @@
             ctx.fillText(label, x + rectWidth / 2, y + rectHeight / 2);
           }
         }
-      } else if (["5", "6", "8"].includes(c)) {
+      } else if (chunkCodes.includes(c)) {
         drawTileLabel(x, y, getNameOfChunk(c), rectWidth * 5, rectHeight * 3);
       } else {
         drawTileLabel(x, y, c);
@@ -259,9 +311,10 @@
   });
 
   function updateArea() {
-    typeAndRoomIndex = "0,0";
+    typeAndRoomIndex = "rooms,0,0";
     currentLevel = getCurrentLevel();
     currentRoomType = getCurrentRoomType();
+    levelChunks = getChunks();
     formattedLevel = formatLevelString(currentLevel.data);
     initChunks();
     drawRoom();
@@ -315,9 +368,18 @@
         {#each levels[areaIndex].data.rooms as rooms, roomTypeIndex}
           <optgroup label={rooms.name}>
             {#each rooms.rooms as room, roomIndex}
-              <option value={`${roomTypeIndex},${roomIndex}`} selected={true}
+              <option value={`rooms,${roomTypeIndex},${roomIndex}`}
                 >{room.name}</option
               >
+            {/each}
+          </optgroup>
+        {/each}
+        {#each levelChunks as [name, chunks]}
+          <optgroup label="Chunk {name}">
+            {#each chunks as chunk, chunkIndex}
+              <option value={`chunks,${name},${chunkIndex}`}>
+                {chunk.data}
+              </option>
             {/each}
           </optgroup>
         {/each}
@@ -375,6 +437,7 @@
   }
 
   textarea.room-string {
-    height: 160px;
+    height: 170px;
+    resize: none;
   }
 </style>
