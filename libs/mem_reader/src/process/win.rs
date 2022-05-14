@@ -1,6 +1,5 @@
 use std::mem::size_of;
 
-use thiserror::Error;
 use winapi::shared::minwindef::{DWORD, HMODULE, LPCVOID, LPVOID, MAX_PATH};
 use winapi::um::handleapi::{CloseHandle, INVALID_HANDLE_VALUE};
 use winapi::um::memoryapi::ReadProcessMemory;
@@ -14,6 +13,7 @@ use winapi::um::winnt::HANDLE;
 use winapi::um::winnt::{PROCESS_QUERY_INFORMATION, PROCESS_VM_READ};
 
 use crate::constants::{self, Offsets, EXE_NAME};
+use crate::process::{FindProcessError, OpenProcessError, ReadMemoryError, Version};
 
 pub struct Process {
     handle: HANDLE,
