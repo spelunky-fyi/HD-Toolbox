@@ -1,4 +1,3 @@
 pub mod constants;
-mod process;
-
-pub use process::Process;
+pub mod manager;
+pub mod process;

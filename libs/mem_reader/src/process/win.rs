@@ -15,42 +15,6 @@ use winapi::um::winnt::{PROCESS_QUERY_INFORMATION, PROCESS_VM_READ};
 
 use crate::constants::{self, Offsets, EXE_NAME};
 
-#[derive(Error, Debug)]
-pub enum FindProcessError {
-    #[error("No Spelunky.exe process found.")]
-    NoProcessFound,
-
-    #[error("Multiple Spelunky.exe processes found.")]
-    MultipleProcessesFound,
-
-    #[error("Failed to lookup process: {0}")]
-    Unknown(String),
-}
-
-#[derive(Debug)]
-pub enum Version {
-    Spelunky14,
-    Spelunky147,
-}
-
-#[derive(Error, Debug)]
-pub enum OpenProcessError {
-    #[error("Failed to find process.")]
-    FindProcessFailed(#[from] FindProcessError),
-
-    #[error("Failed to acquire process handle.")]
-    OpenProcessFailed,
-
-    #[error("Failed to locate base address: {0}")]
-    LocateBaseAddrFailed(String),
-
-    #[error("Process doesn't match any known version of Spelunky HD")]
-    UnknownVersion,
-
-    #[error("Failed to lookup process: {0}")]
-    Unknown(String),
-}
-
 pub struct Process {
     handle: HANDLE,
     pub base_addr: usize,
@@ -126,7 +90,7 @@ impl Process {
         exit_code == STILL_ACTIVE
     }
 
-    pub fn get_spelunky_hd_pid() -> Result<u32, FindProcessError> {
+    fn get_spelunky_hd_pid() -> Result<u32, FindProcessError> {
         let mut pid = None;
 
         let process_snap = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) };
@@ -265,16 +229,7 @@ impl Drop for Process {
     }
 }
 
-#[derive(Error, Debug)]
-pub enum ReadMemoryError {
-    #[error("Failed to read memory.")]
-    Failed,
-
-    #[error("Read less memory than expected.")]
-    ShortRead,
-}
-
-pub(crate) fn read_n_bytes(
+pub fn read_n_bytes(
     process: HANDLE,
     addr: usize,
     num_bytes: usize,
