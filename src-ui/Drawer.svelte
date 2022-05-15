@@ -7,6 +7,7 @@
   import Assets from "@hdt/pages/Assets.svelte";
   import Trackers from "@hdt/pages/Trackers.svelte";
   import LevelViewer from "@hdt/pages/level_viewer/LevelViewer.svelte";
+  import MemoryUpdater from "./pages/memory_updater/MemoryUpdater.svelte";
 
   function launch_spelunky_hd() {
     invoke("launch_spelunky_hd")
@@ -19,6 +20,7 @@
     { name: "Assets", component: Assets },
     { name: "Trackers", component: Trackers },
     { name: "Level Viewer", component: LevelViewer },
+    { name: "Memory Updater", component: MemoryUpdater },
   ];
 
   function selectComponent(index: number) {

@@ -1,6 +1,5 @@
-import { readable, writable } from "svelte/store";
+import { writable } from "svelte/store";
 
-export const areaIndex = writable(0);
 export const imagesLoaded = writable(false);
 
 let imageCount = 0;
@@ -22,6 +21,7 @@ const imageSrcs = [
   { name: "coffin", src: "/images/tiles/coffin.png" },
   { name: "doors", src: "/images/tiles/doors.png" },
   { name: "water", src: "/images/tiles/water.png" },
+  { name: "leaderpics", src: "/images/leaderpics.png" },
 ];
 export const images = {};
 

@@ -3,8 +3,8 @@
   import LayoutGrid, { Cell } from "@smui/layout-grid";
 
   import levels from "@hdt/pages/level_viewer/levels";
-  import { images, imagesLoaded } from "@hdt/pages/level_viewer/store";
   import tiles from "@hdt/pages/level_viewer/tiles";
+  import { images, imagesLoaded } from "@hdt/stores";
 
   let canvas;
   let ctx;
