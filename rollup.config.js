@@ -52,7 +52,7 @@ const bundles = [
     cssOutput: "bundle.css",
   },
   {
-    input: "src-ui/trackers/catTracker.ts",
+    input: "src-ui/trackers/category/main.ts",
     jsOutput: "public/build/trackers/category/bundle.js",
     cssOutput: "bundle.css",
   },
@@ -67,7 +67,7 @@ export default bundles.map((value, index) => {
   return {
     input: value.input,
     output: {
-      sourcemap: true,
+      sourcemap: !production,
       format: "iife",
       name: "app",
       file: value.jsOutput,
