@@ -45,14 +45,32 @@ function serve() {
   };
 }
 
-export default [
+const bundles = [
   {
     input: "src-ui/main.ts",
+    jsOutput: "public/build/bundle.js",
+    cssOutput: "bundle.css",
+  },
+  {
+    input: "src-ui/trackers/catTracker.ts",
+    jsOutput: "public/build/trackers/category/bundle.js",
+    cssOutput: "bundle.css",
+  },
+  {
+    input: "src-ui/windows/auto-fixer/main.ts",
+    jsOutput: "public/build/windows/auto-fixer/bundle.js",
+    cssOutput: "bundle.css",
+  },
+];
+
+export default bundles.map((value, index) => {
+  return {
+    input: value.input,
     output: {
       sourcemap: true,
       format: "iife",
       name: "app",
-      file: "public/build/bundle.js",
+      file: value.jsOutput,
     },
     plugins: [
       aliases,
@@ -67,7 +85,7 @@ export default [
       }),
       // we'll extract any component CSS out into
       // a separate file - better for performance
-      css({ output: "bundle.css" }),
+      css({ output: value.cssOutput }),
 
       // If you have external dependencies installed from
       // npm, you'll most likely need these plugins. In
@@ -86,7 +104,8 @@ export default [
 
       // In dev mode, call `npm run start` once
       // the bundle has been generated
-      !production && serve(),
+      // Only for the first bundle so we don't start multiple servers
+      !production && index === 0 && serve(),
 
       // Watch the `public` directory and refresh the
       // browser on changes when not in production
@@ -99,58 +118,5 @@ export default [
     watch: {
       clearScreen: false,
     },
-  },
-
-  {
-    input: "src-ui/trackers/catTracker.ts",
-    output: {
-      sourcemap: true,
-      format: "iife",
-      name: "app",
-      file: "public/build/trackers/category-bundle.js",
-    },
-    plugins: [
-      aliases,
-      svelte({
-        preprocess: sveltePreprocess({ sourceMap: !production }),
-        compilerOptions: {
-          // enable run-time checks when not in production
-          dev: !production,
-        },
-      }),
-      // we'll extract any component CSS out into
-      // a separate file - better for performance
-      css({ output: "trackers/category-bundle.css" }),
-
-      // If you have external dependencies installed from
-      // npm, you'll most likely need these plugins. In
-      // some cases you'll need additional configuration -
-      // consult the documentation for details:
-      // https://github.com/rollup/plugins/tree/master/packages/commonjs
-      resolve({
-        browser: true,
-        dedupe: ["svelte"],
-      }),
-      commonjs(),
-      typescript({
-        sourceMap: !production,
-        inlineSources: !production,
-      }),
-
-      // // In dev mode, call `npm run start` once
-      // // the bundle has been generated
-      // !production && serve(),
-
-      // Watch the `public` directory and refresh the
-      // browser on changes when not in production
-      !production && livereload("public"),
-
-      // If we're building for production (npm run build
-      // instead of npm run dev), minify
-      production && terser(),
-    ],
-    watch: {
-      clearScreen: false,
-    },
-  },
-];
+  };
+});
