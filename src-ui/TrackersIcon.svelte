@@ -36,18 +36,6 @@
   }
 
   .connecting {
-    animation: gray 3s;
-    animation-iteration-count: infinite;
-    transition-timing-function: ease-in-out;
-  }
-
-  @keyframes gray {
-    0%,
-    100% {
-      filter: grayscale(0);
-    }
-    50% {
-      filter: grayscale(1);
-    }
+    filter: grayscale(0);
   }
 </style>
