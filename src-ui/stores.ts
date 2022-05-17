@@ -1,4 +1,4 @@
-import { writable } from "svelte/store";
+import { derived, writable } from "svelte/store";
 
 export const imagesLoaded = writable(false);
 
@@ -22,6 +22,8 @@ const imageSrcs = [
   { name: "doors", src: "/images/tiles/doors.png" },
   { name: "water", src: "/images/tiles/water.png" },
   { name: "leaderpics", src: "/images/leaderpics.png" },
+  { name: "olmec-smile", src: "/images/olmec-smile.png" },
+  { name: "journal", src: "/images/journal.png" },
 ];
 export const images = {};
 

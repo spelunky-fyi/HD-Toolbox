@@ -8,6 +8,7 @@
   import Trackers from "@hdt/pages/Trackers.svelte";
   import LevelViewer from "@hdt/pages/level_viewer/LevelViewer.svelte";
   import MemoryUpdater from "./pages/memory_updater/MemoryUpdater.svelte";
+  import { activeTab, selectPage } from "./config";
 
   function launch_spelunky_hd() {
     invoke("launch_spelunky_hd")
@@ -15,17 +16,12 @@
       .catch((err) => console.log("Error:", err));
   }
 
-  let activePageIndex = 0;
-  let pages = [
-    { name: "Assets", component: Assets },
-    { name: "Trackers", component: Trackers },
-    { name: "Level Viewer", component: LevelViewer },
-    { name: "Memory Updater", component: MemoryUpdater },
-  ];
-
-  function selectComponent(index: number) {
-    activePageIndex = index;
-  }
+  let pages = {
+    Assets: Assets,
+    Trackers: Trackers,
+    "Level Viewer": LevelViewer,
+    "Memory Updater": MemoryUpdater,
+  };
 </script>
 
 <div class="drawer-container">
@@ -34,12 +30,12 @@
       <div class="drawer-lists">
         <div class="drawer-nav">
           <List>
-            {#each pages as page, idx}
+            {#each Object.keys(pages) as name}
               <Item
-                activated={activePageIndex === idx}
-                on:click={() => selectComponent(idx)}
+                activated={$activeTab === name}
+                on:click={() => selectPage(name)}
               >
-                <Text>{page.name}</Text>
+                <Text>{name}</Text>
               </Item>
             {/each}
           </List>
@@ -60,7 +56,7 @@
   </Drawer>
 
   <AppContent class="app-content">
-    <svelte:component this={pages[activePageIndex].component} />
+    <svelte:component this={pages[$activeTab]} />
   </AppContent>
 </div>
 

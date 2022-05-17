@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import Switch from "@smui/switch";
 
-  import { images, imagesLoaded } from "@hdt/stores";
+  import { images } from "@hdt/stores";
 
   export let x;
   export let y;
@@ -12,18 +12,11 @@
   const height = 36;
 
   let canvas;
-  let unsubscribeImagesLoaded;
   let unlocked = true;
 
   onMount(() => {
-    unsubscribeImagesLoaded = imagesLoaded.subscribe((value) => {
-      if (!value) {
-        return;
-      }
-      draw();
-    });
+    draw();
   });
-  onDestroy(() => unsubscribeImagesLoaded && unsubscribeImagesLoaded());
 
   function draw() {
     let ctx = canvas.getContext("2d");

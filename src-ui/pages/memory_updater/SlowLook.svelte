@@ -1,7 +1,8 @@
 <script type="ts">
   import Button, { Label } from "@smui/button";
   import Card, { Content } from "@smui/card";
-  import { onMount } from "svelte";
+  import Switch from "@smui/switch/src/Switch.svelte";
+  import { autoFixerHeader, enabledAutoFixer } from "@hdt/config";
 
   export let connecting = false;
 
@@ -40,14 +41,21 @@
     </Button>
   </div>
   <div>
-    <h3>Auto-Fixer</h3>
+    <div class="auto-fixer-header">
+      <h3>Auto-Fixer</h3>
+      <Switch bind:checked={$enabledAutoFixer} />
+      <div
+        class="switch-state"
+        class:disabled={!$enabledAutoFixer}
+        class:enabled={$enabledAutoFixer}
+      >
+        {$autoFixerHeader}
+      </div>
+    </div>
     <p>
       The Slow Look auto-fixer will ensure your camera speed is always set to
       the correct default on levels before Olmec's Lair.
     </p>
-    <Button variant="raised" style="justify-content: stretch;">
-      <Label>Launch Auto-Fixer</Label>
-    </Button>
   </div>
 </div>
 
@@ -57,6 +65,23 @@
   }
 
   .card-container.needs-fix {
+    color: rgb(255, 73, 73);
+  }
+
+  div.auto-fixer-header > h3 {
+    border-right: 1px solid white;
+    padding-right: 25px;
+    margin-right: 10px;
+  }
+  .auto-fixer-header {
+    display: flex;
+    align-items: center;
+  }
+  .switch-state.enabled {
+    color: rgb(18, 239, 18);
+  }
+
+  .switch-state.disabled {
     color: rgb(255, 73, 73);
   }
 

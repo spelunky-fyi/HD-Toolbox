@@ -4,11 +4,10 @@
 
   import levels from "@hdt/pages/level_viewer/levels";
   import tiles from "@hdt/pages/level_viewer/tiles";
-  import { images, imagesLoaded } from "@hdt/stores";
+  import { images } from "@hdt/stores";
 
   let canvas;
   let ctx;
-  let unsubscribeImagesLoaded;
   let areaIndex = 0;
   let typeAndRoomIndex = "rooms,0,0";
   let currentRoomType = getCurrentRoomType();
@@ -301,13 +300,8 @@
 
   onMount(() => {
     ctx = canvas.getContext("2d");
-    unsubscribeImagesLoaded = imagesLoaded.subscribe((value) => {
-      if (!value) {
-        return;
-      }
-      initChunks();
-      drawRoom();
-    });
+    initChunks();
+    drawRoom();
   });
 
   function updateArea() {
@@ -332,8 +326,6 @@
     updateChunks();
     drawRoom();
   }
-
-  onDestroy(() => unsubscribeImagesLoaded && unsubscribeImagesLoaded());
 </script>
 
 <LayoutGrid>

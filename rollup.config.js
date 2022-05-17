@@ -56,11 +56,6 @@ const bundles = [
     jsOutput: "public/build/trackers/category/bundle.js",
     cssOutput: "bundle.css",
   },
-  {
-    input: "src-ui/windows/auto-fixer/main.ts",
-    jsOutput: "public/build/windows/auto-fixer/bundle.js",
-    cssOutput: "bundle.css",
-  },
 ];
 
 export default bundles.map((value, index) => {
