@@ -1,5 +1,6 @@
 #[cfg(target_os = "windows")]
 mod win;
+use serde::Serialize;
 #[cfg(target_os = "windows")]
 pub use win::*;
 
@@ -10,7 +11,7 @@ pub use mock::*;
 
 use thiserror::Error;
 
-#[derive(Error, Debug, Clone)]
+#[derive(Error, Debug, Clone, Serialize, PartialEq, Eq)]
 pub enum Failure {
     #[error("Failed to open process.")]
     OpenProcessFailed(#[from] OpenProcessError),
@@ -19,7 +20,7 @@ pub enum Failure {
     ReadMemoryError(#[from] ReadMemoryError),
 }
 
-#[derive(Error, Debug, Clone)]
+#[derive(Error, Debug, Clone, Serialize, PartialEq, Eq)]
 pub enum FindProcessError {
     #[error("No Spelunky.exe process found.")]
     NoProcessFound,
@@ -37,7 +38,7 @@ pub enum Version {
     Spelunky147,
 }
 
-#[derive(Error, Debug, Clone)]
+#[derive(Error, Debug, Clone, Serialize, PartialEq, Eq)]
 pub enum OpenProcessError {
     #[error("Failed to find process.")]
     FindProcessFailed(#[from] FindProcessError),
@@ -55,7 +56,7 @@ pub enum OpenProcessError {
     Unknown(String),
 }
 
-#[derive(Error, Debug, Clone)]
+#[derive(Error, Debug, Clone, Serialize, PartialEq, Eq)]
 pub enum ReadMemoryError {
     #[error("Failed to read memory.")]
     Failed,

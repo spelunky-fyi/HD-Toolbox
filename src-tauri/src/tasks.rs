@@ -9,7 +9,9 @@ use tokio::{
     time::{interval, MissedTickBehavior},
 };
 
-use hdt_mem_reader::manager::ManagerHandle;
+use hdt_mem_reader::manager::{
+    ManagerHandle, MemoryUpdaterPayload, PayloadRequest, PayloadResponse,
+};
 
 use crate::state::State;
 
@@ -36,7 +38,7 @@ pub enum TaskEnd {
 #[derive(Serialize, Debug, Clone)]
 #[serde(tag = "type")]
 pub enum TaskState {
-    Pending(String),
+    Payload(PayloadResponse),
     Connected,
 }
 
@@ -148,9 +150,14 @@ impl MemoryUpdaterTask {
 
     pub async fn run(&mut self) {
         debug!("MemoryUpdaterTask::run - start");
-        let mut poll_interval = interval(Duration::from_secs(5));
+        let mut poll_interval = interval(Duration::from_millis(16));
         poll_interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
-        self.connected();
+
+        if let Ok(_) = self.memory_handle.connect().await {
+            self.connected();
+        }
+
+        let mut last_payload = None;
 
         loop {
             select! {
@@ -158,7 +165,21 @@ impl MemoryUpdaterTask {
                     break;
                 }
                 _now = poll_interval.tick() => {
-                    info!("MemoryUpdaterTask::run - tick...")
+                    if let Ok(payload) = self.memory_handle.get_payload(PayloadRequest::MemoryUpdater).await {
+                        if let Some(last_payload) = &last_payload {
+                            if &payload == last_payload {
+                                continue;
+                            }
+                        }
+                        last_payload = Some(payload.clone());
+
+                        if let Err(err) = self
+                            .app_handle
+                            .emit_all(TASK_STATE_MEMORY_UPDATER, TaskState::Payload(payload))
+                        {
+                            error!("Failed to notify window: {:?}", err);
+                        }
+                    }
                 }
             }
         }
@@ -199,8 +220,9 @@ impl AutoFixerTask {
         debug!("AutoFixerTask::run - start");
         let mut poll_interval = interval(Duration::from_secs(5));
         poll_interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
-        self.connected();
-
+        if let Ok(_) = self.memory_handle.connect().await {
+            self.connected();
+        }
         loop {
             select! {
                 _ = &mut self.shutdown_rx => {
@@ -248,7 +270,11 @@ impl WebServerTask {
         debug!("WebServerTask::run - start");
         let mut poll_interval = interval(Duration::from_secs(5));
         poll_interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
-        self.connected();
+
+        // TODO: Should use webserver, not mem handle for connect status
+        if let Ok(_) = self.memory_handle.connect().await {
+            self.connected();
+        }
 
         loop {
             select! {

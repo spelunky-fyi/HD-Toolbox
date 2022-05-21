@@ -1,66 +1,93 @@
-use std::collections::hash_map::Entry;
-use std::collections::HashMap;
 use std::time::Duration;
 
-use log::debug;
+use log::{debug, info};
+use serde::Serialize;
 use tokio::select;
-use tokio::sync::{mpsc, oneshot, watch};
+use tokio::sync::{mpsc, oneshot};
+use tokio::time::interval;
 use tokio::time::Instant;
 use tokio::time::MissedTickBehavior;
-use tokio::time::{interval, interval_at};
 
 use crate::process::{Failure, Process};
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub enum SubscriptionType {
-    AllowedMem,
-    KillTracker,
-    CategoryTracker,
+#[derive(Debug, Serialize, Clone, Default, PartialEq, Eq)]
+pub struct MemoryUpdaterPayload {}
+
+impl MemoryUpdaterPayload {
+    fn from_process(process: &Process) -> Result<Self, Failure> {
+        Ok(Self {})
+    }
+}
+
+#[derive(Debug, Serialize, Clone, Default, PartialEq, Eq)]
+pub struct AutoFixerPayload {}
+
+impl AutoFixerPayload {
+    fn from_process(process: &Process) -> Result<Self, Failure> {
+        Ok(Self {})
+    }
+}
+
+#[derive(Debug, Serialize, Clone, Default, PartialEq, Eq)]
+pub struct CategoryTrackerPayload {}
+
+impl CategoryTrackerPayload {
+    fn from_process(process: &Process) -> Result<Self, Failure> {
+        Ok(Self {})
+    }
+}
+
+#[derive(Debug, Serialize, Clone, Default, PartialEq, Eq)]
+pub struct PacifistTrackerPayload {}
+
+impl PacifistTrackerPayload {
+    fn from_process(process: &Process) -> Result<Self, Failure> {
+        Ok(Self {})
+    }
 }
 
 #[derive(Debug)]
+pub enum PayloadRequest {
+    MemoryUpdater,
+    AutoFixer,
+    CategoryTracker,
+    PacifistTracker,
+}
 
-pub enum SubscriptionMessage {
-    Empty,
-
-    // Placeholder until actual structs are created
-    AllowedMem(Instant),
-    KillTracker(Instant),
-    CategoryTracker(Instant),
-    Error(Failure),
+#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
+pub enum PayloadResponse {
+    MemoryUpdater(MemoryUpdaterPayload),
+    AutoFixer(AutoFixerPayload),
+    CategoryTracker(CategoryTrackerPayload),
+    PacifistTracker(PacifistTrackerPayload),
+    Failure(Failure),
 }
 
 #[derive(Debug)]
 enum ManagerMessage {
-    Subscribe(
-        SubscriptionType,
-        oneshot::Sender<watch::Receiver<SubscriptionMessage>>,
-    ),
+    Connect(oneshot::Sender<Result<(), Failure>>),
+    GetPayload(PayloadRequest, oneshot::Sender<PayloadResponse>),
     Shutdown(oneshot::Sender<()>),
     Attached(oneshot::Sender<bool>),
 }
 
 pub struct Manager {
-    subscriptions: HashMap<SubscriptionType, watch::Sender<SubscriptionMessage>>,
     handle_tx: mpsc::Sender<ManagerMessage>,
     handle_rx: mpsc::Receiver<ManagerMessage>,
     shutdown_tx: Option<oneshot::Sender<()>>,
     process: Option<Process>,
-    pub poll_interval: Duration,
-    pub backoff: Duration,
+    last_request: Instant,
 }
 
 impl Manager {
-    pub fn new(poll_interval: Duration) -> Self {
+    pub fn new() -> Self {
         let (handle_tx, handle_rx) = mpsc::channel::<ManagerMessage>(100);
         Self {
-            subscriptions: HashMap::new(),
             handle_tx,
             handle_rx,
             shutdown_tx: None,
             process: None,
-            poll_interval,
-            backoff: Duration::from_millis(250),
+            last_request: Instant::now(),
         }
     }
 
@@ -72,7 +99,7 @@ impl Manager {
 
     pub async fn run_forever(&mut self) {
         debug!("Running Memory Manager!");
-        let mut poll_interval = interval(self.poll_interval);
+        let mut poll_interval = interval(Duration::from_secs(1));
         poll_interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
         let (shutdown_tx, mut shutdown_rx) = oneshot::channel();
         self.shutdown_tx = Some(shutdown_tx);
@@ -83,11 +110,11 @@ impl Manager {
                     debug!("Shutting down Memory Manager!");
                     break;
                 }
-                now = poll_interval.tick() => {
-                    // If we have no subscriptions or a connection error delay for backoff amount.
-                    if let Err(_) = self.handle_subscriptions(now).await {
-                        poll_interval = interval_at(Instant::now() + self.backoff, self.poll_interval);
-                        poll_interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
+                _ = poll_interval.tick() => {
+                    if Instant::now() - self.last_request > Duration::from_secs(10) {
+                        if let Some(_) = self.process.take() {
+                            info!("Closing process due to lack of requests...")
+                        }
                     }
                 }
                 msg = self.handle_rx.recv() => {
@@ -99,57 +126,26 @@ impl Manager {
         }
     }
 
-    async fn handle_subscriptions(&mut self, now: Instant) -> Result<(), ()> {
-        if self.subscriptions.is_empty() {
-            // No subscriptions so use backoff time.
-            return Err(());
-        }
-
-        let mut to_remove = vec![];
+    fn ensure_connected(&mut self) -> Result<(), Failure> {
+        self.last_request = Instant::now();
         if self.process.is_none() {
             match Process::new() {
                 Ok(process) => self.process = Some(process),
                 Err(err) => {
-                    let err: Failure = err.into();
-                    for (subscription_type, tx) in &self.subscriptions {
-                        // Failed to send. All receivers must have gone away.
-                        if let Err(_) = tx.send(SubscriptionMessage::Error(err.clone())) {
-                            to_remove.push((*subscription_type).clone());
-                        }
-                    }
-
-                    for subscription_type in to_remove {
-                        self.subscriptions.remove(&subscription_type);
-                    }
-                    return Err(());
+                    return Err(err.into());
                 }
             }
         }
-
-        for (subscription_type, tx) in &self.subscriptions {
-            let response = match *subscription_type {
-                SubscriptionType::AllowedMem => SubscriptionMessage::AllowedMem(now),
-                SubscriptionType::KillTracker => SubscriptionMessage::KillTracker(now),
-                SubscriptionType::CategoryTracker => SubscriptionMessage::CategoryTracker(now),
-            };
-
-            // Failed to send. All receivers must have gone away.
-            if let Err(_) = tx.send(response) {
-                to_remove.push((*subscription_type).clone());
-            }
-        }
-
-        for subscription_type in to_remove {
-            self.subscriptions.remove(&subscription_type);
-        }
-
         Ok(())
     }
 
     async fn handle_msg(&mut self, msg: ManagerMessage) {
         match msg {
-            ManagerMessage::Subscribe(subscription_type, response) => {
-                self.handle_subscribe(subscription_type, response);
+            ManagerMessage::Connect(response) => {
+                self.handle_connect(response);
+            }
+            ManagerMessage::GetPayload(request, response) => {
+                self.handle_get_payload(request, response);
             }
             ManagerMessage::Shutdown(response) => {
                 self.handle_shutdown(response);
@@ -160,20 +156,46 @@ impl Manager {
         };
     }
 
-    fn handle_subscribe(
+    fn handle_connect(&mut self, response: oneshot::Sender<Result<(), Failure>>) {
+        let _ = response.send(self.ensure_connected());
+    }
+
+    fn handle_get_payload(
         &mut self,
-        subscription_type: SubscriptionType,
-        response: oneshot::Sender<watch::Receiver<SubscriptionMessage>>,
+        request: PayloadRequest,
+        response: oneshot::Sender<PayloadResponse>,
     ) {
-        match self.subscriptions.entry(subscription_type) {
-            Entry::Occupied(entry) => {
-                let _ = response.send((*entry.get()).subscribe());
-            }
-            Entry::Vacant(entry) => {
-                let (tx, rx) = watch::channel(SubscriptionMessage::Empty);
-                entry.insert(tx);
-                let _ = response.send(rx);
-            }
+        if let Err(err) = self.ensure_connected() {
+            let _ = response.send(PayloadResponse::Failure(err));
+            return;
+        }
+
+        if let Some(process) = &self.process {
+            let payload_response = match request {
+                PayloadRequest::MemoryUpdater => {
+                    match MemoryUpdaterPayload::from_process(process) {
+                        Ok(payload) => PayloadResponse::MemoryUpdater(payload),
+                        Err(err) => PayloadResponse::Failure(err),
+                    }
+                }
+                PayloadRequest::AutoFixer => match AutoFixerPayload::from_process(process) {
+                    Ok(payload) => PayloadResponse::AutoFixer(payload),
+                    Err(err) => PayloadResponse::Failure(err),
+                },
+                PayloadRequest::CategoryTracker => {
+                    match CategoryTrackerPayload::from_process(process) {
+                        Ok(payload) => PayloadResponse::CategoryTracker(payload),
+                        Err(err) => PayloadResponse::Failure(err),
+                    }
+                }
+                PayloadRequest::PacifistTracker => {
+                    match PacifistTrackerPayload::from_process(process) {
+                        Ok(payload) => PayloadResponse::PacifistTracker(payload),
+                        Err(err) => PayloadResponse::Failure(err),
+                    }
+                }
+            };
+            let _ = response.send(payload_response);
         }
     }
 
@@ -185,7 +207,7 @@ impl Manager {
     }
 
     fn handle_attached(&mut self, response: oneshot::Sender<bool>) {
-        let _ = response.send(false);
+        let _ = response.send(self.process.is_some());
     }
 }
 
@@ -195,13 +217,17 @@ pub struct ManagerHandle {
 }
 
 impl ManagerHandle {
-    pub async fn subscribe(
-        &self,
-        subscription_type: SubscriptionType,
-    ) -> anyhow::Result<watch::Receiver<SubscriptionMessage>> {
+    pub async fn connect(&self) -> anyhow::Result<()> {
+        let (tx, rx) = oneshot::channel();
+        self.handle_tx.send(ManagerMessage::Connect(tx)).await?;
+
+        Ok(rx.await??)
+    }
+
+    pub async fn get_payload(&self, request: PayloadRequest) -> anyhow::Result<PayloadResponse> {
         let (tx, rx) = oneshot::channel();
         self.handle_tx
-            .send(ManagerMessage::Subscribe(subscription_type, tx))
+            .send(ManagerMessage::GetPayload(request, tx))
             .await?;
 
         Ok(rx.await?)

@@ -6,7 +6,7 @@
 mod state;
 mod tasks;
 
-use std::{thread, time::Duration};
+use std::thread;
 
 use log::{debug, error, LevelFilter};
 use tauri::Manager;
@@ -39,7 +39,7 @@ async fn run_mem_manager() -> Result<ManagerHandle, anyhow::Error> {
             .build()
             .unwrap();
         basic_rt.block_on(async {
-            let mut manager = hdt_mem_reader::manager::Manager::new(Duration::from_millis(16));
+            let mut manager = hdt_mem_reader::manager::Manager::new();
             let handle = manager.get_handle();
             let _ = tx.send(handle);
 
