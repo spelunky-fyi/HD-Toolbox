@@ -1,4 +1,4 @@
-import { derived, Writable, writable } from "svelte/store";
+import { writable } from "svelte/store";
 
 export const enum TaskState {
   Disconnected,
@@ -6,9 +6,9 @@ export const enum TaskState {
   Connected,
 }
 
-export type RemoteTaskState = {
+export interface RemoteTaskState {
   type: "Connected" | "Pending";
-};
+}
 
 export const trackersState = writable(TaskState.Disconnected);
 export const trackersFailMessage = writable("");

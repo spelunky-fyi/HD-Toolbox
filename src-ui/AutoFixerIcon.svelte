@@ -4,7 +4,8 @@
   import { listen } from "@tauri-apps/api/event";
   import { invoke } from "@tauri-apps/api/tauri";
   import { enabledAutoFixer, selectPage } from "./config";
-  import { autoFixerState, TaskState, RemoteTaskState } from "./tasks";
+  import { autoFixerState, TaskState } from "./tasks";
+  import type { RemoteTaskState } from "@hdt/tasks";
 
   const taskName = "AutoFixer";
   let unlistener = null;

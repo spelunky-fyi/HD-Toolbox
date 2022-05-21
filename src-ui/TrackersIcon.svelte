@@ -3,12 +3,9 @@
   import Tooltip, { Wrapper } from "@smui/tooltip";
   import { enabledTrackers, selectPage, trackerPort } from "./config";
   import { invoke } from "@tauri-apps/api/tauri";
-  import {
-    TaskState,
-    trackersFailMessage,
-    trackersState,
-    RemoteTaskState,
-  } from "./tasks";
+  import { TaskState, trackersFailMessage, trackersState } from "./tasks";
+  import type { RemoteTaskState } from "@hdt/tasks";
+
   import { get } from "svelte/store";
   import { listen } from "@tauri-apps/api/event";
 

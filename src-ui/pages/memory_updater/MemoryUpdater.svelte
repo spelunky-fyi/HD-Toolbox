@@ -6,7 +6,8 @@
   import CharList from "./CharList.svelte";
   import SlowLook from "./SlowLook.svelte";
   import { onDestroy, onMount } from "svelte";
-  import { memoryUpdaterState, RemoteTaskState, TaskState } from "@hdt/tasks";
+  import { memoryUpdaterState, TaskState } from "@hdt/tasks";
+  import type { RemoteTaskState } from "@hdt/tasks";
   import { invoke } from "@tauri-apps/api/tauri";
   import { listen } from "@tauri-apps/api/event";
 
