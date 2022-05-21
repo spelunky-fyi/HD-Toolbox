@@ -1,33 +1,16 @@
 <script type="ts">
   import { images } from "@hdt/images";
   import Tooltip, { Wrapper } from "@smui/tooltip";
-  import { listen } from "@tauri-apps/api/event";
-  import { invoke } from "@tauri-apps/api/tauri";
   import { enabledAutoFixer, selectPage } from "./config";
-  import { autoFixerState, TaskState } from "./tasks";
-  import type { RemoteTaskState } from "@hdt/tasks";
+  import { autoFixerState, Task, TaskState } from "./tasks";
 
   const taskName = "AutoFixer";
-  let unlistener = null;
+  let task = new Task(taskName, autoFixerState);
   enabledAutoFixer.subscribe((value) => {
     if (value) {
-      listen(`task-state:${taskName}`, (event) => {
-        let payload: RemoteTaskState = <RemoteTaskState>event.payload;
-        if (payload.type == "Connected") {
-          autoFixerState.set(TaskState.Connected);
-        }
-        console.log(event);
-      }).then((unlistenFunc) => {
-        unlistener = unlistenFunc;
-      });
-      autoFixerState.set(TaskState.Pending);
-      invoke("start_task", {
-        task: { type: taskName },
-      });
+      task.start();
     } else {
-      unlistener && unlistener();
-      autoFixerState.set(TaskState.Disconnected);
-      invoke("stop_task", { task: { type: taskName } });
+      task.stop();
     }
   });
 

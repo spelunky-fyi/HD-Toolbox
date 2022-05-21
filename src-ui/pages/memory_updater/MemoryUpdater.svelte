@@ -6,35 +6,19 @@
   import CharList from "./CharList.svelte";
   import SlowLook from "./SlowLook.svelte";
   import { onDestroy, onMount } from "svelte";
-  import { memoryUpdaterState, TaskState } from "@hdt/tasks";
-  import type { RemoteTaskState } from "@hdt/tasks";
-  import { invoke } from "@tauri-apps/api/tauri";
-  import { listen } from "@tauri-apps/api/event";
+  import { memoryUpdaterState, Task, TaskState } from "@hdt/tasks";
 
   const connectingText = "Looking for running Spelunky.exe...";
+
   const taskName = "MemoryUpdater";
-  let unlistener = null;
+  let task: Task;
 
   onMount(() => {
-    listen(`task-state:${taskName}`, (event) => {
-      let payload: RemoteTaskState = <RemoteTaskState>event.payload;
-      if (payload.type == "Connected") {
-        memoryUpdaterState.set(TaskState.Connected);
-      }
-      console.log(event);
-    }).then((unlistenFunc) => {
-      unlistener = unlistenFunc;
-    });
-    memoryUpdaterState.set(TaskState.Pending);
-    invoke("start_task", {
-      task: { type: taskName },
-    });
+    task = new Task(taskName, memoryUpdaterState);
+    task.start();
   });
-
   onDestroy(() => {
-    unlistener && unlistener();
-    memoryUpdaterState.set(TaskState.Disconnected);
-    invoke("stop_task", { task: { type: taskName } });
+    task && task.stop();
   });
 </script>
 

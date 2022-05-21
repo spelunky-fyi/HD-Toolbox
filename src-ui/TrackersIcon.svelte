@@ -2,37 +2,19 @@
   import { images } from "@hdt/images";
   import Tooltip, { Wrapper } from "@smui/tooltip";
   import { enabledTrackers, selectPage, trackerPort } from "./config";
-  import { invoke } from "@tauri-apps/api/tauri";
-  import { TaskState, trackersFailMessage, trackersState } from "./tasks";
-  import type { RemoteTaskState } from "@hdt/tasks";
+  import { Task, TaskState, trackersFailMessage, trackersState } from "./tasks";
 
   import { get } from "svelte/store";
-  import { listen } from "@tauri-apps/api/event";
 
   const toolTipText = "Trackers";
-
-  let unlistener = null;
   const taskName = "WebServer";
+
+  let task = new Task(taskName, trackersState);
   enabledTrackers.subscribe((value) => {
     if (value) {
-      listen(`task-state:${taskName}`, (event) => {
-        let payload: RemoteTaskState = <RemoteTaskState>event.payload;
-        if (payload.type == "Connected") {
-          trackersState.set(TaskState.Connected);
-        }
-        console.log(event);
-      }).then((unlistenFunc) => {
-        unlistener = unlistenFunc;
-      });
-
-      trackersState.set(TaskState.Pending);
-      invoke("start_task", {
-        task: { type: taskName, port: get(trackerPort) },
-      });
+      task.start({ port: get(trackerPort) });
     } else {
-      unlistener && unlistener();
-      trackersState.set(TaskState.Disconnected);
-      invoke("stop_task", { task: { type: taskName } });
+      task.stop();
     }
   });
 
