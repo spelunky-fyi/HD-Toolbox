@@ -8,7 +8,7 @@ mod tasks;
 
 use std::{thread, time::Duration};
 
-use log::{debug, error, info, LevelFilter};
+use log::{debug, error, LevelFilter};
 use tauri::Manager;
 use tauri_plugin_log::LoggerBuilder;
 use tauri_plugin_store::StoreBuilder;

@@ -26,13 +26,11 @@ export class Task {
   }
 
   start(options: {} = {}) {
-    console.log(this.taskName);
     listen(`task-state:${this.taskName}`, (event) => {
       let payload: RemoteTaskState = <RemoteTaskState>event.payload;
       if (payload.type == "Connected") {
         this.taskStateStore.set(TaskState.Connected);
       }
-      console.log(event);
     }).then((unlistenFunc) => {
       this.unlistener = unlistenFunc;
     });
