@@ -1,4 +1,3 @@
-use std::sync::Arc;
 use std::{thread, time::Duration};
 
 use tokio::{runtime, sync::oneshot};
@@ -7,7 +6,7 @@ use hdt_mem_reader::{self, manager::ManagerHandle};
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
-    let (tx, rx) = oneshot::channel::<Arc<ManagerHandle>>();
+    let (tx, rx) = oneshot::channel::<ManagerHandle>();
     thread::spawn(move || {
         let basic_rt = runtime::Builder::new_current_thread()
             .enable_all()
@@ -21,8 +20,8 @@ async fn main() -> Result<(), anyhow::Error> {
             manager.run_forever().await;
         })
     });
-
     let handle = rx.await?;
+
     tokio::time::sleep(Duration::from_secs(1)).await;
 
     let handle2 = handle.clone();

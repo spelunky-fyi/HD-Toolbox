@@ -19,6 +19,7 @@ anyhow = "1"
 byteorder = "1"
 fern = "0.6"
 futures = "0.3"
+hdt_mem_reader = {path = "../libs/mem_reader"}
 hyper = {version = "0.14", features = ["full"] }
 hyper-tungstenite = "0.8"
 log = "0.4"

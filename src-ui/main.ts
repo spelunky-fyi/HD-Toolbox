@@ -1,7 +1,7 @@
-import App from '@hdt/HDToolbox.svelte';
+import App from "@hdt/HDToolbox.svelte";
 
 const app = new App({
-	target: document.body,
+  target: document.body,
 });
 
 export default app;

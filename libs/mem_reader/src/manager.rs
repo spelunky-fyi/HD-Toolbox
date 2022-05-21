@@ -1,8 +1,8 @@
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-use std::sync::Arc;
 use std::time::Duration;
 
+use log::debug;
 use tokio::select;
 use tokio::sync::{mpsc, oneshot, watch};
 use tokio::time::Instant;
@@ -64,13 +64,14 @@ impl Manager {
         }
     }
 
-    pub fn get_handle(&self) -> Arc<ManagerHandle> {
-        Arc::new(ManagerHandle {
+    pub fn get_handle(&self) -> ManagerHandle {
+        ManagerHandle {
             handle_tx: self.handle_tx.clone(),
-        })
+        }
     }
 
     pub async fn run_forever(&mut self) {
+        debug!("Running Memory Manager!");
         let mut poll_interval = interval(self.poll_interval);
         poll_interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
         let (shutdown_tx, mut shutdown_rx) = oneshot::channel();
@@ -79,6 +80,7 @@ impl Manager {
         loop {
             select! {
                 _ = &mut shutdown_rx => {
+                    debug!("Shutting down Memory Manager!");
                     break;
                 }
                 now = poll_interval.tick() => {
@@ -187,6 +189,7 @@ impl Manager {
     }
 }
 
+#[derive(Clone)]
 pub struct ManagerHandle {
     handle_tx: mpsc::Sender<ManagerMessage>,
 }

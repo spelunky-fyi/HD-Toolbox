@@ -8,9 +8,9 @@
     AutoAdjust,
   } from "@smui/top-app-bar";
   import AutoFixerIcon from "./AutoFixerIcon.svelte";
-  import { configLoaded } from "./config";
-  import { imagesLoaded } from "./stores";
   import TrackersIcon from "./TrackersIcon.svelte";
+  import { configLoaded } from "./config";
+  import { imagesLoaded } from "./images";
 
   function disableMenu() {
     // if (window.location.hostname !== "tauri.localhost") {

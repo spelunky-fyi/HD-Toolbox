@@ -5,20 +5,40 @@
 
   import CharList from "./CharList.svelte";
   import SlowLook from "./SlowLook.svelte";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
+  import { memoryUpdaterState, RemoteTaskState, TaskState } from "@hdt/tasks";
+  import { invoke } from "@tauri-apps/api/tauri";
+  import { listen } from "@tauri-apps/api/event";
 
-  let connecting = true;
   const connectingText = "Looking for running Spelunky.exe...";
+  const taskName = "MemoryUpdater";
+  let unlistener = null;
 
   onMount(() => {
-    setTimeout(() => {
-      connecting = false;
-    }, 2000);
+    listen(`task-state:${taskName}`, (event) => {
+      let payload: RemoteTaskState = <RemoteTaskState>event.payload;
+      if (payload.type == "Connected") {
+        memoryUpdaterState.set(TaskState.Connected);
+      }
+      console.log(event);
+    }).then((unlistenFunc) => {
+      unlistener = unlistenFunc;
+    });
+    memoryUpdaterState.set(TaskState.Pending);
+    invoke("start_task", {
+      task: { type: taskName },
+    });
+  });
+
+  onDestroy(() => {
+    unlistener && unlistener();
+    memoryUpdaterState.set(TaskState.Disconnected);
+    invoke("stop_task", { task: { type: taskName } });
   });
 </script>
 
 <div>
-  {#if connecting}
+  {#if $memoryUpdaterState == TaskState.Pending}
     <p class="card-container">
       <Card padded>
         <div class="connecting-text">
@@ -34,10 +54,10 @@
 </div>
 <LayoutGrid>
   <Cell class="char-list" span={7}>
-    <CharList {connecting} />
+    <CharList connecting={$memoryUpdaterState == TaskState.Pending} />
   </Cell>
   <Cell span={5}>
-    <SlowLook {connecting} />
+    <SlowLook connecting={$memoryUpdaterState == TaskState.Pending} />
   </Cell>
 </LayoutGrid>
 

@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import Switch from "@smui/switch";
 
-  import { images } from "@hdt/stores";
+  import { images } from "@hdt/images";
 
   export let x;
   export let y;

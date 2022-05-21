@@ -3,9 +3,18 @@
     windows_subsystem = "windows"
 )]
 
-use log::LevelFilter;
+mod state;
+mod tasks;
+
+use std::{thread, time::Duration};
+
+use log::{debug, error, info, LevelFilter};
+use tauri::Manager;
 use tauri_plugin_log::LoggerBuilder;
 use tauri_plugin_store::StoreBuilder;
+use tokio::{runtime, sync::oneshot};
+
+use hdt_mem_reader::manager::ManagerHandle;
 
 #[cfg(debug_assertions)]
 static LOG_LEVEL: LevelFilter = log::LevelFilter::Debug;
@@ -21,17 +30,35 @@ fn launch_spelunky_hd() -> Result<String, String> {
     Ok("Launched!".into())
 }
 
+async fn run_mem_manager() -> Result<ManagerHandle, anyhow::Error> {
+    debug!("Spawning thread for Memory Manager");
+    let (tx, rx) = oneshot::channel::<ManagerHandle>();
+    thread::spawn(move || {
+        let basic_rt = runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+        basic_rt.block_on(async {
+            let mut manager = hdt_mem_reader::manager::Manager::new(Duration::from_millis(16));
+            let handle = manager.get_handle();
+            let _ = tx.send(handle);
+
+            manager.run_forever().await;
+        })
+    });
+    Ok(rx.await?)
+}
+
 fn main() -> anyhow::Result<()> {
     let main_config = StoreBuilder::new(MAIN_CONFIG.parse()?).build();
+    let log_plugin = LoggerBuilder::new()
+        .level_for("attohttpc", log::LevelFilter::Warn)
+        .level_for("mio::poll", log::LevelFilter::Warn)
+        .level(LOG_LEVEL)
+        .build();
 
     tauri::Builder::default()
-        .plugin(
-            LoggerBuilder::new()
-                .level_for("attohttpc", log::LevelFilter::Warn)
-                .level_for("mio::poll", log::LevelFilter::Warn)
-                .level(LOG_LEVEL)
-                .build(),
-        )
+        .plugin(log_plugin)
         .plugin(
             tauri_plugin_store::PluginBuilder::default()
                 .stores([main_config])
@@ -39,7 +66,25 @@ fn main() -> anyhow::Result<()> {
                 .build(),
         )
         .plugin(tauri_plugin_window_state::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![launch_spelunky_hd,])
+        .setup(|app| {
+            let handle = app.handle();
+            tauri::async_runtime::spawn(async move {
+                match run_mem_manager().await {
+                    Ok(mem_manager) => {
+                        handle.manage(state::State::new(mem_manager));
+                    }
+                    Err(err) => {
+                        error!("Failed to run Memory Manager: {:?}", err);
+                    }
+                }
+            });
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![
+            launch_spelunky_hd,
+            tasks::start_task,
+            tasks::stop_task,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
     Ok(())

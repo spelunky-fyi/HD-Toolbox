@@ -4,7 +4,7 @@
 
   import levels from "@hdt/pages/level_viewer/levels";
   import tiles from "@hdt/pages/level_viewer/tiles";
-  import { images } from "@hdt/stores";
+  import { images } from "@hdt/images";
 
   let canvas;
   let ctx;
