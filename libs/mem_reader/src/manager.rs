@@ -335,6 +335,10 @@ impl Manager {
                     PayloadResponse::Success
                 }
             };
+
+            if let PayloadResponse::Failure(_) = &payload_response {
+                self.process = None;
+            }
             let _ = response.send(payload_response);
         }
     }
