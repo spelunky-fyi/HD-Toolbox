@@ -158,11 +158,23 @@ impl CategoryTrackerPayload {
 }
 
 #[derive(Debug, Serialize, Clone, Default, PartialEq, Eq)]
-pub struct PacifistTrackerPayload {}
+pub struct PacifistTrackerPayload {
+    total_kills: u32,
+}
 
 impl PacifistTrackerPayload {
-    fn from_process(_process: &Process) -> Result<Self, Failure> {
-        Ok(Self {})
+    fn from_process(process: &Process) -> Result<Self, Failure> {
+        let global_state =
+            process.read_u32(process.base_addr + process.offsets.global_state)? as usize;
+
+        let mut total_kills = 0;
+
+        total_kills += process.read_u32(global_state + 0x440694 + 0x90)?;
+        total_kills += process.read_u32(global_state + 0x441B38 + 0x90)?;
+        total_kills += process.read_u32(global_state + 0x442FDC + 0x90)?;
+        total_kills += process.read_u32(global_state + 0x444480 + 0x90)?;
+
+        Ok(Self { total_kills })
     }
 }
 

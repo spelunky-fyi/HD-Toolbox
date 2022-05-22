@@ -31,10 +31,10 @@ async fn main() -> Result<(), anyhow::Error> {
 
         loop {
             let response = handle2
-                .get_payload(hdt_mem_reader::manager::PayloadRequest::MemoryUpdater)
+                .get_payload(hdt_mem_reader::manager::PayloadRequest::PacifistTracker)
                 .await;
             println!("Response: {:?}", response);
-            tokio::time::sleep(Duration::from_secs(1)).await;
+            tokio::time::sleep(Duration::from_millis(16)).await;
         }
     });
     let _ = task.await;

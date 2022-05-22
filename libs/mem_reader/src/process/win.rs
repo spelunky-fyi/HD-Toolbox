@@ -71,6 +71,18 @@ impl Process {
         });
     }
 
+    pub fn traverse_offset(
+        &self,
+        addr: usize,
+        offsets: &[usize],
+    ) -> Result<usize, ReadMemoryError> {
+        let mut result = addr;
+        for offset in offsets {
+            result = self.read_u32(result + offset)? as usize;
+        }
+        Ok(result)
+    }
+
     pub fn read_n_bytes(&self, addr: usize, num_bytes: usize) -> Result<Vec<u8>, ReadMemoryError> {
         read_n_bytes(self.handle, addr, num_bytes)
     }
