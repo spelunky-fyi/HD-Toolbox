@@ -4,8 +4,8 @@ Toolbox full of tools for Spelunky HD
 
 ## Potential Functionality
 
-- [ ] Level Viewer
-- [ ] Game Launcher
+- [-] Level Viewer
+- [x] Game Launcher
 - [ ] Overlay + Injector for Science / Practice
 - [ ] Trackers
   - [ ] Category
@@ -20,9 +20,9 @@ Toolbox full of tools for Spelunky HD
 - [ ] External Tool Managment
   - [ ] RTA Tracker
   - [ ] Frozlunky
-- [ ] Memory Shenanigans
-  - [ ] Character Unlock Manager
-  - [ ] Slowlook Fix Tool
+- [x] Memory Shenanigans
+  - [x] Character Unlock Manager
+  - [x] Slowlook Fix Tool
 
 ## Development
 
