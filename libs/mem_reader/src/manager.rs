@@ -371,7 +371,6 @@ impl Manager {
                         } as usize;
 
                     let char_offset = global_state_offset + 0x4459c8 + 0xa24 + (index * 4);
-                    dbg!(&char_offset);
                     if let Err(err) = process.write_n_bytes(char_offset, bytes) {
                         let _ = response.send(PayloadResponse::Failure(err.into()));
                         return;
