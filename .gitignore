@@ -150,6 +150,7 @@ dist
 
 
 public/build/
+trackers/build/
 
 .DS_Store
 WixTools

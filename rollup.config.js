@@ -53,7 +53,12 @@ const bundles = [
   },
   {
     input: "src-ui/trackers/category/main.ts",
-    jsOutput: "public/build/trackers/category/bundle.js",
+    jsOutput: "trackers/build/category/bundle.js",
+    cssOutput: "bundle.css",
+  },
+  {
+    input: "src-ui/trackers/pacifist/main.ts",
+    jsOutput: "trackers/build/pacifist/bundle.js",
     cssOutput: "bundle.css",
   },
 ];

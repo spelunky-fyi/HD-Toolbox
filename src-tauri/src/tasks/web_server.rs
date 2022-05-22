@@ -1,4 +1,6 @@
+use std::collections::HashMap;
 use std::pin::Pin;
+use std::sync::Arc;
 use std::task::{Context, Poll};
 use std::time::Duration;
 
@@ -7,6 +9,7 @@ use hyper::header::CONTENT_TYPE;
 use hyper::service::Service;
 use hyper::{Body, Request, Response, Server, StatusCode};
 use log::{debug, error, info};
+use static_files::Resource;
 use tauri::{self, AppHandle, Manager};
 use tokio::select;
 use tokio::{
@@ -23,6 +26,7 @@ static TASK_STATE_WEB_SERVER: &str = "task-state:WebServer";
 struct Trackers {
     mem_handle: ManagerHandle,
     app_handle: AppHandle,
+    tracker_resources: Arc<HashMap<&'static str, Resource>>,
 }
 
 impl Service<Request<Body>> for Trackers {
@@ -35,6 +39,21 @@ impl Service<Request<Body>> for Trackers {
     }
 
     fn call(&mut self, mut req: Request<Body>) -> Self::Future {
+        let path = req.uri().path();
+        let mut static_key = &path[1..path.len()];
+        if static_key.is_empty() {
+            static_key = "index.html";
+        }
+
+        // Are you a static request?
+        if let Some(resource) = self.tracker_resources.get(static_key) {
+            let response = Response::builder()
+                .header(CONTENT_TYPE, resource.mime_type)
+                .status(StatusCode::OK)
+                .body(Body::from(resource.data));
+            return Box::pin(async { response });
+        }
+
         let res = Ok(Response::new(Body::from("There's nothing here!")));
         Box::pin(async { res })
     }
@@ -43,6 +62,7 @@ impl Service<Request<Body>> for Trackers {
 struct MakeSvc {
     mem_handle: ManagerHandle,
     app_handle: AppHandle,
+    tracker_resources: Arc<HashMap<&'static str, Resource>>,
 }
 
 impl<T> Service<T> for MakeSvc {
@@ -57,11 +77,13 @@ impl<T> Service<T> for MakeSvc {
     fn call(&mut self, _: T) -> Self::Future {
         let mem_handle = self.mem_handle.clone();
         let app_handle = self.app_handle.clone();
+        let tracker_resources = self.tracker_resources.clone();
 
         let fut = async move {
             Ok(Trackers {
                 mem_handle,
                 app_handle,
+                tracker_resources,
             })
         };
         Box::pin(fut)
@@ -72,6 +94,7 @@ pub struct WebServerTask {
     shutdown_rx: Option<oneshot::Receiver<()>>,
     memory_handle: ManagerHandle,
     app_handle: AppHandle,
+    tracker_resources: Arc<HashMap<&'static str, Resource>>,
     port: u16,
 }
 
@@ -79,6 +102,8 @@ impl WebServerTask {
     pub fn new(
         memory_handle: ManagerHandle,
         app_handle: AppHandle,
+        tracker_resources: Arc<HashMap<&'static str, Resource>>,
+
         port: u16,
     ) -> (Self, oneshot::Sender<()>) {
         let (shutdown_tx, shutdown_rx) = oneshot::channel();
@@ -87,6 +112,7 @@ impl WebServerTask {
                 shutdown_rx: Some(shutdown_rx),
                 memory_handle,
                 app_handle,
+                tracker_resources,
                 port,
             },
             shutdown_tx,
@@ -119,6 +145,7 @@ impl WebServerTask {
             let service = MakeSvc {
                 mem_handle: self.memory_handle.clone(),
                 app_handle: self.app_handle.clone(),
+                tracker_resources: self.tracker_resources.clone(),
             };
             let bind = match Server::try_bind(&addr) {
                 Ok(bind) => bind,

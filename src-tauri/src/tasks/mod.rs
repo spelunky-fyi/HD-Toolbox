@@ -85,8 +85,12 @@ pub async fn start_task(
         }
         TaskStart::WebServer { port } => {
             if tasks.web_server.is_none() {
-                let (mut task, shutdown_tx) =
-                    web_server::WebServerTask::new(mem_manager, app_handle, port);
+                let (mut task, shutdown_tx) = web_server::WebServerTask::new(
+                    mem_manager,
+                    app_handle,
+                    state.tracker_resources.clone(),
+                    port,
+                );
                 tauri::async_runtime::spawn(async move {
                     task.run().await;
                 });
