@@ -18,6 +18,12 @@ pub enum Failure {
 
     #[error("Failed to read memory.")]
     ReadMemoryError(#[from] ReadMemoryError),
+
+    #[error("Failed to write memory.")]
+    WriteMemoryError(#[from] WriteMemoryError),
+
+    #[error("Unknown failure")]
+    Unknown(String),
 }
 
 #[derive(Error, Debug, Clone, Serialize, PartialEq, Eq)]
@@ -63,4 +69,13 @@ pub enum ReadMemoryError {
 
     #[error("Read less memory than expected.")]
     ShortRead,
+}
+
+#[derive(Error, Debug, Clone, Serialize, PartialEq, Eq)]
+pub enum WriteMemoryError {
+    #[error("Failed to write memory.")]
+    Failed,
+
+    #[error("Wrote less memory than expected.")]
+    ShortWrite,
 }

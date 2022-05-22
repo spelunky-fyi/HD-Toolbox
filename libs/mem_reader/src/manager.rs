@@ -1,6 +1,7 @@
 use std::io::Cursor;
 use std::time::Duration;
 
+use byteorder::ByteOrder;
 use byteorder::ReadBytesExt;
 use byteorder::LE;
 use log::{debug, info};
@@ -32,7 +33,6 @@ impl MemoryUpdaterPayload {
         let global_state_offset =
             process.read_u32(base_addr + process.offsets.global_state)? as usize;
 
-        println!("{:x}", global_state_offset + 0x4459c8 + 0xa24);
         let mut chars_cursor =
             Cursor::new(process.read_n_bytes(global_state_offset + 0x4459c8 + 0xa24, 16 * 4)?);
 
@@ -127,6 +127,9 @@ pub enum PayloadRequest {
     AutoFixer,
     CategoryTracker,
     PacifistTracker,
+
+    FixSlowLook,
+    SetCharacter(usize, u32),
 }
 
 #[derive(Debug, Serialize, Clone, PartialEq, Eq)]
@@ -137,6 +140,9 @@ pub enum PayloadResponse {
     CategoryTracker(CategoryTrackerPayload),
     PacifistTracker(PacifistTrackerPayload),
     Failure(Failure),
+
+    // Empty sucess response
+    Success,
 }
 
 #[derive(Debug)]
@@ -269,6 +275,64 @@ impl Manager {
                         Ok(payload) => PayloadResponse::PacifistTracker(payload),
                         Err(err) => PayloadResponse::Failure(err),
                     }
+                }
+                PayloadRequest::FixSlowLook => {
+                    let mut bytes = vec![0; 4];
+                    LE::write_u32(&mut bytes, 0x3F800000);
+
+                    let base_addr = process.base_addr;
+                    let other_state_offset =
+                        match process.read_u32(base_addr + process.offsets.other_state) {
+                            Ok(offset) => offset,
+                            Err(err) => {
+                                let _ = response.send(PayloadResponse::Failure(err.into()));
+                                return;
+                            }
+                        } as usize;
+
+                    if let Err(err) = process.write_n_bytes(other_state_offset + 0x38, bytes) {
+                        let _ = response.send(PayloadResponse::Failure(err.into()));
+                        return;
+                    }
+
+                    PayloadResponse::Success
+                }
+                PayloadRequest::SetCharacter(index, value) => {
+                    if index > 15 {
+                        let _ = response.send(PayloadResponse::Failure(Failure::Unknown(
+                            "Invalid Index".into(),
+                        )));
+                        return;
+                    }
+
+                    if value != 0 && value != 1 {
+                        let _ = response.send(PayloadResponse::Failure(Failure::Unknown(
+                            "Invalid Value".into(),
+                        )));
+                        return;
+                    }
+
+                    let mut bytes = vec![0; 4];
+                    LE::write_u32(&mut bytes, value);
+
+                    let base_addr = process.base_addr;
+                    let global_state_offset =
+                        match process.read_u32(base_addr + process.offsets.global_state) {
+                            Ok(offset) => offset,
+                            Err(err) => {
+                                let _ = response.send(PayloadResponse::Failure(err.into()));
+                                return;
+                            }
+                        } as usize;
+
+                    let char_offset = global_state_offset + 0x4459c8 + 0xa24 + (index * 4);
+                    dbg!(&char_offset);
+                    if let Err(err) = process.write_n_bytes(char_offset, bytes) {
+                        let _ = response.send(PayloadResponse::Failure(err.into()));
+                        return;
+                    }
+
+                    PayloadResponse::Success
                 }
             };
             let _ = response.send(payload_response);

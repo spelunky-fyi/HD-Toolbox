@@ -129,6 +129,30 @@ pub async fn stop_task(task: TaskEnd, state: tauri::State<'_, State>) -> Result<
     Ok(())
 }
 
+#[tauri::command]
+pub async fn fix_slowlook(state: tauri::State<'_, State>) -> Result<(), String> {
+    let mem_manager = state.mem_manager.clone();
+    mem_manager
+        .get_payload(PayloadRequest::FixSlowLook)
+        .await
+        .map_err(|err| format!("{:?}", err))?;
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn set_character(
+    index: usize,
+    value: u32,
+    state: tauri::State<'_, State>,
+) -> Result<(), String> {
+    let mem_manager = state.mem_manager.clone();
+    mem_manager
+        .get_payload(PayloadRequest::SetCharacter(index, value))
+        .await
+        .map_err(|err| format!("{:?}", err))?;
+    Ok(())
+}
+
 pub struct MemoryUpdaterTask {
     shutdown_rx: oneshot::Receiver<()>,
     memory_handle: ManagerHandle,

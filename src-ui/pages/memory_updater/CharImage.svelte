@@ -5,6 +5,7 @@
 
   import { images } from "@hdt/images";
   import { memoryUpdaterData } from "@hdt/tasks";
+  import { invoke } from "@tauri-apps/api/tauri";
 
   export let x;
   export let y;
@@ -41,14 +42,20 @@
 
   function handleClick(ev) {
     memoryUpdaterData.update((values) => {
-      let newValues = { ...values };
-      newValues.chars[charIdx] = +!$unlocked;
-      return newValues;
+      let newValue = +!$unlocked;
+      values.chars[charIdx] = newValue;
+
+      invoke("set_character", { index: charIdx, value: newValue })
+        .then((value) => console.log(value))
+        .catch((reason) => {
+          console.error(reason);
+        });
+      return values;
     });
   }
 </script>
 
-<diV>
+<div>
   <canvas
     class:connecting
     class:locked={!$unlocked}
@@ -63,7 +70,7 @@
     checked={$unlocked}
     on:SMUISwitch:change={handleClick}
   />
-</diV>
+</div>
 
 <style>
   canvas {

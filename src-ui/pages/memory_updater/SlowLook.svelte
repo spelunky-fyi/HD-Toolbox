@@ -6,12 +6,12 @@
 
   import { autoFixerHeader, enabledAutoFixer } from "@hdt/config";
   import { memoryUpdaterData } from "@hdt/tasks";
+  import { invoke } from "@tauri-apps/api/tauri";
 
   export let connecting = false;
 
   const needFixText = "Slow Look is active!";
   const noSlowLookText = "Slow Look isn't currently active";
-  let cardText = noSlowLookText;
 
   let needsFix = derived(memoryUpdaterData, ($memoryUpdaterData) => {
     if ($memoryUpdaterData.camera_speed === 0) {
@@ -21,20 +21,27 @@
     return $memoryUpdaterData.camera_speed !== 0x3f800000;
   });
 
-  if ($needsFix) {
-    cardText = needFixText;
-  } else {
-    cardText = noSlowLookText;
-  }
+  let cardText = derived(needsFix, ($needsFix) => {
+    if ($needsFix) {
+      return needFixText;
+    }
+    return noSlowLookText;
+  });
 
-  function fixSlowLook(_ev) {}
+  function fixSlowLook(_ev) {
+    invoke("fix_slowlook")
+      .then((value) => console.log(value))
+      .catch((reason) => {
+        console.error(reason);
+      });
+  }
 </script>
 
 <div class="slow-look">
   <h2>Slow Look</h2>
   {#if !connecting}
     <p class="card-container" class:needs-fix={$needsFix}>
-      <Card padded>{cardText}</Card>
+      <Card padded>{$cardText}</Card>
     </p>
   {:else}
     <p class="card-container connecting">

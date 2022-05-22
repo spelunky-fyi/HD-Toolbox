@@ -1,10 +1,13 @@
+use std::fmt::Write;
 use std::mem::size_of;
 
 use byteorder::ByteOrder;
 use byteorder::LittleEndian;
 use winapi::shared::minwindef::{DWORD, HMODULE, LPCVOID, LPVOID, MAX_PATH};
+use winapi::um::errhandlingapi::GetLastError;
 use winapi::um::handleapi::{CloseHandle, INVALID_HANDLE_VALUE};
 use winapi::um::memoryapi::ReadProcessMemory;
+use winapi::um::memoryapi::WriteProcessMemory;
 use winapi::um::minwinbase::STILL_ACTIVE;
 use winapi::um::processthreadsapi::{GetExitCodeProcess, OpenProcess};
 use winapi::um::psapi::{EnumProcessModules, GetModuleFileNameExA};
@@ -12,10 +15,13 @@ use winapi::um::tlhelp32::{
     CreateToolhelp32Snapshot, Process32First, Process32Next, PROCESSENTRY32, TH32CS_SNAPPROCESS,
 };
 use winapi::um::winnt::HANDLE;
+use winapi::um::winnt::PROCESS_VM_WRITE;
 use winapi::um::winnt::{PROCESS_QUERY_INFORMATION, PROCESS_VM_READ};
 
 use crate::constants::{self, Offsets, EXE_NAME};
 use crate::process::{FindProcessError, OpenProcessError, ReadMemoryError, Version};
+
+use super::WriteMemoryError;
 
 pub struct Process {
     handle: HANDLE,
@@ -27,8 +33,13 @@ pub struct Process {
 impl Process {
     pub fn new() -> Result<Self, OpenProcessError> {
         let pid = Self::get_spelunky_hd_pid()?;
-        let process_handle: HANDLE =
-            unsafe { OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, 0, pid) };
+        let process_handle: HANDLE = unsafe {
+            OpenProcess(
+                PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE,
+                0,
+                pid,
+            )
+        };
 
         if process_handle == winapi::shared::ntdef::NULL {
             return Err(OpenProcessError::OpenProcessFailed);
@@ -64,6 +75,10 @@ impl Process {
 
     pub fn read_n_bytes(&self, addr: usize, num_bytes: usize) -> Result<Vec<u8>, ReadMemoryError> {
         read_n_bytes(self.handle, addr, num_bytes)
+    }
+
+    pub fn write_n_bytes(&self, addr: usize, bytes: Vec<u8>) -> Result<usize, WriteMemoryError> {
+        write_n_bytes(self.handle, addr, bytes)
     }
 
     pub fn read_u32(&self, addr: usize) -> Result<u32, ReadMemoryError> {
@@ -267,4 +282,32 @@ pub fn read_n_bytes(
     unsafe { buf.set_len(bytes_read) };
 
     Ok(buf)
+}
+
+pub fn write_n_bytes(
+    process: HANDLE,
+    addr: usize,
+    data: Vec<u8>,
+) -> Result<usize, WriteMemoryError> {
+    let mut bytes_written = 0;
+    let num_bytes = data.len();
+
+    if unsafe {
+        WriteProcessMemory(
+            process,
+            addr as LPVOID,
+            data.as_ptr() as LPCVOID,
+            num_bytes,
+            &mut bytes_written,
+        )
+    } == 0
+    {
+        return Err(WriteMemoryError::Failed);
+    }
+
+    if num_bytes != bytes_written {
+        return Err(WriteMemoryError::ShortWrite);
+    }
+
+    Ok(bytes_written)
 }

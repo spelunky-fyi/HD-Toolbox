@@ -84,6 +84,8 @@ fn main() -> anyhow::Result<()> {
             launch_spelunky_hd,
             tasks::start_task,
             tasks::stop_task,
+            tasks::fix_slowlook,
+            tasks::set_character,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
