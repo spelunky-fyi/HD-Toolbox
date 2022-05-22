@@ -1,5 +1,7 @@
 use std::mem::size_of;
 
+use byteorder::ByteOrder;
+use byteorder::LittleEndian;
 use winapi::shared::minwindef::{DWORD, HMODULE, LPCVOID, LPVOID, MAX_PATH};
 use winapi::um::handleapi::{CloseHandle, INVALID_HANDLE_VALUE};
 use winapi::um::memoryapi::ReadProcessMemory;
@@ -58,6 +60,14 @@ impl Process {
             version,
             offsets,
         });
+    }
+
+    pub fn read_n_bytes(&self, addr: usize, num_bytes: usize) -> Result<Vec<u8>, ReadMemoryError> {
+        read_n_bytes(self.handle, addr, num_bytes)
+    }
+
+    pub fn read_u32(&self, addr: usize) -> Result<u32, ReadMemoryError> {
+        Ok(LittleEndian::read_u32(&self.read_n_bytes(addr, 4)?))
     }
 
     fn get_version(process: HANDLE, base_addr: usize) -> Result<Version, OpenProcessError> {

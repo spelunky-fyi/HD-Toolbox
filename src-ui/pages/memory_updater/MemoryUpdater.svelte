@@ -6,7 +6,12 @@
   import CharList from "./CharList.svelte";
   import SlowLook from "./SlowLook.svelte";
   import { onDestroy, onMount } from "svelte";
-  import { memoryUpdaterState, Task, TaskState } from "@hdt/tasks";
+  import {
+    memoryUpdaterData,
+    memoryUpdaterState,
+    Task,
+    TaskState,
+  } from "@hdt/tasks";
 
   const connectingText = "Looking for running Spelunky.exe...";
 
@@ -14,7 +19,7 @@
   let task: Task;
 
   onMount(() => {
-    task = new Task(taskName, memoryUpdaterState);
+    task = new Task(taskName, memoryUpdaterState, memoryUpdaterData);
     task.start();
   });
   onDestroy(() => {

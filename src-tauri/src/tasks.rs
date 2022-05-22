@@ -4,13 +4,14 @@ use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
 use tauri::{self, AppHandle, Manager};
 use tokio::select;
+use tokio::time::Instant;
 use tokio::{
     sync::oneshot,
     time::{interval, MissedTickBehavior},
 };
 
 use hdt_mem_reader::manager::{
-    ManagerHandle, MemoryUpdaterPayload, PayloadRequest, PayloadResponse,
+    AutoFixerPayload, ManagerHandle, MemoryUpdaterPayload, PayloadRequest, PayloadResponse,
 };
 
 use crate::state::State;
@@ -35,11 +36,19 @@ pub enum TaskEnd {
     WebServer,
 }
 
-#[derive(Serialize, Debug, Clone)]
-#[serde(tag = "type")]
-pub enum TaskState {
-    Payload(PayloadResponse),
-    Connected,
+#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
+#[serde(tag = "type", content = "data")]
+pub enum WebServerResponse {
+    WebServer,
+    Failure(String),
+}
+
+#[derive(Debug, Serialize, Clone)]
+#[serde(tag = "type", content = "data")]
+enum TaskUpdate {
+    MemoryUpdater(PayloadResponse),
+    AutoFixer(PayloadResponse),
+    WebServer(WebServerResponse),
 }
 
 pub struct Tasks {
@@ -140,10 +149,12 @@ impl MemoryUpdaterTask {
     }
 
     fn connected(&self) {
-        if let Err(err) = self
-            .app_handle
-            .emit_all(TASK_STATE_MEMORY_UPDATER, TaskState::Connected)
-        {
+        if let Err(err) = self.app_handle.emit_all(
+            TASK_STATE_MEMORY_UPDATER,
+            TaskUpdate::MemoryUpdater(PayloadResponse::MemoryUpdater(
+                MemoryUpdaterPayload::default(),
+            )),
+        ) {
             error!("Failed to notify window: {:?}", err);
         }
     }
@@ -158,6 +169,7 @@ impl MemoryUpdaterTask {
         }
 
         let mut last_payload = None;
+        let mut last_send = Instant::now();
 
         loop {
             select! {
@@ -166,16 +178,17 @@ impl MemoryUpdaterTask {
                 }
                 _now = poll_interval.tick() => {
                     if let Ok(payload) = self.memory_handle.get_payload(PayloadRequest::MemoryUpdater).await {
-                        if let Some(last_payload) = &last_payload {
-                            if &payload == last_payload {
+                        if let Some(last_payload) = &last_payload  {
+                            if &payload == last_payload && Instant::now() - last_send < Duration::from_secs(2){
                                 continue;
                             }
                         }
+                        last_send = Instant::now();
                         last_payload = Some(payload.clone());
 
                         if let Err(err) = self
                             .app_handle
-                            .emit_all(TASK_STATE_MEMORY_UPDATER, TaskState::Payload(payload))
+                            .emit_all(TASK_STATE_MEMORY_UPDATER, TaskUpdate::MemoryUpdater(payload))
                         {
                             error!("Failed to notify window: {:?}", err);
                         }
@@ -208,10 +221,10 @@ impl AutoFixerTask {
     }
 
     fn connected(&self) {
-        if let Err(err) = self
-            .app_handle
-            .emit_all(TASK_STATE_AUTO_FIXER, TaskState::Connected)
-        {
+        if let Err(err) = self.app_handle.emit_all(
+            TASK_STATE_AUTO_FIXER,
+            TaskUpdate::AutoFixer(PayloadResponse::AutoFixer(AutoFixerPayload::default())),
+        ) {
             error!("Failed to notify window: {:?}", err);
         }
     }
@@ -258,10 +271,10 @@ impl WebServerTask {
     }
 
     fn connected(&self) {
-        if let Err(err) = self
-            .app_handle
-            .emit_all(TASK_STATE_WEB_SERVER, TaskState::Connected)
-        {
+        if let Err(err) = self.app_handle.emit_all(
+            TASK_STATE_WEB_SERVER,
+            TaskUpdate::WebServer(WebServerResponse::WebServer),
+        ) {
             error!("Failed to notify window: {:?}", err);
         }
     }

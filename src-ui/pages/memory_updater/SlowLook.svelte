@@ -2,26 +2,38 @@
   import Button, { Label } from "@smui/button";
   import Card, { Content } from "@smui/card";
   import Switch from "@smui/switch/src/Switch.svelte";
+  import { derived } from "svelte/store";
+
   import { autoFixerHeader, enabledAutoFixer } from "@hdt/config";
+  import { memoryUpdaterData } from "@hdt/tasks";
 
   export let connecting = false;
 
   const needFixText = "Slow Look is active!";
   const noSlowLookText = "Slow Look isn't currently active";
-
-  let needsFix = false;
   let cardText = noSlowLookText;
 
-  function fixSlowLook(_ev) {
-    needsFix = false;
+  let needsFix = derived(memoryUpdaterData, ($memoryUpdaterData) => {
+    if ($memoryUpdaterData.camera_speed === 0) {
+      return false;
+    }
+
+    return $memoryUpdaterData.camera_speed !== 0x3f800000;
+  });
+
+  if ($needsFix) {
+    cardText = needFixText;
+  } else {
     cardText = noSlowLookText;
   }
+
+  function fixSlowLook(_ev) {}
 </script>
 
 <div class="slow-look">
   <h2>Slow Look</h2>
   {#if !connecting}
-    <p class="card-container" class:needs-fix={needsFix}>
+    <p class="card-container" class:needs-fix={$needsFix}>
       <Card padded>{cardText}</Card>
     </p>
   {:else}
@@ -33,7 +45,7 @@
   <div>
     <Button
       variant="raised"
-      disabled={connecting || !needsFix}
+      disabled={connecting || !$needsFix}
       on:click={fixSlowLook}
       style="justify-content: stretch;"
     >

@@ -26,18 +26,18 @@ async fn main() -> Result<(), anyhow::Error> {
     let handle = rx.await?;
     let handle2 = handle.clone();
 
-    tokio::spawn(async move {
+    let x = tokio::spawn(async move {
         handle2.connect().await.unwrap();
 
         loop {
             let response = handle2
-                .get_payload(hdt_mem_reader::manager::PayloadRequest::AutoFixer)
+                .get_payload(hdt_mem_reader::manager::PayloadRequest::MemoryUpdater)
                 .await;
             println!("Response: {:?}", response);
             tokio::time::sleep(Duration::from_secs(1)).await;
         }
     });
-
+    x.await;
     tokio::time::sleep(Duration::from_secs(10)).await;
     handle.shutdown().await?;
     tokio::time::sleep(Duration::from_secs(1)).await;

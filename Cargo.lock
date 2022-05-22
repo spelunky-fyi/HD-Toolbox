@@ -1190,6 +1190,7 @@ name = "hdt_mem_reader"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "byteorder",
  "log",
  "serde",
  "thiserror",

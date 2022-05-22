@@ -11,25 +11,45 @@ export const enum TaskState {
 }
 
 export interface RemoteTaskState {
-  type: "Connected" | "Pending";
+  type: string;
+  data: any;
 }
 
 export class Task {
   taskName: string;
   taskStateStore: Writable<TaskState>;
+  taskDataStore: Writable<any>;
 
   unlistener: UnlistenFn = null;
 
-  constructor(taskName: string, taskStateStore: Writable<TaskState>) {
+  constructor(
+    taskName: string,
+    taskStateStore: Writable<TaskState>,
+    taskDataStore?: Writable<any>
+  ) {
     this.taskName = taskName;
     this.taskStateStore = taskStateStore;
+    this.taskDataStore = taskDataStore;
   }
 
   start(options: {} = {}) {
     listen(`task-state:${this.taskName}`, (event) => {
       let payload: RemoteTaskState = <RemoteTaskState>event.payload;
-      if (payload.type == "Connected") {
+
+      if (payload.type !== this.taskName || !payload.data) {
+        console.error("Malformed or unexpected message...", event.payload);
+      }
+
+      let data = payload.data;
+      if (data.type == "Failure") {
+        this.taskStateStore.set(TaskState.Pending);
+      } else if (data.type == this.taskName) {
+        if (this.taskDataStore) {
+          this.taskDataStore.set(data.data);
+        }
         this.taskStateStore.set(TaskState.Connected);
+      } else {
+        console.error("Got unexpected message...", data);
       }
     }).then((unlistenFunc) => {
       this.unlistener = unlistenFunc;
@@ -53,5 +73,10 @@ export const trackersFailMessage = writable("");
 export const autoFixerState = writable(TaskState.Disconnected);
 export const autoFixerFailMessage = writable("");
 
+const memoryUpdaterDefault = {
+  camera_speed: 0,
+  chars: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+};
 export const memoryUpdaterState = writable(TaskState.Disconnected);
+export const memoryUpdaterData = writable({ ...memoryUpdaterDefault });
 export const memoryUpdaterFailMessage = writable("");

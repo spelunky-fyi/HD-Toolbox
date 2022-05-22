@@ -1,5 +1,8 @@
+use std::io::Cursor;
 use std::time::Duration;
 
+use byteorder::ReadBytesExt;
+use byteorder::LE;
 use log::{debug, info};
 use serde::Serialize;
 use tokio::select;
@@ -8,14 +11,86 @@ use tokio::time::interval;
 use tokio::time::Instant;
 use tokio::time::MissedTickBehavior;
 
+use crate::process::ReadMemoryError;
 use crate::process::{Failure, Process};
 
 #[derive(Debug, Serialize, Clone, Default, PartialEq, Eq)]
-pub struct MemoryUpdaterPayload {}
+pub struct MemoryUpdaterPayload {
+    // This is stored as a float but that breaks equality.
+    // Normal    - 1.0 (0x3F800000)
+    // Slow Look - 0.2 (0x3E4CCCCD)
+    camera_speed: u32,
+
+    chars: [u32; 16],
+}
 
 impl MemoryUpdaterPayload {
     fn from_process(process: &Process) -> Result<Self, Failure> {
-        Ok(Self {})
+        let base_addr = process.base_addr;
+        let other_state_offset =
+            process.read_u32(base_addr + process.offsets.other_state)? as usize;
+        let global_state_offset =
+            process.read_u32(base_addr + process.offsets.global_state)? as usize;
+
+        println!("{:x}", global_state_offset + 0x4459c8 + 0xa24);
+        let mut chars_cursor =
+            Cursor::new(process.read_n_bytes(global_state_offset + 0x4459c8 + 0xa24, 16 * 4)?);
+
+        let chars = [
+            chars_cursor
+                .read_u32::<LE>()
+                .map_err(|_| ReadMemoryError::Failed)?,
+            chars_cursor
+                .read_u32::<LE>()
+                .map_err(|_| ReadMemoryError::Failed)?,
+            chars_cursor
+                .read_u32::<LE>()
+                .map_err(|_| ReadMemoryError::Failed)?,
+            chars_cursor
+                .read_u32::<LE>()
+                .map_err(|_| ReadMemoryError::Failed)?,
+            chars_cursor
+                .read_u32::<LE>()
+                .map_err(|_| ReadMemoryError::Failed)?,
+            chars_cursor
+                .read_u32::<LE>()
+                .map_err(|_| ReadMemoryError::Failed)?,
+            chars_cursor
+                .read_u32::<LE>()
+                .map_err(|_| ReadMemoryError::Failed)?,
+            chars_cursor
+                .read_u32::<LE>()
+                .map_err(|_| ReadMemoryError::Failed)?,
+            chars_cursor
+                .read_u32::<LE>()
+                .map_err(|_| ReadMemoryError::Failed)?,
+            chars_cursor
+                .read_u32::<LE>()
+                .map_err(|_| ReadMemoryError::Failed)?,
+            chars_cursor
+                .read_u32::<LE>()
+                .map_err(|_| ReadMemoryError::Failed)?,
+            chars_cursor
+                .read_u32::<LE>()
+                .map_err(|_| ReadMemoryError::Failed)?,
+            chars_cursor
+                .read_u32::<LE>()
+                .map_err(|_| ReadMemoryError::Failed)?,
+            chars_cursor
+                .read_u32::<LE>()
+                .map_err(|_| ReadMemoryError::Failed)?,
+            chars_cursor
+                .read_u32::<LE>()
+                .map_err(|_| ReadMemoryError::Failed)?,
+            chars_cursor
+                .read_u32::<LE>()
+                .map_err(|_| ReadMemoryError::Failed)?,
+        ];
+
+        Ok(Self {
+            camera_speed: process.read_u32(other_state_offset + 0x38)?,
+            chars,
+        })
     }
 }
 
@@ -55,6 +130,7 @@ pub enum PayloadRequest {
 }
 
 #[derive(Debug, Serialize, Clone, PartialEq, Eq)]
+#[serde(tag = "type", content = "data")]
 pub enum PayloadResponse {
     MemoryUpdater(MemoryUpdaterPayload),
     AutoFixer(AutoFixerPayload),

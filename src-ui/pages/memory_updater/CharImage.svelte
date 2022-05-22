@@ -1,18 +1,20 @@
 <script type="ts">
   import { onMount, onDestroy } from "svelte";
+  import { derived } from "svelte/store";
   import Switch from "@smui/switch";
 
   import { images } from "@hdt/images";
+  import { memoryUpdaterData } from "@hdt/tasks";
 
   export let x;
   export let y;
+  export let charIdx: number;
   export let connecting = true;
 
   const width = 128;
   const height = 36;
 
   let canvas;
-  let unlocked = true;
 
   onMount(() => {
     draw();
@@ -33,26 +35,34 @@
     );
   }
 
-  function handleClick(event) {
-    if (connecting) {
-      return;
-    }
+  let unlocked = derived(memoryUpdaterData, ($memoryUpdaterData) => {
+    return $memoryUpdaterData.chars[charIdx] == 1;
+  });
 
-    unlocked = !unlocked;
+  function handleClick(ev) {
+    memoryUpdaterData.update((values) => {
+      let newValues = { ...values };
+      newValues.chars[charIdx] = +!$unlocked;
+      return newValues;
+    });
   }
 </script>
 
 <diV>
   <canvas
     class:connecting
-    class:locked={!unlocked}
+    class:locked={!$unlocked}
     disabled={connecting}
     bind:this={canvas}
+    on:click={handleClick}
     {width}
     {height}
-    on:click={handleClick}
   />
-  <Switch disabled={connecting} bind:checked={unlocked} />
+  <Switch
+    disabled={connecting}
+    checked={$unlocked}
+    on:SMUISwitch:change={handleClick}
+  />
 </diV>
 
 <style>
