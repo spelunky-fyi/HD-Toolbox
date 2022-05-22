@@ -1,4 +1,7 @@
-use super::{OpenProcessError, Version};
+use byteorder::ByteOrder;
+use byteorder::LittleEndian;
+
+use super::{OpenProcessError, ReadMemoryError, Version, WriteMemoryError};
 use crate::constants::{Offsets, EXE_NAME, KALI_ACCEPTS};
 
 pub struct Process {
@@ -17,6 +20,18 @@ impl Process {
             version: Version::Spelunky147,
             offsets: Offsets::get_offsets_by_version(&Version::Spelunky147),
         });
+    }
+
+    pub fn read_n_bytes(&self, _addr: usize, num_bytes: usize) -> Result<Vec<u8>, ReadMemoryError> {
+        Ok(vec![0, num_bytes as u8])
+    }
+
+    pub fn write_n_bytes(&self, _addr: usize, bytes: Vec<u8>) -> Result<usize, WriteMemoryError> {
+        Ok(bytes.len())
+    }
+
+    pub fn read_u32(&self, addr: usize) -> Result<u32, ReadMemoryError> {
+        Ok(LittleEndian::read_u32(&self.read_n_bytes(addr, 4)?))
     }
 
     pub fn still_active(&self) -> bool {
