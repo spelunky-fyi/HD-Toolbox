@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { enabledTrackers, trackersHeader } from "@hdt/config";
+  import { enabledTrackers, trackerPort, trackersHeader } from "@hdt/config";
   import { TaskState, trackersState } from "@hdt/tasks";
   import Card from "@smui/card/src/Card.svelte";
 
@@ -10,7 +10,7 @@
 
 <div>
   <LayoutGrid>
-    <Cell span={12}>
+    <Cell span={8}>
       <div class="header">
         <h2>Trackers</h2>
         <Switch bind:checked={$enabledTrackers} />
@@ -21,6 +21,20 @@
         >
           {$trackersHeader}
         </div>
+      </div>
+    </Cell>
+    <Cell span={4}>
+      <div class="header">
+        <input
+          id="port"
+          style="margin-left: auto; width: 80px;"
+          disabled={$enabledTrackers}
+          type="number"
+          bind:value={$trackerPort}
+        />
+        <label style="padding-left: 5px; padding-bottom: 10px;" for="port"
+          >Port</label
+        >
       </div>
     </Cell>
   </LayoutGrid>
@@ -46,6 +60,7 @@
   .header {
     display: flex;
     align-items: center;
+    height: 64px;
   }
 
   .switch-state.enabled {
