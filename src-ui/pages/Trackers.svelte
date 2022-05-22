@@ -1,6 +1,6 @@
 <script lang="ts">
   import { enabledTrackers, trackerPort, trackersHeader } from "@hdt/config";
-  import { TaskState, trackersState } from "@hdt/tasks";
+  import { TaskState, trackersFailMessage, trackersState } from "@hdt/tasks";
   import Card from "@smui/card/src/Card.svelte";
 
   import Cell from "@smui/layout-grid/src/Cell.svelte";
@@ -43,7 +43,11 @@
       <p class="card-container">
         <Card padded>
           <div class="connecting-text">
-            <span>Enabling Trackers</span>
+            {#if $trackersFailMessage}
+              <span>{$trackersFailMessage}</span>
+            {:else}
+              <span>Enabling Trackers</span>
+            {/if}
           </div>
         </Card>
       </p>

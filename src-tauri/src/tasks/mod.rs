@@ -17,7 +17,7 @@ use crate::state::State;
 pub enum TaskStart {
     MemoryUpdater,
     AutoFixer,
-    WebServer { port: u64 },
+    WebServer { port: u16 },
 }
 
 #[derive(Deserialize, Debug)]
@@ -32,7 +32,7 @@ pub enum TaskEnd {
 #[serde(tag = "type", content = "data")]
 pub enum WebServerResponse {
     WebServer,
-    //Failure(String),
+    Failure(String),
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -83,10 +83,10 @@ pub async fn start_task(
                 tasks.auto_fixer = Some(shutdown_tx);
             }
         }
-        TaskStart::WebServer { .. } => {
+        TaskStart::WebServer { port } => {
             if tasks.web_server.is_none() {
                 let (mut task, shutdown_tx) =
-                    web_server::WebServerTask::new(mem_manager, app_handle);
+                    web_server::WebServerTask::new(mem_manager, app_handle, port);
                 tauri::async_runtime::spawn(async move {
                     task.run().await;
                 });

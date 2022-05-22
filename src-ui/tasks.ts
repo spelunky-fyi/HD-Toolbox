@@ -19,19 +19,21 @@ export class Task {
   taskName: string;
   taskStateStore: Writable<TaskState>;
   taskDataStore: Writable<any>;
+  taskFailureStore: Writable<string>;
 
   unlistener: UnlistenFn = null;
 
   constructor(
     taskName: string,
     taskStateStore: Writable<TaskState>,
-    taskDataStore?: Writable<any>
+    taskDataStore?: Writable<any>,
+    taskFailureStore?: Writable<string>
   ) {
     this.taskName = taskName;
     this.taskStateStore = taskStateStore;
     this.taskDataStore = taskDataStore;
+    this.taskFailureStore = taskFailureStore;
   }
-
   start(options: {} = {}) {
     listen(`task-state:${this.taskName}`, (event) => {
       let payload: RemoteTaskState = <RemoteTaskState>event.payload;
@@ -47,6 +49,9 @@ export class Task {
 
       let data = payload.data;
       if (data.type == "Failure") {
+        if (this.taskFailureStore) {
+          this.taskFailureStore.set(data.data);
+        }
         this.taskStateStore.set(TaskState.Pending);
       } else if (data.type == this.taskName) {
         if (this.taskDataStore) {
@@ -76,7 +81,6 @@ export const trackersState = writable(TaskState.Disconnected);
 export const trackersFailMessage = writable("");
 
 export const autoFixerState = writable(TaskState.Disconnected);
-export const autoFixerFailMessage = writable("");
 
 const memoryUpdaterDefault = {
   camera_speed: 0,
@@ -84,4 +88,3 @@ const memoryUpdaterDefault = {
 };
 export const memoryUpdaterState = writable(TaskState.Disconnected);
 export const memoryUpdaterData = writable({ ...memoryUpdaterDefault });
-export const memoryUpdaterFailMessage = writable("");

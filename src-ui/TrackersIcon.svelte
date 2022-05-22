@@ -9,12 +9,13 @@
   const toolTipText = "Trackers";
   const taskName = "WebServer";
 
-  let task = new Task(taskName, trackersState);
+  let task = new Task(taskName, trackersState, null, trackersFailMessage);
   enabledTrackers.subscribe((value) => {
     if (value) {
       task.start({ port: get(trackerPort) });
     } else {
       task.stop();
+      trackersFailMessage.set("");
     }
   });
 
