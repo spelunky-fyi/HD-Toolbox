@@ -40,7 +40,7 @@ pub enum TaskEnd {
 #[serde(tag = "type", content = "data")]
 pub enum WebServerResponse {
     WebServer,
-    Failure(String),
+    //Failure(String),
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -261,18 +261,44 @@ impl AutoFixerTask {
 
     pub async fn run(&mut self) {
         debug!("AutoFixerTask::run - start");
-        let mut poll_interval = interval(Duration::from_secs(5));
+        let mut poll_interval = interval(Duration::from_millis(16));
         poll_interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
+
         if let Ok(_) = self.memory_handle.connect().await {
             self.connected();
         }
+
+        let mut last_payload = None;
+        let mut last_send = Instant::now();
+
         loop {
             select! {
                 _ = &mut self.shutdown_rx => {
                     break;
                 }
                 _now = poll_interval.tick() => {
-                    info!("AutoFixerTask::run - tick...")
+                    if let Ok(payload) = self.memory_handle.get_payload(PayloadRequest::AutoFixer).await {
+                        if let PayloadResponse::Failure(_) = &payload {
+                            poll_interval = interval_at(Instant::now() + Duration::from_secs(1), Duration::from_millis(16));
+                            poll_interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
+                        }
+
+                        if let Some(last_payload) = &last_payload  {
+                            if &payload == last_payload && Instant::now() - last_send < Duration::from_secs(2){
+                                continue;
+                            }
+                        }
+
+                        last_send = Instant::now();
+                        last_payload = Some(payload.clone());
+
+                        if let Err(err) = self
+                            .app_handle
+                            .emit_all(TASK_STATE_AUTO_FIXER, TaskUpdate::AutoFixer(payload))
+                        {
+                            error!("Failed to notify window: {:?}", err);
+                        }
+                    }
                 }
             }
         }

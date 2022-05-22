@@ -5,7 +5,7 @@ import { Store } from "tauri-plugin-store-api";
 export const configLoaded = writable(false);
 
 // Defaults
-export const activeTab = writable("Assets");
+export const activeTab = writable("Level Viewer");
 export const enabledTrackers = writable(false);
 export const enabledAutoFixer = writable(false);
 export const trackerPort = writable(4225);

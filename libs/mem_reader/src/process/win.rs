@@ -1,10 +1,8 @@
-use std::fmt::Write;
 use std::mem::size_of;
 
 use byteorder::ByteOrder;
 use byteorder::LittleEndian;
 use winapi::shared::minwindef::{DWORD, HMODULE, LPCVOID, LPVOID, MAX_PATH};
-use winapi::um::errhandlingapi::GetLastError;
 use winapi::um::handleapi::{CloseHandle, INVALID_HANDLE_VALUE};
 use winapi::um::memoryapi::ReadProcessMemory;
 use winapi::um::memoryapi::WriteProcessMemory;

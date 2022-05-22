@@ -37,7 +37,12 @@ export class Task {
       let payload: RemoteTaskState = <RemoteTaskState>event.payload;
 
       if (payload.type !== this.taskName || !payload.data) {
-        console.error("Malformed or unexpected message...", event.payload);
+        console.error(
+          "Malformed or unexpected message...",
+          this.taskName,
+          payload
+        );
+        return;
       }
 
       let data = payload.data;

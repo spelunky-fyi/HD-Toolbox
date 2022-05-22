@@ -73,7 +73,7 @@
     </div>
     <p>
       The Slow Look auto-fixer will ensure your camera speed is always set to
-      the correct default on levels before Olmec's Lair.
+      the correct default between runs.
     </p>
   </div>
 </div>

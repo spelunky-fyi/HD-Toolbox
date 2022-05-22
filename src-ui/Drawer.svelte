@@ -17,9 +17,9 @@
   }
 
   let pages = {
-    Assets: Assets,
-    Trackers: Trackers,
+    // Assets: Assets,
     "Level Viewer": LevelViewer,
+    // Trackers: Trackers,
     "Memory Updater": MemoryUpdater,
   };
 </script>

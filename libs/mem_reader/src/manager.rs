@@ -94,12 +94,57 @@ impl MemoryUpdaterPayload {
     }
 }
 
+#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
+pub enum AutoFixerState {
+    NoSlowLook,
+    SlowLookWaiting,
+    SlowLookFixed,
+}
+
+impl Default for AutoFixerState {
+    fn default() -> Self {
+        AutoFixerState::NoSlowLook
+    }
+}
+
 #[derive(Debug, Serialize, Clone, Default, PartialEq, Eq)]
-pub struct AutoFixerPayload {}
+pub struct AutoFixerPayload {
+    state: AutoFixerState,
+}
 
 impl AutoFixerPayload {
     fn from_process(process: &Process) -> Result<Self, Failure> {
-        Ok(Self {})
+        let base_addr = process.base_addr;
+        let other_state_offset =
+            process.read_u32(base_addr + process.offsets.other_state)? as usize;
+        let camera_speed = process.read_u32(other_state_offset + 0x38)?;
+
+        if camera_speed == 0x3F800000 {
+            return Ok(Self {
+                state: AutoFixerState::NoSlowLook,
+            });
+        }
+
+        let global_state_offset =
+            process.read_u32(base_addr + process.offsets.global_state)? as usize;
+        let screen_state = process.read_u32(global_state_offset + 0x58)? as usize;
+
+        // Gameplay Screen States
+        if screen_state <= 11 {
+            return Ok(Self {
+                state: AutoFixerState::SlowLookWaiting,
+            });
+        }
+
+        let mut bytes = vec![0; 4];
+        LE::write_u32(&mut bytes, 0x3F800000);
+
+        process.write_n_bytes(other_state_offset + 0x38, bytes)?;
+
+        // PayloadResponse::Success
+        Ok(Self {
+            state: AutoFixerState::SlowLookFixed,
+        })
     }
 }
 
@@ -107,7 +152,7 @@ impl AutoFixerPayload {
 pub struct CategoryTrackerPayload {}
 
 impl CategoryTrackerPayload {
-    fn from_process(process: &Process) -> Result<Self, Failure> {
+    fn from_process(_process: &Process) -> Result<Self, Failure> {
         Ok(Self {})
     }
 }
@@ -116,7 +161,7 @@ impl CategoryTrackerPayload {
 pub struct PacifistTrackerPayload {}
 
 impl PacifistTrackerPayload {
-    fn from_process(process: &Process) -> Result<Self, Failure> {
+    fn from_process(_process: &Process) -> Result<Self, Failure> {
         Ok(Self {})
     }
 }

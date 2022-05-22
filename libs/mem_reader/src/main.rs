@@ -26,7 +26,7 @@ async fn main() -> Result<(), anyhow::Error> {
     let handle = rx.await?;
     let handle2 = handle.clone();
 
-    let x = tokio::spawn(async move {
+    let task = tokio::spawn(async move {
         handle2.connect().await.unwrap();
 
         loop {
@@ -37,7 +37,7 @@ async fn main() -> Result<(), anyhow::Error> {
             tokio::time::sleep(Duration::from_secs(1)).await;
         }
     });
-    x.await;
+    let _ = task.await;
     tokio::time::sleep(Duration::from_secs(10)).await;
     handle.shutdown().await?;
     tokio::time::sleep(Duration::from_secs(1)).await;
