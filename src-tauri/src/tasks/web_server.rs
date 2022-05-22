@@ -2,20 +2,18 @@ use std::collections::HashMap;
 use std::pin::Pin;
 use std::sync::Arc;
 use std::task::{Context, Poll};
-use std::time::Duration;
 
 use futures::Future;
+use futures::{sink::SinkExt, stream::StreamExt};
 use hyper::header::CONTENT_TYPE;
 use hyper::service::Service;
 use hyper::{Body, Request, Response, Server, StatusCode};
-use log::{debug, error, info};
+use hyper_tungstenite::{tungstenite, HyperWebsocket};
+use log::{debug, error};
 use static_files::Resource;
 use tauri::{self, AppHandle, Manager};
 use tokio::select;
-use tokio::{
-    sync::oneshot,
-    time::{interval, MissedTickBehavior},
-};
+use tokio::sync::oneshot;
 
 use hdt_mem_reader::manager::ManagerHandle;
 
@@ -25,7 +23,6 @@ static TASK_STATE_WEB_SERVER: &str = "task-state:WebServer";
 
 struct Trackers {
     mem_handle: ManagerHandle,
-    app_handle: AppHandle,
     tracker_resources: Arc<HashMap<&'static str, Resource>>,
 }
 
@@ -54,14 +51,64 @@ impl Service<Request<Body>> for Trackers {
             return Box::pin(async { response });
         }
 
+        // Handle Websockets
+        if path.starts_with("/ws/") && hyper_tungstenite::is_upgrade_request(&req) {
+            let (response, websocket) = match hyper_tungstenite::upgrade(&mut req, None) {
+                Ok((response, websocket)) => (response, websocket),
+                Err(_) => {
+                    return Box::pin(async {
+                        Response::builder()
+                            .status(StatusCode::INTERNAL_SERVER_ERROR)
+                            .body(Body::from("Failed to upgrade request"))
+                    });
+                }
+            };
+
+            // Spawn a task to handle the websocket connection.
+            tauri::async_runtime::spawn(async move {
+                if let Err(e) = serve_websocket(websocket).await {
+                    eprintln!("Error in websocket connection: {}", e);
+                }
+            });
+
+            // Return the response so the spawned future can continue.
+            return Box::pin(async { Ok(response) });
+        }
+
         let res = Ok(Response::new(Body::from("There's nothing here!")));
         Box::pin(async { res })
     }
 }
 
+async fn serve_websocket(websocket: HyperWebsocket) -> Result<(), anyhow::Error> {
+    let mut websocket = websocket.await?;
+
+    loop {
+        select! {
+            val = websocket.next() => {
+                match val {
+                    Some(msg) => {
+                        match msg? {
+                            // Not currently doing anything with
+                            tungstenite::Message::Text(msg) => {
+                                websocket.send(tungstenite::Message::text(msg)).await?;
+                            },
+                            _ => {}
+                        }
+                    },
+                    None => {
+                        break
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(())
+}
+
 struct MakeSvc {
     mem_handle: ManagerHandle,
-    app_handle: AppHandle,
     tracker_resources: Arc<HashMap<&'static str, Resource>>,
 }
 
@@ -76,13 +123,11 @@ impl<T> Service<T> for MakeSvc {
 
     fn call(&mut self, _: T) -> Self::Future {
         let mem_handle = self.mem_handle.clone();
-        let app_handle = self.app_handle.clone();
         let tracker_resources = self.tracker_resources.clone();
 
         let fut = async move {
             Ok(Trackers {
                 mem_handle,
-                app_handle,
                 tracker_resources,
             })
         };
@@ -144,7 +189,6 @@ impl WebServerTask {
             let addr = ([127, 0, 0, 1], self.port).into();
             let service = MakeSvc {
                 mem_handle: self.memory_handle.clone(),
-                app_handle: self.app_handle.clone(),
                 tracker_resources: self.tracker_resources.clone(),
             };
             let bind = match Server::try_bind(&addr) {

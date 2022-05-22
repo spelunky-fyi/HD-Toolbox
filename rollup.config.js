@@ -50,6 +50,8 @@ const bundles = [
     input: "src-ui/main.ts",
     jsOutput: "public/build/bundle.js",
     cssOutput: "bundle.css",
+    serve: serve,
+    liveReload: "public",
   },
   {
     input: "src-ui/trackers/category/main.ts",
@@ -63,7 +65,7 @@ const bundles = [
   },
 ];
 
-export default bundles.map((value, index) => {
+export default bundles.map((value) => {
   return {
     input: value.input,
     output: {
@@ -105,11 +107,11 @@ export default bundles.map((value, index) => {
       // In dev mode, call `npm run start` once
       // the bundle has been generated
       // Only for the first bundle so we don't start multiple servers
-      !production && index === 0 && serve(),
+      !production && value.serve && value.serve(),
 
       // Watch the `public` directory and refresh the
       // browser on changes when not in production
-      !production && livereload("public"),
+      !production && value.liveReload && livereload(value.liveReload),
 
       // If we're building for production (npm run build
       // instead of npm run dev), minify
