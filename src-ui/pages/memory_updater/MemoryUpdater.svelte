@@ -1,7 +1,6 @@
 <script type="ts">
   import LayoutGrid, { Cell } from "@smui/layout-grid";
   import Card, { Content } from "@smui/card";
-  import CircularProgress from "@smui/circular-progress";
 
   import CharList from "./CharList.svelte";
   import SlowLook from "./SlowLook.svelte";
@@ -32,10 +31,6 @@
     <p class="card-container">
       <Card padded>
         <div class="connecting-text">
-          <CircularProgress
-            style="height: 32px; width: 32px; margin-right: 10px;"
-            indeterminate
-          />
           <span>{connectingText}</span>
         </div>
       </Card>

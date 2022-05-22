@@ -2,7 +2,6 @@
   import { enabledTrackers, trackersHeader } from "@hdt/config";
   import { TaskState, trackersState } from "@hdt/tasks";
   import Card from "@smui/card/src/Card.svelte";
-  import CircularProgress from "@smui/circular-progress/src/CircularProgress.svelte";
 
   import Cell from "@smui/layout-grid/src/Cell.svelte";
   import LayoutGrid from "@smui/layout-grid/src/LayoutGrid.svelte";
@@ -30,10 +29,6 @@
       <p class="card-container">
         <Card padded>
           <div class="connecting-text">
-            <CircularProgress
-              style="height: 32px; width: 32px; margin-right: 10px;"
-              indeterminate
-            />
             <span>Enabling Trackers</span>
           </div>
         </Card>

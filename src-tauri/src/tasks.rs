@@ -7,7 +7,7 @@ use tokio::select;
 use tokio::time::Instant;
 use tokio::{
     sync::oneshot,
-    time::{interval, MissedTickBehavior},
+    time::{interval, interval_at, MissedTickBehavior},
 };
 
 use hdt_mem_reader::manager::{
@@ -202,11 +202,17 @@ impl MemoryUpdaterTask {
                 }
                 _now = poll_interval.tick() => {
                     if let Ok(payload) = self.memory_handle.get_payload(PayloadRequest::MemoryUpdater).await {
+                        if let PayloadResponse::Failure(_) = &payload {
+                            poll_interval = interval_at(Instant::now() + Duration::from_secs(1), Duration::from_millis(16));
+                            poll_interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
+                        }
+
                         if let Some(last_payload) = &last_payload  {
                             if &payload == last_payload && Instant::now() - last_send < Duration::from_secs(2){
                                 continue;
                             }
                         }
+
                         last_send = Instant::now();
                         last_payload = Some(payload.clone());
 

@@ -18,7 +18,6 @@
     "@rollup/plugin-typescript": "^8.3.2",
     "@smui/button": "^6.0.0-beta.16",
     "@smui/card": "^6.0.0-beta.16",
-    "@smui/circular-progress": "^6.0.0-beta.16",
     "@smui/drawer": "^6.0.0-beta.16",
     "@smui/layout-grid": "^6.0.0-beta.16",
     "@smui/list": "^6.0.0-beta.16",
