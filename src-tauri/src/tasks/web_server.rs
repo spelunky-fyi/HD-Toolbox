@@ -79,7 +79,7 @@ impl Service<Request<Body>> for Trackers {
             // Spawn a task to handle the websocket connection.
             tauri::async_runtime::spawn(async move {
                 if let Err(e) = handle_websocket(name.into(), tracker_handle, websocket).await {
-                    eprintln!("Error in websocket connection: {}", e);
+                    error!("Error in websocket connection: {}", e);
                 }
             });
 
@@ -117,13 +117,31 @@ async fn handle_websocket(
                 match val { None => { break }, _ => {} }
             }
             _now = poll_interval.tick() => {
-                // TODO: send updates even with no changes at slower interval
-                websocket.send(tungstenite::Message::text(r#"{"hello": "world"}"#)).await?;
+                let ser_value = {
+                    match serde_json::to_string(&*watcher.borrow()) {
+                        Err(err) => {
+                            error!("Failed to understand message: {}", err);
+                            continue;
+                        },
+                        Ok(ser_msg) => ser_msg,
+                    }
+                };
+                websocket.send(tungstenite::Message::text(ser_value)).await?
+
             }
-            _value = watcher.changed() => {
-                // TODO: Do.
-                debug!("Saw Update");
-            }
+            value = watcher.changed() => {
+                value?;
+                let ser_value = {
+                    match serde_json::to_string(&*watcher.borrow()) {
+                        Err(err) => {
+                            error!("Failed to understand message: {}", err);
+                            continue;
+                        },
+                        Ok(ser_msg) => ser_msg,
+                    }
+                };
+                websocket.send(tungstenite::Message::text(ser_value)).await?
+            },
         }
     }
 
@@ -227,7 +245,7 @@ impl WebServerTask {
             });
             self.connected();
             if let Err(e) = graceful.await {
-                eprintln!("server error: {}", e);
+                error!("server error: {}", e);
             }
         };
 

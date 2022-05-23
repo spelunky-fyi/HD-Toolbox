@@ -92,8 +92,7 @@ impl TrackerManager {
                     break;
                 }
                 _ = poll_interval.tick() => {
-                    // Check dead tasks.
-
+                    // TODO: Check dead tasks.
                 }
                 msg = self.handle_rx.recv() => {
                     if let Some(msg) = msg {

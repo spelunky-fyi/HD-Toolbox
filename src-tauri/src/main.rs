@@ -10,7 +10,7 @@ use std::thread;
 
 use log::{debug, LevelFilter};
 use tasks::trackers::TrackerManager;
-use tauri::Manager;
+use tauri::{Manager, RunEvent};
 use tauri_plugin_log::LoggerBuilder;
 use tauri_plugin_store::StoreBuilder;
 use tokio::{runtime, sync::oneshot};
@@ -85,7 +85,17 @@ fn main() -> anyhow::Result<()> {
             tasks::fix_slowlook,
             tasks::set_character,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while running tauri application")
+        .run(|app, event| {
+            if let RunEvent::Exit = event {
+                let app_handle = app.clone();
+                tauri::async_runtime::spawn(async move {
+                    let state = app_handle.state::<state::State>();
+                    state.tracker_manager.shutdown().await.ok();
+                    state.mem_manager.shutdown().await.ok();
+                });
+            }
+        });
     Ok(())
 }
