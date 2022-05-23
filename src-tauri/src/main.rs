@@ -8,7 +8,8 @@ mod tasks;
 
 use std::thread;
 
-use log::{debug, error, LevelFilter};
+use log::{debug, LevelFilter};
+use tasks::trackers::TrackerManager;
 use tauri::Manager;
 use tauri_plugin_log::LoggerBuilder;
 use tauri_plugin_store::StoreBuilder;
@@ -30,7 +31,7 @@ fn launch_spelunky_hd() -> Result<String, String> {
     Ok("Launched!".into())
 }
 
-async fn run_mem_manager() -> Result<ManagerHandle, anyhow::Error> {
+async fn run_mem_manager() -> ManagerHandle {
     debug!("Spawning thread for Memory Manager");
     let (tx, rx) = oneshot::channel::<ManagerHandle>();
     thread::spawn(move || {
@@ -46,7 +47,7 @@ async fn run_mem_manager() -> Result<ManagerHandle, anyhow::Error> {
             manager.run_forever().await;
         })
     });
-    Ok(rx.await?)
+    rx.await.expect("Failed to run Memory Manger")
 }
 
 fn main() -> anyhow::Result<()> {
@@ -70,14 +71,10 @@ fn main() -> anyhow::Result<()> {
         .setup(|app| {
             let handle = app.handle();
             tauri::async_runtime::spawn(async move {
-                match run_mem_manager().await {
-                    Ok(mem_manager) => {
-                        handle.manage(state::State::new(mem_manager));
-                    }
-                    Err(err) => {
-                        error!("Failed to run Memory Manager: {:?}", err);
-                    }
-                }
+                let memory_manager = run_mem_manager().await;
+                let tracker_manager =
+                    TrackerManager::run_in_background(memory_manager.clone()).await;
+                handle.manage(state::State::new(memory_manager, tracker_manager));
             });
             Ok(())
         })

@@ -16,15 +16,15 @@ use tauri::{self, AppHandle, Manager};
 use tokio::select;
 use tokio::sync::oneshot;
 
-use hdt_mem_reader::manager::ManagerHandle;
 use tokio::time::interval;
 
+use super::trackers::{Handle as TrackerHandle, TrackerType};
 use super::{TaskUpdate, WebServerResponse};
 
 static TASK_STATE_WEB_SERVER: &str = "task-state:WebServer";
 
 struct Trackers {
-    mem_handle: ManagerHandle,
+    tracker_handle: TrackerHandle,
     tracker_resources: Arc<HashMap<&'static str, Resource>>,
 }
 
@@ -55,6 +55,15 @@ impl Service<Request<Body>> for Trackers {
 
         // Handle Websockets
         if path.starts_with("/ws/") && hyper_tungstenite::is_upgrade_request(&req) {
+            let name: String = path.strip_prefix("/ws/").unwrap().into();
+            if !["category", "pacifist"].contains(&name.as_ref()) {
+                return Box::pin(async {
+                    Response::builder()
+                        .status(StatusCode::NOT_FOUND)
+                        .body(Body::from(""))
+                });
+            }
+
             let (response, websocket) = match hyper_tungstenite::upgrade(&mut req, None) {
                 Ok((response, websocket)) => (response, websocket),
                 Err(_) => {
@@ -66,9 +75,10 @@ impl Service<Request<Body>> for Trackers {
                 }
             };
 
+            let tracker_handle = self.tracker_handle.clone();
             // Spawn a task to handle the websocket connection.
             tauri::async_runtime::spawn(async move {
-                if let Err(e) = serve_websocket(websocket).await {
+                if let Err(e) = handle_websocket(name.into(), tracker_handle, websocket).await {
                     eprintln!("Error in websocket connection: {}", e);
                 }
             });
@@ -77,12 +87,26 @@ impl Service<Request<Body>> for Trackers {
             return Box::pin(async { Ok(response) });
         }
 
-        let res = Ok(Response::new(Body::from("There's nothing here!")));
-        Box::pin(async { res })
+        Box::pin(async {
+            Response::builder()
+                .status(StatusCode::NOT_FOUND)
+                .body(Body::from("Not Found."))
+        })
     }
 }
 
-async fn serve_websocket(websocket: HyperWebsocket) -> Result<(), anyhow::Error> {
+async fn handle_websocket(
+    name: String,
+    tracker_handle: TrackerHandle,
+    websocket: HyperWebsocket,
+) -> Result<(), anyhow::Error> {
+    let tracker_type = match name.as_ref() {
+        "category" => TrackerType::Category,
+        "pacifist" => TrackerType::Pacifist,
+        _ => panic!("This shouldn't be possible."),
+    };
+
+    let mut watcher = tracker_handle.get_watcher(tracker_type).await?;
     let mut websocket = websocket.await?;
     let mut poll_interval = interval(Duration::from_secs(1));
 
@@ -93,7 +117,12 @@ async fn serve_websocket(websocket: HyperWebsocket) -> Result<(), anyhow::Error>
                 match val { None => { break }, _ => {} }
             }
             _now = poll_interval.tick() => {
-                websocket.send(tungstenite::Message::text(r#"{"hello": "world"}"#)).await;
+                // TODO: send updates even with no changes at slower interval
+                websocket.send(tungstenite::Message::text(r#"{"hello": "world"}"#)).await?;
+            }
+            _value = watcher.changed() => {
+                // TODO: Do.
+                debug!("Saw Update");
             }
         }
     }
@@ -102,7 +131,7 @@ async fn serve_websocket(websocket: HyperWebsocket) -> Result<(), anyhow::Error>
 }
 
 struct MakeSvc {
-    mem_handle: ManagerHandle,
+    tracker_handle: TrackerHandle,
     tracker_resources: Arc<HashMap<&'static str, Resource>>,
 }
 
@@ -116,12 +145,12 @@ impl<T> Service<T> for MakeSvc {
     }
 
     fn call(&mut self, _: T) -> Self::Future {
-        let mem_handle = self.mem_handle.clone();
+        let tracker_handle = self.tracker_handle.clone();
         let tracker_resources = self.tracker_resources.clone();
 
         let fut = async move {
             Ok(Trackers {
-                mem_handle,
+                tracker_handle,
                 tracker_resources,
             })
         };
@@ -131,7 +160,7 @@ impl<T> Service<T> for MakeSvc {
 
 pub struct WebServerTask {
     shutdown_rx: Option<oneshot::Receiver<()>>,
-    memory_handle: ManagerHandle,
+    tracker_handle: TrackerHandle,
     app_handle: AppHandle,
     tracker_resources: Arc<HashMap<&'static str, Resource>>,
     port: u16,
@@ -139,7 +168,7 @@ pub struct WebServerTask {
 
 impl WebServerTask {
     pub fn new(
-        memory_handle: ManagerHandle,
+        tracker_handle: TrackerHandle,
         app_handle: AppHandle,
         tracker_resources: Arc<HashMap<&'static str, Resource>>,
 
@@ -149,7 +178,7 @@ impl WebServerTask {
         (
             Self {
                 shutdown_rx: Some(shutdown_rx),
-                memory_handle,
+                tracker_handle,
                 app_handle,
                 tracker_resources,
                 port,
@@ -182,7 +211,7 @@ impl WebServerTask {
         if let Some(shutdown_rx) = self.shutdown_rx.take() {
             let addr = ([127, 0, 0, 1], self.port).into();
             let service = MakeSvc {
-                mem_handle: self.memory_handle.clone(),
+                tracker_handle: self.tracker_handle.clone(),
                 tracker_resources: self.tracker_resources.clone(),
             };
             let bind = match Server::try_bind(&addr) {

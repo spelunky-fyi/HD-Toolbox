@@ -1,5 +1,6 @@
 pub mod auto_fixer;
 pub mod memory_updater;
+pub mod trackers;
 pub mod web_server;
 
 use log::info;
@@ -60,11 +61,11 @@ pub async fn start_task(
     let mut tasks = state.tasks.lock().expect("Failed to get lock");
 
     let app_handle = app_handle.clone();
-    let mem_manager = state.mem_manager.clone();
 
     match task {
         TaskStart::MemoryUpdater => {
             if tasks.memory_updater.is_none() {
+                let mem_manager = state.mem_manager.clone();
                 let (mut task, shutdown_tx) =
                     memory_updater::MemoryUpdaterTask::new(mem_manager, app_handle);
                 tauri::async_runtime::spawn(async move {
@@ -75,6 +76,7 @@ pub async fn start_task(
         }
         TaskStart::AutoFixer => {
             if tasks.auto_fixer.is_none() {
+                let mem_manager = state.mem_manager.clone();
                 let (mut task, shutdown_tx) =
                     auto_fixer::AutoFixerTask::new(mem_manager, app_handle);
                 tauri::async_runtime::spawn(async move {
@@ -85,8 +87,9 @@ pub async fn start_task(
         }
         TaskStart::WebServer { port } => {
             if tasks.web_server.is_none() {
+                let tracker_manager = state.tracker_manager.clone();
                 let (mut task, shutdown_tx) = web_server::WebServerTask::new(
-                    mem_manager,
+                    tracker_manager,
                     app_handle,
                     state.tracker_resources.clone(),
                     port,

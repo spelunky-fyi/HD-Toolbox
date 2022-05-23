@@ -23,7 +23,7 @@ impl Process {
     }
 
     pub fn read_n_bytes(&self, _addr: usize, num_bytes: usize) -> Result<Vec<u8>, ReadMemoryError> {
-        Ok(vec![0, num_bytes as u8])
+        Ok(vec![0; num_bytes])
     }
 
     pub fn write_n_bytes(&self, _addr: usize, bytes: Vec<u8>) -> Result<usize, WriteMemoryError> {
