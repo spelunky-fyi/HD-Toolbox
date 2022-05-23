@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::pin::Pin;
 use std::sync::Arc;
 use std::task::{Context, Poll};
+use std::time::Duration;
 
 use futures::Future;
 use futures::{sink::SinkExt, stream::StreamExt};
@@ -16,6 +17,7 @@ use tokio::select;
 use tokio::sync::oneshot;
 
 use hdt_mem_reader::manager::ManagerHandle;
+use tokio::time::interval;
 
 use super::{TaskUpdate, WebServerResponse};
 
@@ -82,24 +84,16 @@ impl Service<Request<Body>> for Trackers {
 
 async fn serve_websocket(websocket: HyperWebsocket) -> Result<(), anyhow::Error> {
     let mut websocket = websocket.await?;
+    let mut poll_interval = interval(Duration::from_secs(1));
 
     loop {
         select! {
+            // Watch for disconnect, discard and messages from client.
             val = websocket.next() => {
-                match val {
-                    Some(msg) => {
-                        match msg? {
-                            // Not currently doing anything with
-                            tungstenite::Message::Text(msg) => {
-                                websocket.send(tungstenite::Message::text(msg)).await?;
-                            },
-                            _ => {}
-                        }
-                    },
-                    None => {
-                        break
-                    }
-                }
+                match val { None => { break }, _ => {} }
+            }
+            _now = poll_interval.tick() => {
+                websocket.send(tungstenite::Message::text(r#"{"hello": "world"}"#)).await;
             }
         }
     }

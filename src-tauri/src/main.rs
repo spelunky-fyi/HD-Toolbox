@@ -54,6 +54,7 @@ fn main() -> anyhow::Result<()> {
     let log_plugin = LoggerBuilder::new()
         .level_for("attohttpc", log::LevelFilter::Warn)
         .level_for("mio::poll", log::LevelFilter::Warn)
+        .level_for("tungstenite::protocol", log::LevelFilter::Warn)
         .level(LOG_LEVEL)
         .build();
 
