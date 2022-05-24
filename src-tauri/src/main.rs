@@ -52,6 +52,9 @@ async fn run_mem_manager() -> ManagerHandle {
 
 fn main() -> anyhow::Result<()> {
     let main_config = StoreBuilder::new(MAIN_CONFIG.parse()?).build();
+    let tracker_pacifist_config =StoreBuilder::new("tracker-pacifist.config".parse()?).build();
+    let tracker_category_config =StoreBuilder::new("tracker-category.config".parse()?).build();
+
     let log_plugin = LoggerBuilder::new()
         .level_for("attohttpc", log::LevelFilter::Warn)
         .level_for("mio::poll", log::LevelFilter::Warn)
@@ -63,7 +66,7 @@ fn main() -> anyhow::Result<()> {
         .plugin(log_plugin)
         .plugin(
             tauri_plugin_store::PluginBuilder::default()
-                .stores([main_config])
+                .stores([main_config, tracker_pacifist_config, tracker_category_config])
                 .freeze()
                 .build(),
         )

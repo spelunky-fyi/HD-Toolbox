@@ -6,6 +6,8 @@
   import Cell from "@smui/layout-grid/src/Cell.svelte";
   import LayoutGrid from "@smui/layout-grid/src/LayoutGrid.svelte";
   import Switch from "@smui/switch/src/Switch.svelte";
+  import Category from "./Category.svelte";
+  import Pacifist from "./Pacifist.svelte";
 </script>
 
 <div>
@@ -36,6 +38,15 @@
           >Port</label
         >
       </div>
+    </Cell>
+  </LayoutGrid>
+
+  <LayoutGrid>
+    <Cell span={6}>
+      <Category />
+    </Cell>
+    <Cell span={6}>
+      <Pacifist />
     </Cell>
   </LayoutGrid>
   <div>

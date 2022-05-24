@@ -5,7 +5,7 @@
   import List, { Item, Text } from "@smui/list";
 
   import Assets from "@hdt/pages/Assets.svelte";
-  import Trackers from "@hdt/pages/Trackers.svelte";
+  import Trackers from "@hdt/pages/trackers/Trackers.svelte";
   import LevelViewer from "@hdt/pages/level_viewer/LevelViewer.svelte";
   import MemoryUpdater from "./pages/memory_updater/MemoryUpdater.svelte";
   import { activeTab, selectPage } from "./config";
