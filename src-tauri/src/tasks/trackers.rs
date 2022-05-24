@@ -1,26 +1,29 @@
+use std::collections::hash_map::Entry;
+use std::collections::HashMap;
 use std::time::Duration;
 
 use hdt_mem_reader::manager::ManagerHandle;
-use log::debug;
+use log::{debug, error};
 use serde::Serialize;
 use tokio::select;
 use tokio::sync::{mpsc, oneshot, watch};
 use tokio::time::interval;
 use tokio::time::MissedTickBehavior;
 
-#[derive(Debug, Serialize)]
-pub struct CategoryResponse {}
+use super::category::{CategoryResponse, CategoryTracker};
+use super::pacifist::{PacifistResponse, PacifistTracker};
+use super::tracker_task::{TrackerTask, TrackerTaskHandle};
 
-#[derive(Debug, Serialize)]
-pub struct PacifistResponse {}
-
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
+#[serde(tag = "type", content = "data")]
 pub enum Response {
     Category(CategoryResponse),
     Pacifist(PacifistResponse),
+    Failure(String),
+    Empty,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum TrackerType {
     Category,
     Pacifist,
@@ -46,6 +49,8 @@ pub struct TrackerManager {
     shutdown_tx: Option<oneshot::Sender<()>>,
 
     memory_manager: ManagerHandle,
+
+    tasks: HashMap<TrackerType, TrackerTaskHandle>,
 }
 
 impl TrackerManager {
@@ -56,6 +61,7 @@ impl TrackerManager {
             handle_rx,
             shutdown_tx: None,
             memory_manager,
+            tasks: HashMap::new(),
         }
     }
 
@@ -92,7 +98,25 @@ impl TrackerManager {
                     break;
                 }
                 _ = poll_interval.tick() => {
-                    // TODO: Check dead tasks.
+                    let mut to_remove = vec![];
+                    for (task_type, task) in &self.tasks {
+                        match task.is_stale().await {
+                            Ok(is_stale) => {
+                                if is_stale {
+                                    to_remove.push(*task_type);
+                                    task.shutdown().await.ok();
+                                }
+                            },
+                            Err(err) => {
+                                error!("Task went away: {:?}", err);
+                                to_remove.push(*task_type);
+                            }
+                        }
+                    }
+
+                    for task_type in to_remove {
+                        self.tasks.remove(&task_type);
+                    }
                 }
                 msg = self.handle_rx.recv() => {
                     if let Some(msg) = msg {
@@ -109,7 +133,7 @@ impl TrackerManager {
                 self.handle_shutdown(response);
             }
             Message::GetWatcher(tracker_type, response) => {
-                self.handle_get_watcher(tracker_type, response);
+                self.handle_get_watcher(tracker_type, response).await;
             }
         };
     }
@@ -121,11 +145,40 @@ impl TrackerManager {
         let _ = response.send(());
     }
 
-    fn handle_get_watcher(
+    async fn handle_get_watcher(
         &mut self,
         tracker_type: TrackerType,
         response: oneshot::Sender<Result<watch::Receiver<Response>, anyhow::Error>>,
     ) {
+        let entry = match self.tasks.entry(tracker_type) {
+            Entry::Occupied(entry) => {
+                let watcher = entry.get().subscribe().await;
+                response.send(watcher).ok();
+                return;
+            }
+            Entry::Vacant(entry) => entry,
+        };
+
+        let mut task = TrackerTask::new();
+        let handle = task.get_handle();
+        let mem_manager = self.memory_manager.clone();
+        match tracker_type {
+            TrackerType::Pacifist => {
+                tauri::async_runtime::spawn(async move {
+                    let tracker = PacifistTracker::new(mem_manager);
+                    task.run(tracker).await;
+                });
+            }
+            TrackerType::Category => {
+                tauri::async_runtime::spawn(async move {
+                    let tracker = CategoryTracker::new(mem_manager);
+                    task.run(tracker).await;
+                });
+            }
+        }
+        let watcher = handle.subscribe().await;
+        entry.insert(handle);
+        response.send(watcher).ok();
     }
 }
 

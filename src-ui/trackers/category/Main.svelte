@@ -1,8 +1,16 @@
 <script lang="ts">
+  import { WebSocketState } from "../websockets";
+
   import { state, data } from "./stores";
 </script>
 
-<main>Category Tracker</main>
+<main>
+  {#if $state === WebSocketState.Pending}
+    <span class="pending">Connecting...</span>
+  {:else}
+    <span />
+  {/if}
+</main>
 
 <style>
   main {

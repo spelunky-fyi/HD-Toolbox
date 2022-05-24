@@ -4,4 +4,4 @@ import { HDWebSocket, WebSocketState } from "../websockets";
 export const state = writable(WebSocketState.Pending);
 export const data = writable(null);
 
-export const ws = new HDWebSocket("pacifist", state, data);
+export const ws = new HDWebSocket("pacifist", "Pacifist", state, data);

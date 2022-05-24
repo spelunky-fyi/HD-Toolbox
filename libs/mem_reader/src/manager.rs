@@ -159,7 +159,7 @@ impl CategoryTrackerPayload {
 
 #[derive(Debug, Serialize, Clone, Default, PartialEq, Eq)]
 pub struct PacifistTrackerPayload {
-    total_kills: u32,
+    pub total_kills: u32,
 }
 
 impl PacifistTrackerPayload {

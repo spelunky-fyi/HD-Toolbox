@@ -17,6 +17,7 @@ tauri-build = {version = "1.0.0-rc.9", features = [] }
 
 [dependencies]
 anyhow = "1"
+async-trait = "0.1"
 byteorder = "1"
 fern = "0.6"
 futures = "0.3"

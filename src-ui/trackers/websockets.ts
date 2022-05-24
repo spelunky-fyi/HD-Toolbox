@@ -10,16 +10,19 @@ export const enum WebSocketState {
 
 export class HDWebSocket {
   name: string;
+  payloadKey: string;
   stateStore: Writable<WebSocketState>;
   dataStore: Writable<any>;
   ws?: WebSocket;
 
   constructor(
     name: string,
+    payloadKey: string,
     stateStore: Writable<WebSocketState>,
     dataStore: Writable<WebSocketState>
   ) {
     this.name = name;
+    this.payloadKey = payloadKey;
     this.stateStore = stateStore;
     this.dataStore = dataStore;
 
@@ -32,15 +35,17 @@ export class HDWebSocket {
     this.ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       console.log(data);
-      if (
-        data.type == "Connecting" &&
+      if (data.type == this.payloadKey) {
+        this.stateStore.set(WebSocketState.Connected);
+        this.dataStore.set(data.data);
+      } else if (
+        data.type == "Failure" &&
         get(this.stateStore) == WebSocketState.Connected
       ) {
         this.stateStore.set(WebSocketState.Pending);
         this.dataStore.set(null);
-      } else if (data.type == "Payload") {
-        this.stateStore.set(WebSocketState.Connected);
-        this.dataStore.set(data.data);
+      } else {
+        console.error("Unknown data", data);
       }
     };
 
