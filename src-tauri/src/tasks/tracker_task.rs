@@ -1,7 +1,10 @@
-use std::time::Duration;
+use std::{collections::HashMap, time::Duration};
 
 use async_trait::async_trait;
-use log::debug;
+use log::{debug, warn};
+use serde::de::DeserializeOwned;
+use serde::Serialize;
+use serde_json::Value as JsonValue;
 use tokio::select;
 use tokio::time::Instant;
 use tokio::{
@@ -15,11 +18,13 @@ use super::trackers::Response;
 
 #[async_trait]
 pub trait TrackerTicker {
+    type Config: Default + DeserializeOwned + Serialize;
+
     async fn startup(&mut self) -> Option<Response> {
         None
     }
 
-    async fn tick(&mut self) -> Response;
+    async fn tick(&mut self, config: &Self::Config) -> Response;
 }
 
 #[derive(Debug)]
@@ -36,10 +41,12 @@ pub struct TrackerTask {
     watcher: watch::Sender<Response>,
 
     last_non_empty: Instant,
+
+    config: watch::Receiver<HashMap<String, JsonValue>>,
 }
 
 impl TrackerTask {
-    pub fn new() -> Self {
+    pub fn new(config: watch::Receiver<HashMap<String, JsonValue>>) -> Self {
         let (handle_tx, handle_rx) = mpsc::channel::<TrackerTaskMessage>(100);
         let (watcher, _) = watch::channel(Response::Empty);
         Self {
@@ -47,12 +54,33 @@ impl TrackerTask {
             handle_rx,
             watcher,
             last_non_empty: Instant::now(),
+            config,
         }
     }
 
     pub fn get_handle(&self) -> TrackerTaskHandle {
         TrackerTaskHandle {
             handle_tx: self.handle_tx.clone(),
+        }
+    }
+
+    pub fn serialize_config<T: TrackerTicker>(&self) -> T::Config {
+        let config = self.config.borrow().clone();
+
+        let value = match serde_json::to_value(config) {
+            Ok(value) => value,
+            Err(err) => {
+                warn!("Failed to convert config to JSON Value... {:?}", err);
+                return T::Config::default();
+            }
+        };
+
+        match serde_json::from_value(value) {
+            Ok(value) => value,
+            Err(err) => {
+                warn!("Failed to deserialize config, using default... {:?}", err);
+                T::Config::default()
+            }
         }
     }
 
@@ -71,8 +99,14 @@ impl TrackerTask {
         let mut last_response = None;
         let mut last_send = Instant::now();
 
+        let mut config = self.serialize_config::<T>();
+
         loop {
             select! {
+                _ = self.config.changed() => {
+                    debug!("Config changed.");
+                    config = self.serialize_config::<T>();
+                }
                 msg = self.handle_rx.recv() => {
                     if let Some(msg) = msg {
                         match msg {
@@ -92,7 +126,7 @@ impl TrackerTask {
                     }
                 }
                 _ = tick_interval.tick() => {
-                        let response = ticker.tick().await;
+                        let response = ticker.tick(&config).await;
                         // Slow down while we're failing.
                         if let Response::Failure(_) = &response {
                             tick_interval = interval_at(Instant::now() + Duration::from_secs(1), Duration::from_millis(16));

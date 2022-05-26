@@ -38,10 +38,9 @@ export class HDWebSocket {
       if (data.type == this.payloadKey) {
         this.stateStore.set(WebSocketState.Connected);
         this.dataStore.set(data.data);
-      } else if (
-        data.type == "Failure" &&
-        get(this.stateStore) == WebSocketState.Connected
-      ) {
+      } else if (data.type == "Empty") {
+        // Do Nothing.
+      } else if (data.type == "Failure") {
         this.stateStore.set(WebSocketState.Pending);
         this.dataStore.set(null);
       } else {

@@ -3,13 +3,14 @@
     windows_subsystem = "windows"
 )]
 
+mod config;
 mod state;
 mod tasks;
 
-use std::thread;
+use std::{collections::HashMap, thread};
 
 use log::{debug, LevelFilter};
-use tasks::trackers::TrackerManager;
+use tasks::trackers::{TrackerManager, TrackerType};
 use tauri::{Manager, RunEvent};
 use tauri_plugin_log::LoggerBuilder;
 use tauri_plugin_store::StoreBuilder;
@@ -52,8 +53,12 @@ async fn run_mem_manager() -> ManagerHandle {
 
 fn main() -> anyhow::Result<()> {
     let main_config = StoreBuilder::new(MAIN_CONFIG.parse()?).build();
-    let tracker_pacifist_config =StoreBuilder::new("tracker-pacifist.config".parse()?).build();
-    let tracker_category_config =StoreBuilder::new("tracker-category.config".parse()?).build();
+    let mut tracker_pacifist_config = StoreBuilder::new("tracker-pacifist.config".parse()?).build();
+    let mut tracker_category_config = StoreBuilder::new("tracker-category.config".parse()?).build();
+
+    let mut tracker_configs = HashMap::new();
+    tracker_configs.insert(TrackerType::Pacifist, tracker_pacifist_config.get_watcher());
+    tracker_configs.insert(TrackerType::Category, tracker_category_config.get_watcher());
 
     let log_plugin = LoggerBuilder::new()
         .level_for("attohttpc", log::LevelFilter::Warn)
@@ -66,7 +71,11 @@ fn main() -> anyhow::Result<()> {
         .plugin(log_plugin)
         .plugin(
             tauri_plugin_store::PluginBuilder::default()
-                .stores([main_config, tracker_pacifist_config, tracker_category_config])
+                .stores([
+                    main_config,
+                    tracker_pacifist_config,
+                    tracker_category_config,
+                ])
                 .freeze()
                 .build(),
         )
@@ -76,7 +85,8 @@ fn main() -> anyhow::Result<()> {
             tauri::async_runtime::spawn(async move {
                 let memory_manager = run_mem_manager().await;
                 let tracker_manager =
-                    TrackerManager::run_in_background(memory_manager.clone()).await;
+                    TrackerManager::run_in_background(memory_manager.clone(), tracker_configs)
+                        .await;
                 handle.manage(state::State::new(memory_manager, tracker_manager));
             });
             Ok(())

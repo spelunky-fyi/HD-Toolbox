@@ -5,6 +5,7 @@ use std::time::Duration;
 use hdt_mem_reader::manager::ManagerHandle;
 use log::{debug, error};
 use serde::Serialize;
+use serde_json::Value as JsonValue;
 use tokio::select;
 use tokio::sync::{mpsc, oneshot, watch};
 use tokio::time::interval;
@@ -51,10 +52,15 @@ pub struct TrackerManager {
     memory_manager: ManagerHandle,
 
     tasks: HashMap<TrackerType, TrackerTaskHandle>,
+
+    configs: HashMap<TrackerType, watch::Receiver<HashMap<String, JsonValue>>>,
 }
 
 impl TrackerManager {
-    pub fn new(memory_manager: ManagerHandle) -> Self {
+    pub fn new(
+        memory_manager: ManagerHandle,
+        configs: HashMap<TrackerType, watch::Receiver<HashMap<String, JsonValue>>>,
+    ) -> Self {
         let (handle_tx, handle_rx) = mpsc::channel::<Message>(100);
         Self {
             handle_tx,
@@ -62,14 +68,18 @@ impl TrackerManager {
             shutdown_tx: None,
             memory_manager,
             tasks: HashMap::new(),
+            configs: configs,
         }
     }
 
-    pub async fn run_in_background(memory_manager: ManagerHandle) -> Handle {
+    pub async fn run_in_background(
+        memory_manager: ManagerHandle,
+        configs: HashMap<TrackerType, watch::Receiver<HashMap<String, JsonValue>>>,
+    ) -> Handle {
         debug!("Spawning thread for Tracker Manager");
         let (tx, rx) = oneshot::channel::<Handle>();
         tauri::async_runtime::spawn(async move {
-            let mut manager = TrackerManager::new(memory_manager);
+            let mut manager = TrackerManager::new(memory_manager, configs);
             let handle = manager.get_handle();
             let _ = tx.send(handle);
             manager.run_forever().await;
@@ -159,7 +169,13 @@ impl TrackerManager {
             Entry::Vacant(entry) => entry,
         };
 
-        let mut task = TrackerTask::new();
+        let config = self
+            .configs
+            .get(&tracker_type)
+            .map(|c| c.clone())
+            .expect("No config found.");
+
+        let mut task = TrackerTask::new(config);
         let handle = task.get_handle();
         let mem_manager = self.memory_manager.clone();
         match tracker_type {

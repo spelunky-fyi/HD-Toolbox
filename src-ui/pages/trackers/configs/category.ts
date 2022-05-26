@@ -6,7 +6,7 @@ export const configLoaded = writable(false);
 
 // Defaults
 export const hideEarly = writable(false);
-export const showNo = writable(true);
+export const showNo = writable(false);
 export const showNoGold = writable(true);
 export const showPacifist = writable(true);
 

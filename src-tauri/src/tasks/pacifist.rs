@@ -3,12 +3,15 @@ use async_trait::async_trait;
 use hdt_mem_reader::manager::{ManagerHandle, PayloadResponse};
 use serde::Serialize;
 
+use crate::config::PacifistConfig;
+
 use super::tracker_task::TrackerTicker;
 use super::trackers::Response;
 
 #[derive(Debug, Serialize, Clone, PartialEq, Eq)]
 pub struct PacifistResponse {
     pub total_kills: u32,
+    pub show_kills: bool,
 }
 
 pub struct PacifistTracker {
@@ -23,6 +26,8 @@ impl PacifistTracker {
 
 #[async_trait]
 impl TrackerTicker for PacifistTracker {
+    type Config = PacifistConfig;
+
     async fn startup(&mut self) -> Option<Response> {
         if let Err(_) = self.memory_handle.connect().await {
             return Some(Response::Failure("Failed to connect to process.".into()));
@@ -30,7 +35,7 @@ impl TrackerTicker for PacifistTracker {
         None
     }
 
-    async fn tick(&mut self) -> Response {
+    async fn tick(&mut self, config: &Self::Config) -> Response {
         let pacifist_data = match self
             .memory_handle
             .get_payload(hdt_mem_reader::manager::PayloadRequest::PacifistTracker)
@@ -47,6 +52,7 @@ impl TrackerTicker for PacifistTracker {
         };
         Response::Pacifist(PacifistResponse {
             total_kills: pacifist_data.total_kills,
+            show_kills: config.show_kills,
         })
     }
 }

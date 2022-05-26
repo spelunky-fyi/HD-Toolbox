@@ -27,14 +27,7 @@
     );
   }
 
-  function disableSelect() {
-    window.addEventListener("selectstart", function (event) {
-      event.preventDefault();
-    });
-  }
-
   disableMenu();
-  disableSelect();
 
   let topAppBar: TopAppBarComponentDev;
 </script>

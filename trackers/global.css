@@ -1,17 +1,23 @@
 html,
 body {
-  position: relative;
+  overflow: hidden;
   width: 100%;
   height: 100%;
 }
 
 body {
   color: #fff;
-  background-color: #666;
+  background-color: #141414;
   margin: 0;
+  padding: 5px 15px;
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+.text-stroke {
+  -webkit-text-stroke: 2px black;
+  paint-order: stroke fill;
 }
 
 a {

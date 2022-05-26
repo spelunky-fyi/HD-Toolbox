@@ -43,10 +43,10 @@
 
   <LayoutGrid>
     <Cell span={6}>
-      <Category />
+      <Category enabled={enabledTrackers} />
     </Cell>
     <Cell span={6}>
-      <Pacifist />
+      <Pacifist enabled={enabledTrackers} />
     </Cell>
   </LayoutGrid>
   <div>
