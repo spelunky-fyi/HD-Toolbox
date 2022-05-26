@@ -11,7 +11,7 @@ use std::{collections::HashMap, thread};
 
 use log::{debug, LevelFilter};
 use tasks::trackers::{TrackerManager, TrackerType};
-use tauri::{Manager, RunEvent};
+use tauri::{Manager, WindowEvent};
 use tauri_plugin_log::LoggerBuilder;
 use tauri_plugin_store::StoreBuilder;
 use tokio::{runtime, sync::oneshot};
@@ -82,6 +82,20 @@ fn main() -> anyhow::Result<()> {
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .setup(|app| {
             let handle = app.handle();
+            let main = app.get_window("main").expect("Failed to get main window.");
+            main.on_window_event(move |event| {
+                if let WindowEvent::CloseRequested { .. } = event {
+                    let handle = handle.clone();
+                    tauri::async_runtime::spawn(async move {
+                        let state = handle.state::<state::State>();
+                        state.tracker_manager.shutdown().await.ok();
+                        state.mem_manager.shutdown().await.ok();
+                        handle.exit(0);
+                    });
+                }
+            });
+
+            let handle = app.handle();
             tauri::async_runtime::spawn(async move {
                 let memory_manager = run_mem_manager().await;
                 let tracker_manager =
@@ -100,15 +114,6 @@ fn main() -> anyhow::Result<()> {
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")
-        .run(|app, event| {
-            if let RunEvent::Exit = event {
-                let app_handle = app.clone();
-                tauri::async_runtime::spawn(async move {
-                    let state = app_handle.state::<state::State>();
-                    state.tracker_manager.shutdown().await.ok();
-                    state.mem_manager.shutdown().await.ok();
-                });
-            }
-        });
+        .run(|_app, _event| {});
     Ok(())
 }
