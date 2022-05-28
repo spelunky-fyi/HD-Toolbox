@@ -1,23 +1,47 @@
-pub static ALL_LABELS: &[Label] = &[
-    Label::NoTeleporter,
-    Label::Haunted,
-    Label::Max,
-    Label::Low,
-    Label::No,
-    Label::NoGold,
-    Label::Pacifist,
-    Label::Any,
-    Label::Hell,
-    Label::Shield,
-    Label::Eggplant,
-    Label::BigMoney,
-    Label::JumboMoney,
-    Label::Tutorial,
-    Label::TempleShortcut,
-    Label::MaxIceCavesShortcut,
-    Label::Invalid,
-];
+use std::{cmp::Reverse, collections::HashSet, hash::Hash};
 
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub enum LabelType {
+    Label(Label),
+    TerminusLabel(TerminusLabel),
+    // Unused for actual labels.
+    Default,
+}
+
+impl LabelType {
+    pub fn to_label_metadata(&self) -> LabelMetadata {
+        match self {
+            LabelType::Label(label) => label.to_label_metadata(),
+            LabelType::TerminusLabel(label) => label.to_label_metadata(),
+            LabelType::Default => LabelMetadata::default(),
+        }
+    }
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct LabelMetadata {
+    pub name: &'static str,
+    pub hide_early: bool,
+    pub add_ok: bool,
+    pub name_priority: u8,
+    pub percent_priority: Option<u8>,
+    pub label_type: LabelType,
+}
+
+impl Default for LabelMetadata {
+    fn default() -> Self {
+        Self {
+            name: "DEFAULT",
+            name_priority: 0,
+            hide_early: false,
+            add_ok: false,
+            percent_priority: None,
+            label_type: LabelType::Default,
+        }
+    }
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub enum Label {
     NoTeleporter,
     Haunted,
@@ -26,80 +50,525 @@ pub enum Label {
     No,
     NoGold,
     Pacifist,
-    Any,
-    Hell,
     Shield,
     Eggplant,
-    BigMoney,
-    JumboMoney,
-    Tutorial,
-    TempleShortcut,
-    MaxIceCavesShortcut,
-    Invalid,
 }
 
 impl Label {
-    pub fn name(&self) -> String {
-        match self {
-            Label::NoTeleporter => "No Teleporter".into(),
-            Label::Haunted => "Haunted".into(),
-            Label::Max => "Max".into(),
-            Label::Low => "Low".into(),
-            Label::No => "No".into(),
-            Label::NoGold => "No Gold".into(),
-            Label::Pacifist => "Pacifist".into(),
-            Label::Any => "Any".into(),
-            Label::Hell => "Hell".into(),
-            Label::Shield => "Shield Run".into(),
-            Label::Eggplant => "Eggplant".into(),
-            Label::BigMoney => "Big Money".into(),
-            Label::JumboMoney => "Jumbo Money".into(),
-            Label::Tutorial => "Tutorial".into(),
-            Label::TempleShortcut => "Temple Shortcut".into(),
-            Label::MaxIceCavesShortcut => "Max Ice Caves Shortcut".into(),
-            Label::Invalid => "No Known Valid Run".into(),
-        }
+    pub fn default_labels() -> HashSet<Label> {
+        let mut labels = HashSet::new();
+        labels.insert(Label::NoTeleporter);
+        labels.insert(Label::No);
+        labels.insert(Label::Low);
+        labels.insert(Label::NoGold);
+        labels.insert(Label::Pacifist);
+        labels
     }
 
-    pub fn percent_priority(&self) -> Option<u8> {
+    pub fn to_label_metadata(&self) -> LabelMetadata {
         match self {
-            Label::NoTeleporter => None,
-            Label::Haunted => None,
-            Label::Max => None,
-            Label::Low => Some(2),
-            Label::No => Some(2),
-            Label::NoGold => None,
-            Label::Pacifist => None,
-            Label::Any => Some(1),
-            Label::Hell => Some(1),
-            Label::Shield => None,
-            Label::Eggplant => Some(1),
-            Label::BigMoney => Some(0),
-            Label::JumboMoney => Some(0),
-            Label::Tutorial => Some(0),
-            Label::TempleShortcut => Some(0),
-            Label::MaxIceCavesShortcut => Some(0),
-            Label::Invalid => None,
-        }
-    }
-
-    pub fn is_exclusive(&self) -> bool {
-        match self {
-            Label::BigMoney
-            | Label::JumboMoney
-            | Label::Tutorial
-            | Label::TempleShortcut
-            | Label::MaxIceCavesShortcut
-            | Label::Invalid => true,
-            _ => false,
+            Label::NoTeleporter => LabelMetadata {
+                name: "No Teleporter",
+                label_type: LabelType::Label(Label::NoTeleporter),
+                name_priority: 6,
+                ..Default::default()
+            },
+            Label::Haunted => LabelMetadata {
+                name: "Haunted",
+                label_type: LabelType::Label(Label::Haunted),
+                name_priority: 5,
+                add_ok: true,
+                ..Default::default()
+            },
+            Label::Max => LabelMetadata {
+                name: "Max",
+                label_type: LabelType::Label(Label::Max),
+                name_priority: 4,
+                add_ok: true,
+                ..Default::default()
+            },
+            Label::Low => LabelMetadata {
+                name: "Low",
+                label_type: LabelType::Label(Label::Low),
+                name_priority: 3,
+                percent_priority: Some(2),
+                ..Default::default()
+            },
+            Label::No => LabelMetadata {
+                name: "No",
+                label_type: LabelType::Label(Label::No),
+                name_priority: 3,
+                hide_early: true,
+                percent_priority: Some(2),
+                ..Default::default()
+            },
+            Label::NoGold => LabelMetadata {
+                name: "No Gold",
+                label_type: LabelType::Label(Label::NoGold),
+                name_priority: 2,
+                hide_early: true,
+                ..Default::default()
+            },
+            Label::Pacifist => LabelMetadata {
+                name: "Pacifist",
+                label_type: LabelType::Label(Label::Pacifist),
+                name_priority: 1,
+                hide_early: true,
+                ..Default::default()
+            },
+            Label::Shield => LabelMetadata {
+                name: "Shield Run",
+                label_type: LabelType::Label(Label::Shield),
+                add_ok: true,
+                ..Default::default()
+            },
+            Label::Eggplant => LabelMetadata {
+                name: "Eggplant",
+                label_type: LabelType::Label(Label::Eggplant),
+                add_ok: true,
+                percent_priority: Some(1),
+                ..Default::default()
+            },
         }
     }
 }
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub enum TerminusLabel {
+    Any,
+    Hell,
+    Tutorial,
+    TempleShortcut,
+    MaxIceCavesShortcut,
+    BigMoney,
+    JumboMoney,
+    Death,
+    Invalid,
+}
+
+impl TerminusLabel {
+    pub fn to_label_metadata(&self) -> LabelMetadata {
+        match self {
+            TerminusLabel::Any => LabelMetadata {
+                name: "Any",
+                label_type: LabelType::TerminusLabel(TerminusLabel::Any),
+                percent_priority: Some(1),
+                ..Default::default()
+            },
+            TerminusLabel::Hell => LabelMetadata {
+                name: "Hell",
+                label_type: LabelType::TerminusLabel(TerminusLabel::Hell),
+                percent_priority: Some(1),
+                ..Default::default()
+            },
+            TerminusLabel::Tutorial => LabelMetadata {
+                name: "Tutorial",
+                label_type: LabelType::TerminusLabel(TerminusLabel::Tutorial),
+                percent_priority: Some(0),
+                ..Default::default()
+            },
+            TerminusLabel::TempleShortcut => LabelMetadata {
+                name: "Temple Shortcut",
+                label_type: LabelType::TerminusLabel(TerminusLabel::TempleShortcut),
+                percent_priority: Some(0),
+                ..Default::default()
+            },
+            TerminusLabel::MaxIceCavesShortcut => LabelMetadata {
+                name: "Max Ice Caves Shortcut",
+                label_type: LabelType::TerminusLabel(TerminusLabel::MaxIceCavesShortcut),
+                percent_priority: Some(0),
+                ..Default::default()
+            },
+            TerminusLabel::BigMoney => LabelMetadata {
+                name: "Big Money",
+                label_type: LabelType::TerminusLabel(TerminusLabel::BigMoney),
+                percent_priority: Some(0),
+                ..Default::default()
+            },
+            TerminusLabel::JumboMoney => LabelMetadata {
+                name: "Jumbo Money",
+                label_type: LabelType::TerminusLabel(TerminusLabel::JumboMoney),
+                percent_priority: Some(0),
+                ..Default::default()
+            },
+            TerminusLabel::Death => LabelMetadata {
+                name: "Death",
+                percent_priority: Some(0),
+                label_type: LabelType::TerminusLabel(TerminusLabel::Death),
+                ..Default::default()
+            },
+            TerminusLabel::Invalid => LabelMetadata {
+                name: "No Known Valid Run",
+                label_type: LabelType::TerminusLabel(TerminusLabel::Invalid),
+                ..Default::default()
+            },
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
+struct LabelCache {
+    text: String,
+    hide_early: bool,
+    exclude_labels: HashSet<LabelType>,
+}
+
+#[derive(Debug)]
+pub struct RunLabels {
+    labels: HashSet<Label>,
+    terminus: TerminusLabel,
+
+    label_cache: Option<LabelCache>,
+}
+
+impl RunLabels {
+    pub fn new(labels: HashSet<Label>, terminus: TerminusLabel) -> Self {
+        Self {
+            labels,
+            terminus,
+            label_cache: None,
+        }
+    }
+
+    pub fn new_tutorial() -> Self {
+        Self::new(Label::default_labels(), TerminusLabel::Tutorial)
+    }
+
+    pub fn new_temple_shortcut() -> Self {
+        Self::new(Label::default_labels(), TerminusLabel::TempleShortcut)
+    }
+
+    pub fn new_max_ics() -> Self {
+        Self::new(Label::default_labels(), TerminusLabel::MaxIceCavesShortcut)
+    }
+
+    pub fn set_terminus(&mut self, terminus: TerminusLabel) {
+        if terminus == self.terminus {
+            return;
+        }
+        self.terminus = terminus;
+        self.label_cache = None;
+    }
+
+    pub fn add_label(&mut self, label: Label) {
+        if self.labels.insert(label) {
+            self.label_cache = None;
+        }
+    }
+
+    pub fn rm_label(&mut self, label: &Label) {
+        if self.labels.remove(label) {
+            self.label_cache = None;
+        }
+    }
+
+    fn get_percent(
+        &self,
+        metadatas: &Vec<LabelMetadata>,
+        visible: &HashSet<LabelType>,
+    ) -> Option<LabelType> {
+        let mut found = None;
+
+        for candidate in metadatas {
+            if !visible.contains(&candidate.label_type) {
+                continue;
+            }
+
+            let priorty = match candidate.percent_priority {
+                None => continue,
+                Some(priority) => priority,
+            };
+
+            match found {
+                None => found = Some(candidate.clone()),
+                Some(ref metadata) => {
+                    if priorty > metadata.percent_priority.unwrap_or(0) {
+                        found = Some(candidate.clone())
+                    }
+                }
+            }
+        }
+
+        found.map(|metadata| metadata.label_type)
+    }
+
+    fn get_visible(
+        &self,
+        metadatas: &Vec<LabelMetadata>,
+        hide_early: bool,
+        exclude_labels: &HashSet<LabelType>,
+    ) -> HashSet<LabelType> {
+        // Most Terminus Labels result in only showing themselves
+        match self.terminus {
+            TerminusLabel::Tutorial
+            | TerminusLabel::TempleShortcut
+            | TerminusLabel::MaxIceCavesShortcut
+            | TerminusLabel::BigMoney
+            | TerminusLabel::JumboMoney
+            | TerminusLabel::Death
+            | TerminusLabel::Invalid => {
+                let mut visible = HashSet::with_capacity(1);
+                visible.insert(LabelType::TerminusLabel(self.terminus.clone()));
+                return visible;
+            }
+            _ => {}
+        }
+
+        let mut visible = HashSet::with_capacity(metadatas.len());
+        for label_metadata in metadatas {
+            if exclude_labels.contains(&label_metadata.label_type) {
+                continue;
+            }
+
+            if hide_early && label_metadata.hide_early {
+                continue;
+            }
+            visible.insert(label_metadata.label_type.clone());
+        }
+
+        let mut num_vis = visible.len();
+        let mut current_loop = 0;
+        let max_loops = 5;
+
+        loop {
+            for label_metadata in metadatas {
+                match &label_metadata.label_type {
+                    LabelType::Label(label) => match label {
+                        Label::NoGold => {
+                            if visible.contains(&LabelType::Label(Label::No)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                        }
+                        Label::NoTeleporter => {
+                            if visible.contains(&LabelType::Label(Label::Low)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                            if visible.contains(&LabelType::Label(Label::No)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                        }
+                        Label::Low => {
+                            if visible.contains(&LabelType::Label(Label::No)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                        }
+                        Label::Haunted => {
+                            if !visible.contains(&LabelType::Label(Label::Max)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                        }
+                        _ => {}
+                    },
+                    LabelType::TerminusLabel(terminus) => match terminus {
+                        TerminusLabel::Hell => {
+                            if visible.contains(&LabelType::Label(Label::Eggplant)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                            if visible.contains(&LabelType::Label(Label::Shield)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                        }
+                        TerminusLabel::Any => {
+                            // Only elide Any when No Gold is the only label
+                            if visible.contains(&LabelType::Label(Label::NoGold))
+                                && self.labels.len() == 1
+                            {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                            if visible.contains(&LabelType::Label(Label::Low)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                            if visible.contains(&LabelType::Label(Label::No)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                        }
+                        _ => {}
+                    },
+                    _ => {}
+                };
+            }
+
+            if visible.len() == num_vis || visible.is_empty() || current_loop >= max_loops {
+                break;
+            }
+            num_vis = visible.len();
+            current_loop += 1;
+        }
+
+        visible
+    }
+
+    pub fn get_text(&mut self, hide_early: bool, exclude_labels: &HashSet<LabelType>) -> String {
+        if let Some(label_cache) = &self.label_cache {
+            if label_cache.hide_early == hide_early && label_cache.exclude_labels == *exclude_labels
+            {
+                return label_cache.text.clone();
+            }
+        }
+
+        let metadatas = self.get_combined();
+        let visible_labels = self.get_visible(&metadatas, hide_early, &exclude_labels);
+        let percent_label = self.get_percent(&metadatas, &visible_labels);
+
+        let mut parts = vec![];
+
+        for candidate in metadatas {
+            if !visible_labels.contains(&candidate.label_type) {
+                continue;
+            }
+
+            if Some(candidate.label_type) == percent_label {
+                parts.push(format!("{}%", candidate.name));
+            } else {
+                parts.push(format!("{}", candidate.name));
+            }
+        }
+
+        let text = parts.join(" ");
+        self.label_cache = Some(LabelCache {
+            text: text.clone(),
+            hide_early,
+            exclude_labels: exclude_labels.clone(),
+        });
+
+        text
+    }
+
+    fn get_combined(&self) -> Vec<LabelMetadata> {
+        let mut combined: Vec<LabelMetadata> = Vec::with_capacity(&self.labels.len() + 1);
+
+        for label in &self.labels {
+            combined.push(label.to_label_metadata());
+        }
+        combined.push(self.terminus.to_label_metadata());
+
+        combined.sort_unstable_by_key(|metadata| Reverse(metadata.name_priority));
+        return combined;
+    }
+}
+
+impl Default for RunLabels {
+    fn default() -> Self {
+        Self::new(Label::default_labels(), TerminusLabel::Any)
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
+
+    use crate::{Label, RunLabels, TerminusLabel};
+
     #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
+    fn test_non_standard_terminus() {
+        let exclude_labels = HashSet::new();
+
+        let mut labels = RunLabels::new_tutorial();
+        assert_eq!(
+            labels.get_text(true, &exclude_labels),
+            String::from("Tutorial%")
+        );
+
+        let mut labels = RunLabels::new_temple_shortcut();
+        assert_eq!(
+            labels.get_text(true, &exclude_labels),
+            String::from("Temple Shortcut%")
+        );
+
+        let mut labels = RunLabels::new_max_ics();
+        assert_eq!(
+            labels.get_text(true, &exclude_labels),
+            String::from("Max Ice Caves Shortcut%")
+        );
+    }
+
+    #[test]
+    fn test_standard_run() {
+        let mut exclude_labels = HashSet::new();
+
+        let mut labels = RunLabels::default();
+        assert_eq!(labels.get_text(true, &exclude_labels), String::from("Low%"));
+
+        assert_eq!(
+            labels.get_text(false, &exclude_labels),
+            String::from("No% Pacifist")
+        );
+        exclude_labels.insert(crate::LabelType::Label(Label::Pacifist));
+        assert_eq!(labels.get_text(false, &exclude_labels), String::from("No%"));
+
+        labels.rm_label(&Label::No);
+        assert_eq!(
+            labels.get_text(false, &exclude_labels),
+            String::from("Low% No Gold")
+        );
+        assert_eq!(labels.get_text(true, &exclude_labels), String::from("Low%"));
+    }
+
+    #[test]
+    fn test_haunted() {
+        let exclude_labels = HashSet::new();
+
+        let mut labels = RunLabels::default();
+        labels.rm_label(&Label::No);
+        labels.rm_label(&Label::Pacifist);
+        labels.rm_label(&Label::NoGold);
+        labels.add_label(Label::Haunted);
+
+        assert_eq!(
+            labels.get_text(false, &exclude_labels),
+            String::from("Low%")
+        );
+
+        labels.add_label(Label::Max);
+        assert_eq!(
+            labels.get_text(false, &exclude_labels),
+            String::from("Haunted Max Low%")
+        );
+    }
+
+    #[test]
+    fn test_most_visible() {
+        let exclude_labels = HashSet::new();
+
+        let mut labels = RunLabels::default();
+        labels.add_label(Label::Haunted);
+        labels.add_label(Label::Max);
+        labels.rm_label(&Label::No);
+        assert_eq!(
+            labels.get_text(false, &exclude_labels),
+            String::from("Haunted Max Low% No Gold Pacifist")
+        );
+
+        labels.set_terminus(TerminusLabel::Hell);
+        assert_eq!(
+            labels.get_text(false, &exclude_labels),
+            String::from("Haunted Max Low% No Gold Pacifist Hell")
+        );
+
+        labels.add_label(Label::Eggplant);
+        assert_eq!(
+            labels.get_text(false, &exclude_labels),
+            String::from("Haunted Max Low% No Gold Pacifist Eggplant")
+        );
+
+        labels.add_label(Label::Shield);
+        labels.rm_label(&Label::Eggplant);
+        assert_eq!(
+            labels.get_text(false, &exclude_labels),
+            String::from("Haunted Max Low% No Gold Pacifist Shield Run")
+        );
+
+        labels.rm_label(&Label::Low);
+        assert_eq!(
+            labels.get_text(false, &exclude_labels),
+            String::from("No Teleporter Haunted Max No Gold Pacifist Shield Run")
+        );
+
+        labels.rm_label(&Label::Shield);
+        labels.add_label(Label::Eggplant);
+        assert_eq!(
+            labels.get_text(false, &exclude_labels),
+            String::from("No Teleporter Haunted Max No Gold Pacifist Eggplant%")
+        );
     }
 }
