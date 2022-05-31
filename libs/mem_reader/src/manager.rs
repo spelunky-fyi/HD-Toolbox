@@ -1,4 +1,7 @@
+use std::collections::HashSet;
 use std::io::Cursor;
+use std::io::Seek;
+use std::io::SeekFrom;
 use std::time::Duration;
 
 use byteorder::ByteOrder;
@@ -148,12 +151,398 @@ impl AutoFixerPayload {
     }
 }
 
+#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
+pub enum Ownership {
+    Unowned,
+    HiredHand,
+    Player1,
+    Player2,
+    Player3,
+    Player4,
+    Unknown(i32),
+}
+
+impl Default for Ownership {
+    fn default() -> Self {
+        Self::Unowned
+    }
+}
+
+impl From<i32> for Ownership {
+    fn from(value: i32) -> Self {
+        match value {
+            -99 => Self::Unowned,
+            -1 => Self::HiredHand,
+            0 => Self::Player1,
+            1 => Self::Player2,
+            2 => Self::Player3,
+            3 => Self::Player4,
+            _ => Self::Unknown(value),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
+pub enum EntityKind {
+    Entity,
+    Floor,
+    Active,
+    Player,
+    Monster,
+    Item,
+    Background,
+    Explosion,
+    Unknown(i32),
+}
+
+impl Default for EntityKind {
+    fn default() -> Self {
+        Self::Entity
+    }
+}
+
+impl From<i32> for EntityKind {
+    fn from(value: i32) -> Self {
+        match value {
+            -99 => Self::Entity,
+            0 => Self::Floor,
+            1 => Self::Active,
+            2 => Self::Player,
+            3 => Self::Monster,
+            4 => Self::Item,
+            5 => Self::Background,
+            6 => Self::Explosion,
+            _ => Self::Unknown(value),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
+pub enum EntityType {
+    Player,
+    ShotgunPellet,
+
+    Mattock,
+    Boomerang,
+    Machete,
+    Crysknife,
+    WebGun,
+    Shotgun,
+    FreezeRay,
+    PlasmaCannon,
+    Camera,
+    Teleporter,
+    Cape,
+    Jetpack,
+    Shield,
+    Idol,
+    Sceptre,
+    VladsCape,
+
+    Unknown(i32),
+}
+
+impl Default for EntityType {
+    fn default() -> Self {
+        Self::Player
+    }
+}
+
+impl From<i32> for EntityType {
+    fn from(value: i32) -> Self {
+        match value {
+            0 => Self::Player,
+            117 => Self::ShotgunPellet,
+
+            510 => Self::Mattock,
+            511 => Self::Boomerang,
+            512 => Self::Machete,
+            513 => Self::Crysknife,
+            514 => Self::WebGun,
+            515 => Self::Shotgun,
+            516 => Self::FreezeRay,
+            517 => Self::PlasmaCannon,
+            518 => Self::Camera,
+            519 => Self::Teleporter,
+            521 => Self::Cape,
+            522 => Self::Jetpack,
+            523 => Self::Shield,
+            525 => Self::Idol,
+            530 => Self::Sceptre,
+            532 => Self::VladsCape,
+            _ => Self::Unknown(value),
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Clone, Default, PartialEq, Eq)]
-pub struct CategoryTrackerPayload {}
+pub struct PartialEntity {
+    entity_kind: EntityKind,
+    entity_type: EntityType,
+    owner: Ownership,
+}
+
+#[derive(Debug, Serialize, Clone, PartialEq, Eq, Hash)]
+pub enum Input {
+    None,
+    Left,
+    Right,
+    Up,
+    Down,
+    Whip,
+    Jump,
+    Bomb,
+    Rope,
+    Run,
+    PurchaseDoor,
+}
+
+impl Default for Input {
+    fn default() -> Self {
+        Self::None
+    }
+}
+#[derive(Debug, Serialize, Clone, Default, PartialEq, Eq)]
+pub struct GameState {
+    pub scene: u32,
+    pub level: u32,
+
+    pub total_time_ms: u64,
+
+    pub is_haunted_castle: u8,
+    pub is_black_market: u8,
+    pub is_mothership: u8,
+    pub is_city_of_gold: u8,
+    pub is_worm: u8,
+
+    pub total_money: u32,
+    pub total_kills: u32,
+    pub respawn_level: u32,
+
+    pub player_held_item: EntityType,
+    pub player_ledge_grabbing: bool,
+    pub inputs: HashSet<Input>,
+    //pub active_entities: Vec<PartialEntity>,
+}
+
+#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
+pub enum CategoryTrackerPayload {
+    NoPlayers(u32),
+
+    // Returned when multiple players are detected.
+    // Not valid for Category Tracker.
+    Multiplayer,
+
+    // Returned outside of scenes where we normally do any processing
+    InactiveScene(u32),
+
+    GameState(GameState),
+
+    Dead,
+}
+
+impl Default for CategoryTrackerPayload {
+    fn default() -> Self {
+        Self::InactiveScene(0)
+    }
+}
+
+const ACTIVE_SCENES: &[u32] = &[
+    0, // Running
+    1, 2, 3,  // Loading
+    11, // Level Transition
+    18, 19, 20, // Victory
+    26, // Tutorial
+    30, // Death Screen
+];
+
+fn get_inputs(
+    process: &Process,
+    global_state_offset: usize,
+    active_player: usize,
+) -> Result<HashSet<Input>, Failure> {
+    let mut inputs = HashSet::new();
+
+    let controls_offset = process.read_u32(global_state_offset + 0x40)? as usize;
+    let player_inputs = process.read_n_bytes(controls_offset + active_player * 152, 33 * 4)?;
+
+    let action_offsets: &[u32] = &[0, 1, 2, 3, 4, 5, 12, 13];
+    let input_types = [
+        (0x24, Input::Whip),
+        (0x28, Input::Jump),
+        (0x2c, Input::Bomb),
+        (0x30, Input::Rope),
+        (0x34, Input::Run),
+        (0x38, Input::PurchaseDoor),
+    ];
+
+    for (offset, input_type) in input_types {
+        let action_key = LE::read_u32(&player_inputs[offset..offset + 4]);
+        let offset = action_offsets[action_key as usize];
+        if player_inputs[offset as usize] >= 1 {
+            inputs.insert(input_type);
+        }
+    }
+
+    let x_axis = LE::read_i32(&player_inputs[0x1c..0x1c + 4]);
+    if x_axis > 0x14 {
+        inputs.insert(Input::Right);
+    } else if x_axis < -0x14 {
+        inputs.insert(Input::Left);
+    }
+
+    let y_axis = LE::read_i32(&player_inputs[0x20..0x20 + 4]);
+    if y_axis > 0x14 {
+        inputs.insert(Input::Up);
+    } else if y_axis < -12 {
+        inputs.insert(Input::Down);
+    }
+
+    Ok(inputs)
+}
+
+fn _get_active_entities(
+    process: &Process,
+    global_state_offset: usize,
+) -> Result<Vec<PartialEntity>, Failure> {
+    let entity_struct_offset = process.read_u32(global_state_offset + 0x30)? as usize;
+    let num_active_entities = process.read_u32(entity_struct_offset + 0x7810)? as usize;
+    let mut active_entities = Vec::with_capacity(num_active_entities);
+
+    let mut entity_ptrs =
+        Cursor::new(process.read_n_bytes(entity_struct_offset, 4 * num_active_entities)?);
+    for _ in 0..num_active_entities {
+        let ptr = entity_ptrs
+            .read_u32::<LE>()
+            .map_err(|_| ReadMemoryError::Failed)? as usize;
+
+        let partial_entity = _get_partial_entity(process, ptr)?;
+        // if owner == Ownership::Unowned || owner == Ownership::HiredHand {
+        //     continue;
+        // }
+        active_entities.push(partial_entity);
+    }
+
+    Ok(active_entities)
+}
+
+fn _get_partial_entity(process: &Process, addr: usize) -> Result<PartialEntity, Failure> {
+    let mut entity_data = Cursor::new(process.read_n_bytes(addr + 0x8, 20)?);
+    let entity_kind = entity_data
+        .read_i32::<LE>()
+        .map_err(|_| ReadMemoryError::Failed)?
+        .into();
+    let entity_type = entity_data
+        .read_i32::<LE>()
+        .map_err(|_| ReadMemoryError::Failed)?
+        .into();
+    entity_data
+        .seek(SeekFrom::Start(0x10))
+        .map_err(|_| ReadMemoryError::Failed)?;
+    let owner = entity_data
+        .read_i32::<LE>()
+        .map_err(|_| ReadMemoryError::Failed)?
+        .into();
+
+    Ok(PartialEntity {
+        entity_kind,
+        entity_type,
+        owner,
+    })
+}
 
 impl CategoryTrackerPayload {
-    fn from_process(_process: &Process) -> Result<Self, Failure> {
-        Ok(Self {})
+    fn from_process(process: &Process) -> Result<Self, Failure> {
+        let base_addr = process.base_addr;
+        // let other_state_offset =
+        //     process.read_u32(base_addr + process.offsets.other_state)? as usize;
+        let global_state_offset =
+            process.read_u32(base_addr + process.offsets.global_state)? as usize;
+
+        let mut players_offset =
+            Cursor::new(process.read_n_bytes(global_state_offset + 0x440684, 4 * 4)?);
+
+        let scene = process.read_u32(global_state_offset + 0x58)?;
+        if scene == 30 {
+            return Ok(Self::Dead);
+        }
+
+        let mut player = None;
+        let mut active_player = 0;
+        for i in 0..4 {
+            let potential_player = players_offset
+                .read_u32::<LE>()
+                .map_err(|_| ReadMemoryError::Failed)?;
+            if potential_player == 0 {
+                continue;
+            }
+
+            if !player.is_none() {
+                return Ok(Self::Multiplayer);
+            }
+
+            player = Some(potential_player);
+            active_player = i;
+        }
+
+        let player_ptr = match player {
+            None => {
+                // If we're in an active scene but there's no players
+                // just return inactive scene so the runstate stops processing
+                // temporarily.
+                if ACTIVE_SCENES.contains(&scene) {
+                    return Ok(Self::InactiveScene(scene));
+                }
+                return Ok(Self::NoPlayers(scene));
+            }
+            Some(player) => player,
+        } as usize;
+        let player_data_offset = global_state_offset + (0x440694 + (0x14a4 * active_player));
+        let player_ledge_grabbing = process.read_u8(player_ptr + 0x207)? != 0;
+
+        let player_held_item = process.read_i32(player_data_offset + 0x88)?;
+        let total_kills = process.read_u32(player_data_offset + 0x90)?;
+
+        if !ACTIVE_SCENES.contains(&scene) {
+            return Ok(Self::InactiveScene(scene));
+        }
+
+        let level = process.read_u32(global_state_offset + 0x4405D4)?;
+        let is_haunted_castle = process.read_u8(global_state_offset + 0x4405F7)?;
+        let is_black_market = process.read_u8(global_state_offset + 0x4405FF)?;
+        let is_mothership = process.read_u8(global_state_offset + 0x440602)?;
+        let is_city_of_gold = process.read_u8(global_state_offset + 0x440604)?;
+        let is_worm = process.read_u8(global_state_offset + 0x440606)?;
+
+        let total_minutes = process.read_u32(global_state_offset + 0x445940)?;
+        let total_seconds = process.read_u32(global_state_offset + 0x445944)?;
+        let total_ms = process.read_f64(global_state_offset + 0x445948)?;
+        let mut total_time_ms: u64 = total_minutes as u64 * 60 * 1000;
+        total_time_ms += total_seconds as u64 * 1000;
+        total_time_ms += total_ms.trunc() as u64;
+
+        let total_money = process.read_u32(global_state_offset + 0x44592C)?;
+        let respawn_level = process.read_u32(global_state_offset + 0x44734C)?;
+
+        Ok(Self::GameState(GameState {
+            scene,
+            level,
+
+            is_haunted_castle,
+            is_black_market,
+            is_mothership,
+            is_city_of_gold,
+            is_worm,
+
+            total_time_ms,
+            total_kills,
+            total_money,
+            respawn_level,
+
+            player_held_item: player_held_item.into(),
+            player_ledge_grabbing,
+            inputs: get_inputs(process, global_state_offset, active_player)?,
+        }))
     }
 }
 

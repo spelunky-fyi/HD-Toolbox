@@ -457,7 +457,7 @@ impl Default for RunLabels {
 mod tests {
     use std::collections::HashSet;
 
-    use crate::{Label, RunLabels, TerminusLabel};
+    use crate::{Label, LabelType, RunLabels, TerminusLabel};
 
     #[test]
     fn test_non_standard_terminus() {
@@ -502,6 +502,13 @@ mod tests {
             String::from("Low% No Gold")
         );
         assert_eq!(labels.get_text(true, &exclude_labels), String::from("Low%"));
+
+        exclude_labels = HashSet::new();
+        exclude_labels.insert(LabelType::Label(Label::No));
+        assert_eq!(
+            labels.get_text(false, &exclude_labels),
+            String::from("No Gold Low% Pacifist")
+        );
     }
 
     #[test]

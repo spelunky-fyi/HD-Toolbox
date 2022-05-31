@@ -17,7 +17,7 @@
   {#if $state === WebSocketState.Pending}
     <span class="pending">Connecting...</span>
   {:else}
-    <span />
+    <span>{$data.category}</span>
   {/if}
 </main>
 

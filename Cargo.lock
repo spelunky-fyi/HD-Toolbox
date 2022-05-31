@@ -1141,6 +1141,7 @@ dependencies = [
  "byteorder",
  "fern",
  "futures",
+ "hdt_cat_labels",
  "hdt_mem_reader",
  "hyper",
  "hyper-tungstenite",

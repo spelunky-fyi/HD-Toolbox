@@ -95,6 +95,18 @@ impl Process {
         Ok(LittleEndian::read_u32(&self.read_n_bytes(addr, 4)?))
     }
 
+    pub fn read_i32(&self, addr: usize) -> Result<i32, ReadMemoryError> {
+        Ok(LittleEndian::read_i32(&self.read_n_bytes(addr, 4)?))
+    }
+
+    pub fn read_f64(&self, addr: usize) -> Result<f64, ReadMemoryError> {
+        Ok(LittleEndian::read_f64(&self.read_n_bytes(addr, 8)?))
+    }
+
+    pub fn read_u8(&self, addr: usize) -> Result<u8, ReadMemoryError> {
+        Ok(self.read_n_bytes(addr, 1)?[0])
+    }
+
     fn get_version(process: HANDLE, base_addr: usize) -> Result<Version, OpenProcessError> {
         if let Ok(bytes) = read_n_bytes(
             process,

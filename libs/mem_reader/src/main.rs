@@ -1,8 +1,11 @@
 use std::{thread, time::Duration};
 
-use tokio::{runtime, sync::oneshot};
+use tokio::{runtime, sync::oneshot, time::Instant};
 
-use hdt_mem_reader::{self, manager::ManagerHandle};
+use hdt_mem_reader::{
+    self,
+    manager::{ManagerHandle, PayloadResponse},
+};
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
@@ -29,11 +32,25 @@ async fn main() -> Result<(), anyhow::Error> {
     let task = tokio::spawn(async move {
         handle2.connect().await.unwrap();
 
+        let mut last_response = PayloadResponse::Success;
+
         loop {
+            let start = Instant::now();
             let response = handle2
-                .get_payload(hdt_mem_reader::manager::PayloadRequest::PacifistTracker)
+                .get_payload(hdt_mem_reader::manager::PayloadRequest::CategoryTracker)
                 .await;
-            println!("Response: {:?}", response);
+            let response = match response {
+                Ok(response) => response,
+                Err(_) => continue,
+            };
+            let finish = Instant::now();
+            let _time_to_run = finish - start;
+            //println!("{}", time_to_run.as_micros());
+
+            if response != last_response {
+                println!("Response: {:?}", response);
+                last_response = response
+            }
             tokio::time::sleep(Duration::from_millis(16)).await;
         }
     });
