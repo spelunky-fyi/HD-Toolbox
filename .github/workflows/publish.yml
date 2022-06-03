@@ -23,9 +23,6 @@ jobs:
         with:
           toolchain: stable
 
-      - name: clean cargo
-        run: cargo clean
-
       - name: install app dependencies and build it
         run: npm install && npm run build
 
