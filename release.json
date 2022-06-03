@@ -1,11 +1,10 @@
 {
-  "version": "v0.2.0",
-  "notes": "Character Unlocker/Locker and Slow Look fixers",
-  "pub_date": "2022-05-22T05:09:05Z",
+  "version": "v0.3.0",
+  "notes": "Add Category and Pacifist Trackers",
+  "pub_date": "2022-06-03T07:50:55Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWG1DNDNaZ2E2UzhPSDdNVnRyYTEyajNWZjZtWmxoeldmYUFzTW51ZCtDa2hqUHNYMnJPekxWK09KeU1oc3RxUFllZldXWitJNGQ4WnVLVHg2QS9yc2dFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjUzMTk1ODMzCWZpbGU6RDpcYVxIRC1Ub29sYm94XEhELVRvb2xib3hcdGFyZ2V0XHJlbGVhc2VcYnVuZGxlL21zaS9IRCBUb29sYm94XzAuMi4wX3g2NF9lbi1VUy5tc2kuemlwCnpjd2ZWZzMzM3ZPWGJmRlllYzY2dGxPMDJwMWpmRkYyZldOcW1wNFN5bzhtcXF1RDVuMUdrcTA4NTN3aTNOWi9ycCswRkQ0cFZxREVoSU5pT0NNS0FRPT0K",
-      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.2.0/HD.Toolbox_0.2.0_x64_en-US.msi.zip"
-    }
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWG5uQThXZFJ2RkhUd0tsZ043RHdIck8zaEJaSjY4dUh3alcwZjBBZjNLNloxZ3IxVXFJMlVOUGgvVTF0RXdBZUpxcWVNakZaOE5jaCtzakw2aCtBK0EwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjU0MjQyNTQ3CWZpbGU6RDpcYVxIRC1Ub29sYm94XEhELVRvb2xib3hcdGFyZ2V0XHJlbGVhc2VcYnVuZGxlL21zaS9IRCBUb29sYm94XzAuMy4wX3g2NF9lbi1VUy5tc2kuemlwClU2cDRjZ1lvcm1NUTdmenBDQmJ5dWMrS2x5NlJSaExMVEJtWkpmZXlBb1dVZWEvc1dmTkF2K0NsQzYzMndSajJiNUsxN2c1M2ZIU2RGS2p6azdKbEJnPT0K",
+      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.3.0/HD.Toolbox_0.3.0_x64_en-US.msi.zip"    }
   }
 }
