@@ -20,7 +20,7 @@
   export let enabled;
 
   let dialogOpen = writable(false);
-  let minWidth = 520;
+  let minWidth = 1700;
   let minHeight = 120;
 
   const url = derived(trackerPort, ($trackerPort) => {
@@ -50,7 +50,7 @@
       <Content style="padding: 0px;">
         <div style="display: flex;">
           <h2 class="mdc-typography--headline6" style="margin: 0;">
-            Category Tracker
+            Category Tracker 🐈
           </h2>
           <div style="margin-left: auto;">
             <Button on:click={() => dialogOpen.set(true)}>Help</Button>

@@ -137,7 +137,6 @@ impl Label {
 pub enum TerminusLabel {
     Any,
     Hell,
-    Tutorial,
     TempleShortcut,
     MaxIceCavesShortcut,
     BigMoney,
@@ -159,12 +158,6 @@ impl TerminusLabel {
                 name: "Hell",
                 label_type: LabelType::TerminusLabel(TerminusLabel::Hell),
                 percent_priority: Some(1),
-                ..Default::default()
-            },
-            TerminusLabel::Tutorial => LabelMetadata {
-                name: "Tutorial",
-                label_type: LabelType::TerminusLabel(TerminusLabel::Tutorial),
-                percent_priority: Some(0),
                 ..Default::default()
             },
             TerminusLabel::TempleShortcut => LabelMetadata {
@@ -230,16 +223,14 @@ impl RunLabels {
         }
     }
 
-    pub fn new_tutorial() -> Self {
-        Self::new(Label::default_labels(), TerminusLabel::Tutorial)
-    }
-
     pub fn new_temple_shortcut() -> Self {
         Self::new(Label::default_labels(), TerminusLabel::TempleShortcut)
     }
 
     pub fn new_max_ics() -> Self {
-        Self::new(Label::default_labels(), TerminusLabel::MaxIceCavesShortcut)
+        let mut labels = Label::default_labels();
+        labels.insert(Label::Max);
+        Self::new(labels, TerminusLabel::MaxIceCavesShortcut)
     }
 
     pub fn set_terminus(&mut self, terminus: TerminusLabel) {
@@ -248,6 +239,10 @@ impl RunLabels {
         }
         self.terminus = terminus;
         self.label_cache = None;
+    }
+
+    pub fn get_terminus(&self) -> &TerminusLabel {
+        return &self.terminus;
     }
 
     pub fn add_label(&mut self, label: Label) {
@@ -260,6 +255,14 @@ impl RunLabels {
         if self.labels.remove(label) {
             self.label_cache = None;
         }
+    }
+
+    pub fn terminus_requires_low(&self) -> bool {
+        [
+            TerminusLabel::TempleShortcut,
+            TerminusLabel::MaxIceCavesShortcut,
+        ]
+        .contains(&self.terminus)
     }
 
     fn get_percent(
@@ -300,8 +303,7 @@ impl RunLabels {
     ) -> HashSet<LabelType> {
         // Most Terminus Labels result in only showing themselves
         match self.terminus {
-            TerminusLabel::Tutorial
-            | TerminusLabel::TempleShortcut
+            TerminusLabel::TempleShortcut
             | TerminusLabel::MaxIceCavesShortcut
             | TerminusLabel::BigMoney
             | TerminusLabel::JumboMoney
@@ -346,6 +348,15 @@ impl RunLabels {
                             if visible.contains(&LabelType::Label(Label::No)) {
                                 visible.remove(&label_metadata.label_type);
                             }
+                            if visible.contains(&LabelType::Label(Label::Eggplant)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                            if visible.contains(&LabelType::Label(Label::Shield)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                            if visible.contains(&LabelType::Label(Label::Pacifist)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
                         }
                         Label::Low => {
                             if visible.contains(&LabelType::Label(Label::No)) {
@@ -379,6 +390,9 @@ impl RunLabels {
                                 visible.remove(&label_metadata.label_type);
                             }
                             if visible.contains(&LabelType::Label(Label::No)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                            if visible.contains(&LabelType::Label(Label::Eggplant)) {
                                 visible.remove(&label_metadata.label_type);
                             }
                         }
@@ -462,12 +476,6 @@ mod tests {
     #[test]
     fn test_non_standard_terminus() {
         let exclude_labels = HashSet::new();
-
-        let mut labels = RunLabels::new_tutorial();
-        assert_eq!(
-            labels.get_text(true, &exclude_labels),
-            String::from("Tutorial%")
-        );
 
         let mut labels = RunLabels::new_temple_shortcut();
         assert_eq!(

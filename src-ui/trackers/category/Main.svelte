@@ -14,16 +14,31 @@
 </script>
 
 <main class="text-stroke">
-  {#if $state === WebSocketState.Pending}
-    <span class="pending">Connecting...</span>
-  {:else}
-    <span>{$data.category}</span>
-  {/if}
+  <div class="wrapper">
+    {#if $state === WebSocketState.Pending}
+      <span class="output pending">Connecting...</span>
+    {:else}
+      <span class="output">{$data.category}</span>
+    {/if}
+  </div>
 </main>
 
 <style>
   main {
     font-size: 70px;
     font-weight: bold;
+  }
+
+  .wrapper {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  .output {
+    display: table-cell;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 </style>

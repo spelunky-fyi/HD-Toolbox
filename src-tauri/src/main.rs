@@ -84,13 +84,28 @@ fn main() -> anyhow::Result<()> {
             let handle = app.handle();
             let main = app.get_window("main").expect("Failed to get main window.");
             main.on_window_event(move |event| {
-                if let WindowEvent::CloseRequested { .. } = event {
+                if let WindowEvent::CloseRequested { api, .. } = event {
+                    api.prevent_close();
+
                     let handle = handle.clone();
                     tauri::async_runtime::spawn(async move {
                         let state = handle.state::<state::State>();
                         state.tracker_manager.shutdown().await.ok();
                         state.mem_manager.shutdown().await.ok();
-                        handle.exit(0);
+
+                        let mut main = None;
+                        for (window_name, window) in handle.windows() {
+                            if window_name == "main" {
+                                main = Some(window);
+                                continue;
+                            }
+                            debug!("Closing {}", window_name);
+                            window.close().ok();
+                        }
+
+                        if let Some(main) = main {
+                            main.close().ok();
+                        }
                     });
                 }
             });
