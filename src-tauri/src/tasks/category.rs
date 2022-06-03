@@ -237,12 +237,17 @@ impl RunState {
     }
 
     fn update_held_item(&mut self, gamestate: &GameState) {
-        if self.is_low_percent && gamestate.player_held_entity.entity_type == EntityType::Shield {
+        let held_entity = match &gamestate.player_held_entity {
+            Some(entity) => entity,
+            None => return,
+        };
+
+        if self.is_low_percent && held_entity.entity_type == EntityType::Shield {
             self.fail_low();
         }
 
         if !self.hell_failed {
-            match gamestate.player_held_entity.entity_type {
+            match held_entity.entity_type {
                 EntityType::Shield => {
                     self.is_shield = true;
                     self.run_labels.add_label(Label::Shield);
@@ -281,14 +286,18 @@ impl RunState {
             EntityType::Sceptre,
         ];
 
-        println!("{:?}", &gamestate.player_held_entity);
-        if banned_low_items.contains(&gamestate.player_held_entity.entity_type)
+        let held_entity = match &gamestate.player_held_entity {
+            Some(entity) => entity,
+            None => return,
+        };
+
+        if banned_low_items.contains(&held_entity.entity_type)
             && gamestate.inputs.contains(&Input::Whip)
             && !gamestate.player_ducking
             && !gamestate.player_ledge_grabbing
         {
             self.fail_low();
-            if &gamestate.player_held_entity.entity_type == &EntityType::Teleporter {
+            if &held_entity.entity_type == &EntityType::Teleporter {
                 self.run_labels.rm_label(&Label::NoTeleporter);
             }
         }
@@ -299,8 +308,10 @@ impl RunState {
             return;
         }
 
-        if gamestate.player_held_entity.entity_type == EntityType::Player {
-            return;
+        if let Some(held_item) = &gamestate.player_held_entity {
+            if held_item.entity_type == EntityType::Player {
+                return;
+            }
         }
 
         self.run_labels.rm_label(&Label::No);
@@ -339,8 +350,10 @@ impl RunState {
     }
 
     fn someone_holding(&self, gamestate: &GameState, item: EntityType) -> bool {
-        if gamestate.player_held_entity.entity_type == item {
-            return true;
+        if let Some(held_item) = &gamestate.player_held_entity {
+            if held_item.entity_type == item {
+                return true;
+            }
         }
 
         for hh_held_item in &gamestate.player_data.hh_held_item_ids {

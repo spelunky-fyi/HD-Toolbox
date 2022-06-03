@@ -84,7 +84,7 @@
         <div>
           <FormField>
             <Checkbox bind:checked={$altNames} />
-            <span slot="label">Alternative Names</span>
+            <span slot="label">Alternative Name Order</span>
           </FormField>
         </div>
       </Content>

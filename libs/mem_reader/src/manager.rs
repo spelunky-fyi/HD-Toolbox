@@ -448,7 +448,7 @@ pub struct GameState {
     pub player_data: PlayerData,
     pub player_ducking: bool,
     pub player_ledge_grabbing: bool,
-    pub player_held_entity: PartialEntity,
+    pub player_held_entity: Option<PartialEntity>,
 
     pub inputs: HashSet<Input>,
     //pub active_entities: Vec<PartialEntity>,
@@ -549,17 +549,21 @@ fn _get_active_entities(
             .read_u32::<LE>()
             .map_err(|_| ReadMemoryError::Failed)? as usize;
 
-        let partial_entity = get_partial_entity(process, ptr)?;
-        // if owner == Ownership::Unowned || owner == Ownership::HiredHand {
-        //     continue;
-        // }
-        active_entities.push(partial_entity);
+        if let Some(partial_entity) = get_partial_entity(process, ptr)? {
+            // if owner == Ownership::Unowned || owner == Ownership::HiredHand {
+            //     continue;
+            // }
+            active_entities.push(partial_entity);
+        }
     }
 
     Ok(active_entities)
 }
 
-fn get_partial_entity(process: &Process, addr: usize) -> Result<PartialEntity, Failure> {
+fn get_partial_entity(process: &Process, addr: usize) -> Result<Option<PartialEntity>, Failure> {
+    if addr == 0 {
+        return Ok(None);
+    }
     let mut entity_data = Cursor::new(process.read_n_bytes(addr + 0x8, 20)?);
     let entity_kind = entity_data
         .read_i32::<LE>()
@@ -577,11 +581,11 @@ fn get_partial_entity(process: &Process, addr: usize) -> Result<PartialEntity, F
         .map_err(|_| ReadMemoryError::Failed)?
         .into();
 
-    Ok(PartialEntity {
+    Ok(Some(PartialEntity {
         entity_kind,
         entity_type,
         owner,
-    })
+    }))
 }
 
 #[derive(Debug, Serialize, Clone, Default, PartialEq, Eq)]
