@@ -19,6 +19,7 @@ pub struct CategoryConfig {
     pub show_no: bool,
     pub show_no_gold: bool,
     pub show_pacifist: bool,
+    pub alt_names: bool,
 }
 
 impl Default for CategoryConfig {
@@ -28,6 +29,7 @@ impl Default for CategoryConfig {
             show_no: false,
             show_no_gold: true,
             show_pacifist: true,
+            alt_names: false,
         }
     }
 }

@@ -24,6 +24,7 @@ pub struct LabelMetadata {
     pub hide_early: bool,
     pub add_ok: bool,
     pub name_priority: u8,
+    pub alt_name_priority: Option<u8>,
     pub percent_priority: Option<u8>,
     pub label_type: LabelType,
 }
@@ -33,6 +34,7 @@ impl Default for LabelMetadata {
         Self {
             name: "DEFAULT",
             name_priority: 0,
+            alt_name_priority: None,
             hide_early: false,
             add_ok: false,
             percent_priority: None,
@@ -70,34 +72,36 @@ impl Label {
             Label::NoTeleporter => LabelMetadata {
                 name: "No Teleporter",
                 label_type: LabelType::Label(Label::NoTeleporter),
-                name_priority: 6,
+                name_priority: 7,
                 ..Default::default()
             },
             Label::Haunted => LabelMetadata {
                 name: "Haunted",
                 label_type: LabelType::Label(Label::Haunted),
-                name_priority: 5,
+                name_priority: 6,
                 add_ok: true,
                 ..Default::default()
             },
             Label::Max => LabelMetadata {
                 name: "Max",
                 label_type: LabelType::Label(Label::Max),
-                name_priority: 4,
+                name_priority: 5,
                 add_ok: true,
                 ..Default::default()
             },
             Label::Low => LabelMetadata {
                 name: "Low",
                 label_type: LabelType::Label(Label::Low),
-                name_priority: 3,
+                name_priority: 4,
+                alt_name_priority: Some(1),
                 percent_priority: Some(2),
                 ..Default::default()
             },
             Label::No => LabelMetadata {
                 name: "No",
                 label_type: LabelType::Label(Label::No),
-                name_priority: 3,
+                name_priority: 4,
+                alt_name_priority: Some(1),
                 hide_early: true,
                 percent_priority: Some(2),
                 ..Default::default()
@@ -105,14 +109,14 @@ impl Label {
             Label::NoGold => LabelMetadata {
                 name: "No Gold",
                 label_type: LabelType::Label(Label::NoGold),
-                name_priority: 2,
+                name_priority: 3,
                 hide_early: true,
                 ..Default::default()
             },
             Label::Pacifist => LabelMetadata {
                 name: "Pacifist",
                 label_type: LabelType::Label(Label::Pacifist),
-                name_priority: 1,
+                name_priority: 2,
                 hide_early: true,
                 ..Default::default()
             },
@@ -203,6 +207,7 @@ impl TerminusLabel {
 struct LabelCache {
     text: String,
     hide_early: bool,
+    alt_names: bool,
     exclude_labels: HashSet<LabelType>,
 }
 
@@ -367,6 +372,9 @@ impl RunLabels {
                             if !visible.contains(&LabelType::Label(Label::Max)) {
                                 visible.remove(&label_metadata.label_type);
                             }
+                            if visible.contains(&LabelType::Label(Label::Shield)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
                         }
                         _ => {}
                     },
@@ -412,15 +420,22 @@ impl RunLabels {
         visible
     }
 
-    pub fn get_text(&mut self, hide_early: bool, exclude_labels: &HashSet<LabelType>) -> String {
+    pub fn get_text(
+        &mut self,
+        hide_early: bool,
+        exclude_labels: &HashSet<LabelType>,
+        alt_names: bool,
+    ) -> String {
         if let Some(label_cache) = &self.label_cache {
-            if label_cache.hide_early == hide_early && label_cache.exclude_labels == *exclude_labels
+            if label_cache.hide_early == hide_early
+                && label_cache.exclude_labels == *exclude_labels
+                && label_cache.alt_names == alt_names
             {
                 return label_cache.text.clone();
             }
         }
 
-        let metadatas = self.get_combined();
+        let metadatas = self.get_combined(alt_names);
         let visible_labels = self.get_visible(&metadatas, hide_early, &exclude_labels);
         let percent_label = self.get_percent(&metadatas, &visible_labels);
 
@@ -443,12 +458,13 @@ impl RunLabels {
             text: text.clone(),
             hide_early,
             exclude_labels: exclude_labels.clone(),
+            alt_names,
         });
 
         text
     }
 
-    fn get_combined(&self) -> Vec<LabelMetadata> {
+    fn get_combined(&self, alt_names: bool) -> Vec<LabelMetadata> {
         let mut combined: Vec<LabelMetadata> = Vec::with_capacity(&self.labels.len() + 1);
 
         for label in &self.labels {
@@ -456,7 +472,17 @@ impl RunLabels {
         }
         combined.push(self.terminus.to_label_metadata());
 
-        combined.sort_unstable_by_key(|metadata| Reverse(metadata.name_priority));
+        combined.sort_unstable_by_key(|metadata| {
+            let priority = if alt_names {
+                match metadata.alt_name_priority {
+                    Some(priority) => priority,
+                    None => metadata.name_priority,
+                }
+            } else {
+                metadata.name_priority
+            };
+            Reverse(priority)
+        });
         return combined;
     }
 }
@@ -479,13 +505,13 @@ mod tests {
 
         let mut labels = RunLabels::new_temple_shortcut();
         assert_eq!(
-            labels.get_text(true, &exclude_labels),
+            labels.get_text(true, &exclude_labels, false),
             String::from("Temple Shortcut%")
         );
 
         let mut labels = RunLabels::new_max_ics();
         assert_eq!(
-            labels.get_text(true, &exclude_labels),
+            labels.get_text(true, &exclude_labels, false),
             String::from("Max Ice Caves Shortcut%")
         );
     }
@@ -495,27 +521,48 @@ mod tests {
         let mut exclude_labels = HashSet::new();
 
         let mut labels = RunLabels::default();
-        assert_eq!(labels.get_text(true, &exclude_labels), String::from("Low%"));
+        assert_eq!(
+            labels.get_text(true, &exclude_labels, false),
+            String::from("Low%")
+        );
 
         assert_eq!(
-            labels.get_text(false, &exclude_labels),
+            labels.get_text(false, &exclude_labels, false),
             String::from("No% Pacifist")
         );
+        assert_eq!(
+            labels.get_text(false, &exclude_labels, true),
+            String::from("Pacifist No%")
+        );
         exclude_labels.insert(crate::LabelType::Label(Label::Pacifist));
-        assert_eq!(labels.get_text(false, &exclude_labels), String::from("No%"));
+        assert_eq!(
+            labels.get_text(false, &exclude_labels, false),
+            String::from("No%")
+        );
 
         labels.rm_label(&Label::No);
         assert_eq!(
-            labels.get_text(false, &exclude_labels),
+            labels.get_text(false, &exclude_labels, false),
             String::from("Low% No Gold")
         );
-        assert_eq!(labels.get_text(true, &exclude_labels), String::from("Low%"));
+        assert_eq!(
+            labels.get_text(false, &exclude_labels, true),
+            String::from("No Gold Low%")
+        );
+        assert_eq!(
+            labels.get_text(true, &exclude_labels, false),
+            String::from("Low%")
+        );
 
         exclude_labels = HashSet::new();
         exclude_labels.insert(LabelType::Label(Label::No));
         assert_eq!(
-            labels.get_text(false, &exclude_labels),
-            String::from("No Gold Low% Pacifist")
+            labels.get_text(false, &exclude_labels, false),
+            String::from("Low% No Gold Pacifist")
+        );
+        assert_eq!(
+            labels.get_text(false, &exclude_labels, true),
+            String::from("No Gold Pacifist Low%")
         );
     }
 
@@ -530,14 +577,22 @@ mod tests {
         labels.add_label(Label::Haunted);
 
         assert_eq!(
-            labels.get_text(false, &exclude_labels),
+            labels.get_text(false, &exclude_labels, false),
             String::from("Low%")
         );
 
         labels.add_label(Label::Max);
         assert_eq!(
-            labels.get_text(false, &exclude_labels),
+            labels.get_text(false, &exclude_labels, false),
             String::from("Haunted Max Low%")
+        );
+
+        labels.add_label(Label::Shield);
+        labels.set_terminus(TerminusLabel::Hell);
+        labels.rm_label(&Label::Low);
+        assert_eq!(
+            labels.get_text(false, &exclude_labels, false),
+            String::from("Max Shield Run")
         );
     }
 
@@ -550,40 +605,40 @@ mod tests {
         labels.add_label(Label::Max);
         labels.rm_label(&Label::No);
         assert_eq!(
-            labels.get_text(false, &exclude_labels),
+            labels.get_text(false, &exclude_labels, false),
             String::from("Haunted Max Low% No Gold Pacifist")
         );
 
         labels.set_terminus(TerminusLabel::Hell);
         assert_eq!(
-            labels.get_text(false, &exclude_labels),
+            labels.get_text(false, &exclude_labels, false),
             String::from("Haunted Max Low% No Gold Pacifist Hell")
         );
 
         labels.add_label(Label::Eggplant);
         assert_eq!(
-            labels.get_text(false, &exclude_labels),
+            labels.get_text(false, &exclude_labels, false),
             String::from("Haunted Max Low% No Gold Pacifist Eggplant")
         );
 
         labels.add_label(Label::Shield);
         labels.rm_label(&Label::Eggplant);
         assert_eq!(
-            labels.get_text(false, &exclude_labels),
-            String::from("Haunted Max Low% No Gold Pacifist Shield Run")
+            labels.get_text(false, &exclude_labels, false),
+            String::from("Max Low% No Gold Pacifist Shield Run")
         );
 
         labels.rm_label(&Label::Low);
         assert_eq!(
-            labels.get_text(false, &exclude_labels),
-            String::from("No Teleporter Haunted Max No Gold Pacifist Shield Run")
+            labels.get_text(false, &exclude_labels, false),
+            String::from("Max No Gold Pacifist Shield Run")
         );
 
         labels.rm_label(&Label::Shield);
         labels.add_label(Label::Eggplant);
         assert_eq!(
-            labels.get_text(false, &exclude_labels),
-            String::from("No Teleporter Haunted Max No Gold Pacifist Eggplant%")
+            labels.get_text(false, &exclude_labels, false),
+            String::from("Haunted Max No Gold Pacifist Eggplant%")
         );
     }
 }
