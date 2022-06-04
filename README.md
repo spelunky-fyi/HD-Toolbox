@@ -4,17 +4,18 @@ Toolbox full of tools for Spelunky HD
 
 ## Potential Functionality
 
-- [-] Level Viewer
+- [ ] Level Viewer (In Progress)
 - [x] Game Launcher
 - [ ] Overlay + Injector for Science / Practice
-- [ ] Trackers
-  - [ ] Category
-  - [ ] Kill Counter
+- [x] Trackers
+  - [x] Category
+  - [x] Kill Counter
 - [ ] Save Management
   - [ ] Editor
   - [ ] Named Backup / Auto Backup / Restore
   - [ ] Stat Viewer
-- [ ] WAD/WIX Extractor/Packer
+- [ ] Asset Management
+  - [ ] WAD/WIX Extractor/Packer
   - [ ] Skin Selector
 - [ ] Mod Management
 - [ ] External Tool Managment
