@@ -30,8 +30,20 @@ impl Process {
         Ok(bytes.len())
     }
 
+    pub fn read_f64(&self, addr: usize) -> Result<f64, ReadMemoryError> {
+        Ok(LittleEndian::read_f64(&self.read_n_bytes(addr, 8)?))
+    }
+
+    pub fn read_i32(&self, addr: usize) -> Result<i32, ReadMemoryError> {
+        Ok(LittleEndian::read_i32(&self.read_n_bytes(addr, 4)?))
+    }
+
     pub fn read_u32(&self, addr: usize) -> Result<u32, ReadMemoryError> {
         Ok(LittleEndian::read_u32(&self.read_n_bytes(addr, 4)?))
+    }
+
+    pub fn read_u8(&self, _addr: usize) -> Result<u8, ReadMemoryError> {
+        Ok(0)
     }
 
     pub fn still_active(&self) -> bool {

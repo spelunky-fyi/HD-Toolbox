@@ -34,7 +34,7 @@ Run Dev Frontend
 npm install
 
 # Run dev server
-npm dev
+npm run dev
 ```
 
 Run Tauri Dev
