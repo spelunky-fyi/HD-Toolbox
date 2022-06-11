@@ -1,7 +1,5 @@
 use std::collections::HashSet;
 use std::io::Cursor;
-use std::io::Seek;
-use std::io::SeekFrom;
 use std::time::Duration;
 
 use byteorder::ByteOrder;
@@ -315,6 +313,7 @@ impl From<i32> for PlayState {
 pub enum EntityType {
     Player,
     ShotgunPellet,
+    TikiSpikes,
     Eggplant,
 
     Spectacles,
@@ -349,6 +348,8 @@ pub enum EntityType {
     VladsCape,
     VladsAmulet,
 
+    KingYamaHead,
+    KingYamaFist,
     Unknown(i32),
 }
 
@@ -363,6 +364,7 @@ impl From<i32> for EntityType {
         match value {
             0 => Self::Player,
             117 => Self::ShotgunPellet,
+            157 => Self::TikiSpikes,
             252 => Self::Eggplant,
             503 => Self::Spectacles,
             504 => Self::ClimbingGloves,
@@ -395,6 +397,8 @@ impl From<i32> for EntityType {
             531 => Self::BookOfTheDead,
             532 => Self::VladsCape,
             533 => Self::VladsAmulet,
+            1056 => Self::KingYamaHead,
+            1057 => Self::KingYamaFist,
             _ => Self::Unknown(value),
         }
     }
@@ -404,6 +408,8 @@ impl From<i32> for EntityType {
 pub struct PartialEntity {
     pub entity_kind: EntityKind,
     pub entity_type: EntityType,
+    pub bin_x: u32,
+    pub bin_y: u32,
     pub owner: Ownership,
 }
 
@@ -534,7 +540,7 @@ fn get_inputs(
     Ok(inputs)
 }
 
-fn _get_active_entities(
+pub fn get_active_entities(
     process: &Process,
     global_state_offset: usize,
 ) -> Result<Vec<PartialEntity>, Failure> {
@@ -550,9 +556,6 @@ fn _get_active_entities(
             .map_err(|_| ReadMemoryError::Failed)? as usize;
 
         if let Some(partial_entity) = get_partial_entity(process, ptr)? {
-            // if owner == Ownership::Unowned || owner == Ownership::HiredHand {
-            //     continue;
-            // }
             active_entities.push(partial_entity);
         }
     }
@@ -573,9 +576,14 @@ fn get_partial_entity(process: &Process, addr: usize) -> Result<Option<PartialEn
         .read_i32::<LE>()
         .map_err(|_| ReadMemoryError::Failed)?
         .into();
-    entity_data
-        .seek(SeekFrom::Start(0x10))
-        .map_err(|_| ReadMemoryError::Failed)?;
+    let bin_x = entity_data
+        .read_u32::<LE>()
+        .map_err(|_| ReadMemoryError::Failed)?
+        .into();
+    let bin_y = entity_data
+        .read_u32::<LE>()
+        .map_err(|_| ReadMemoryError::Failed)?
+        .into();
     let owner = entity_data
         .read_i32::<LE>()
         .map_err(|_| ReadMemoryError::Failed)?
@@ -584,6 +592,8 @@ fn get_partial_entity(process: &Process, addr: usize) -> Result<Option<PartialEn
     Ok(Some(PartialEntity {
         entity_kind,
         entity_type,
+        bin_x,
+        bin_y,
         owner,
     }))
 }
@@ -733,6 +743,7 @@ impl CategoryTrackerPayload {
 
         let total_money = process.read_u32(global_state_offset + 0x44592C)?;
         let respawn_level = process.read_u32(global_state_offset + 0x44734C)?;
+        //let active_entities = get_active_entities(process, global_state_offset)?;
 
         Ok(Self::GameState(GameState {
             screen_state,
@@ -755,7 +766,7 @@ impl CategoryTrackerPayload {
             player_held_entity,
 
             player_data,
-
+            //active_entities,
             inputs: get_inputs(process, global_state_offset, active_player)?,
         }))
     }
