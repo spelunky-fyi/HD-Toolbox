@@ -76,7 +76,7 @@
     room[idx + 20 + 3] = 0;
     room[idx + 20 + 4] = 0;
 
-    if (type === "v") {
+    if (type === "V") {
       room[idx + 30 + 0] = 0;
       room[idx + 30 + 1] = 0;
       room[idx + 30 + 2] = 0;
@@ -122,7 +122,7 @@
       room[idx + 20 + 3] = chunk[13];
       room[idx + 20 + 4] = chunk[14];
 
-      if (value == "v") {
+      if (value == "V") {
         room[idx + 30 + 0] = chunk[15];
         room[idx + 30 + 1] = chunk[16];
         room[idx + 30 + 2] = chunk[17];
@@ -290,7 +290,17 @@
           }
         }
       } else if (chunkCodes.includes(c)) {
-        drawTileLabel(x, y, getNameOfChunk(c), rectWidth * 5, rectHeight * 3);
+        let height = 3;
+        if (c == "V") {
+          height = 4;
+        }
+        drawTileLabel(
+          x,
+          y,
+          getNameOfChunk(c),
+          rectWidth * 5,
+          rectHeight * height
+        );
       } else {
         drawTileLabel(x, y, c);
       }

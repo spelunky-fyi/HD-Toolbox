@@ -69,7 +69,7 @@ export default {
   L: {
     images: function (ctx) {
       if (ctx.area == "Jungle") {
-        if (ctx.below == "0" || ctx.below == "") {
+        if (ctx.below != "L") {
           return [{ name: "alltiles", x: 576, y: 0 }];
         }
         return [{ name: "alltiles", x: 960, y: 192 }];
