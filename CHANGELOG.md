@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix vine chunks to show 4th row
 - Fix vine preview to show bottom sprite when floor beneath
 
+### Added
+
+- Level Viewer: Growable Vine/Chain tile `Q`
+- Level Viewer: Support for normal stone brick in `r`
+
 ## [0.3.1] - 2022-06-11
 
 ### Added

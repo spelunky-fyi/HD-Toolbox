@@ -82,6 +82,23 @@ export default {
       return [{ name: "alltiles", x: 128, y: 0 }];
     },
   },
+  Q: {
+    images: function (ctx) {
+      if (ctx.area == "Jungle") {
+        return [
+          { name: "alltiles", x: 960, y: 192 },
+          { name: "alltiles", x: 576, y: 0, offY: 64 },
+        ];
+      } else if (ctx.area == "Hell / Yama") {
+        return [
+          { name: "alltiles", x: 64 * 18, y: 64 * 8 },
+          { name: "alltiles", x: 64 * 17, y: 64 * 8, offY: 64 },
+        ];
+      }
+      return [{ name: "alltiles", x: 128, y: 0 }];
+    },
+    label: "Grow",
+  },
   P: {
     images: [{ name: "alltiles", x: 192, y: 0 }],
   },
@@ -339,8 +356,14 @@ export default {
     },
   },
   r: {
-    // Hell Bricks
-    images: [{ name: "alltiles", x: 16 * 64, y: 17 * 64, alpha: 0.5 }],
+    images: function (ctx) {
+      if (ctx.area == "Hell / Yama") {
+        // Hell Bricks
+        return [{ name: "alltiles", x: 16 * 64, y: 17 * 64, alpha: 0.5 }];
+      }
+
+      return [{ name: "alltiles", x: 1536, y: 64 }];
+    },
     label: "50%",
   },
   s: {
