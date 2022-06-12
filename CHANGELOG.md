@@ -17,8 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Level Viewer: Growable Vine/Chain tile `Q`
-- Level Viewer: Support for normal stone brick in `r`
+- Level Viewer
+  - Rest of Jungle Rooms
+  - Growable Vine/Chain tile `Q`
+  - Support for normal stone brick in `r`
 
 ## [0.3.1] - 2022-06-11
 
