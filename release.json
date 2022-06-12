@@ -1,10 +1,11 @@
 {
-  "version": "v0.3.0",
-  "notes": "Add Category and Pacifist Trackers",
-  "pub_date": "2022-06-03T07:50:55Z",
+  "version": "v0.3.1",
+  "notes": "Level Viewer - Hell, Trackers - Handle Olmec for Pacifist",
+  "pub_date": "2022-06-12T03:15:37Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWG5uQThXZFJ2RkhUd0tsZ043RHdIck8zaEJaSjY4dUh3alcwZjBBZjNLNloxZ3IxVXFJMlVOUGgvVTF0RXdBZUpxcWVNakZaOE5jaCtzakw2aCtBK0EwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjU0MjQyNTQ3CWZpbGU6RDpcYVxIRC1Ub29sYm94XEhELVRvb2xib3hcdGFyZ2V0XHJlbGVhc2VcYnVuZGxlL21zaS9IRCBUb29sYm94XzAuMy4wX3g2NF9lbi1VUy5tc2kuemlwClU2cDRjZ1lvcm1NUTdmenBDQmJ5dWMrS2x5NlJSaExMVEJtWkpmZXlBb1dVZWEvc1dmTkF2K0NsQzYzMndSajJiNUsxN2c1M2ZIU2RGS2p6azdKbEJnPT0K",
-      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.3.0/HD.Toolbox_0.3.0_x64_en-US.msi.zip"    }
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWHRWUVpCM0NaN2YyV1dVczI1L3c3U0E1WE1ZdEs3WjFPaEZiK29sVUhFUExEdjRIa00zeUpSVUk5SXJibThOUi9FZTRWR3NTajh2THVGeFdWeDdhUEEwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjU1MDAzNjExCWZpbGU6RDpcYVxIRC1Ub29sYm94XEhELVRvb2xib3hcdGFyZ2V0XHJlbGVhc2VcYnVuZGxlL21zaS9IRCBUb29sYm94XzAuMy4xX3g2NF9lbi1VUy5tc2kuemlwClJleUNTYXF5anV0RkUyaXFkdS95U2MvU1c3MmlyKzcrT2JkYUJEZXlHSUhkS0FGaFprYWtaenY0d1QvYWhCSXZ4Njk3ZFpwc0htL1lSbFZmaFhXUUN3PT0K",
+      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.3.1/HD.Toolbox_0.3.1_x64_en-US.msi.zip"
+    }
   }
 }
