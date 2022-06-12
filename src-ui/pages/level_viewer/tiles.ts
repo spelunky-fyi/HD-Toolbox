@@ -1,4 +1,4 @@
-import { RoomFlags } from "./enums";
+import { RoomFlags, RoomType } from "./enums";
 
 interface ImageSpec {
   name: string;
@@ -15,10 +15,28 @@ function getTerrainFunc(alpha?: number) {
   return (ctx): ImageSpec[] => {
     if (ctx.area == "Jungle") {
       return [{ name: "alltiles", x: 512, y: 128, alpha: alpha }];
+    } else if (ctx.area == "Hell / Yama") {
+      return [{ name: "alltiles", x: 16 * 64, y: 9 * 64, alpha: alpha }];
     }
 
     // Default to mines
     return [{ name: "alltiles", x: 0, y: 128, alpha: alpha }];
+  };
+}
+
+function getTerrainSpikesFunc(alpha?: number) {
+  return (ctx): ImageSpec[] => {
+    if (ctx.area == "Jungle") {
+      return [{ name: "alltiles", x: 64 * 13, y: 64 * 6, alpha: alpha }];
+    } else if (ctx.area == "Hell / Yama") {
+      if (ctx.roomFlags.includes(RoomFlags.VLADS)) {
+        return [{ name: "alltiles", x: 64 * 21, y: 64 * 23, alpha: alpha }];
+      }
+      return [{ name: "alltiles", x: 64 * 21, y: 64 * 14, alpha: alpha }];
+    }
+
+    // Default to mines
+    return [{ name: "alltiles", x: 64 * 5, y: 64 * 6, alpha: alpha }];
   };
 }
 
@@ -55,6 +73,11 @@ export default {
           return [{ name: "alltiles", x: 576, y: 0 }];
         }
         return [{ name: "alltiles", x: 960, y: 192 }];
+      } else if (ctx.area == "Hell / Yama") {
+        if (ctx.below != "L") {
+          return [{ name: "alltiles", x: 64 * 17, y: 64 * 8 }];
+        }
+        return [{ name: "alltiles", x: 64 * 18, y: 64 * 8 }];
       }
       return [{ name: "alltiles", x: 128, y: 0 }];
     },
@@ -94,7 +117,13 @@ export default {
     label: "v",
   },
   "=": {
-    images: [{ name: "alltiles", x: 1536, y: 1600 }],
+    images: function (ctx) {
+      if (ctx.area == "Hell / Yama") {
+        return [{ name: "alltiles", x: 16 * 64, y: 17 * 64 }];
+      }
+      return [{ name: "alltiles", x: 1536, y: 1600 }];
+    },
+
     label: "=",
   },
   x: {
@@ -104,19 +133,41 @@ export default {
     ],
   },
   A: {
-    images: [
-      { name: "alltiles", x: 256, y: 448 },
-      { name: "alltiles", x: 256 + 64, y: 448, offX: 64 },
-    ],
+    images: function (ctx) {
+      if (ctx.area == "Hell / Yama") {
+        return [
+          { name: "alltiles", x: 64 * 22, y: 64 * 15 },
+          { name: "alltiles", x: 64 * 23, y: 64 * 15, offX: 64 },
+        ];
+      }
+      return [
+        { name: "alltiles", x: 256, y: 448 },
+        { name: "alltiles", x: 256 + 64, y: 448, offX: 64 },
+      ];
+    },
   },
   I: {
-    images: [{ name: "items", x: 960, y: 0, offX: 24, w: 80, h: 80 }],
+    images: function (ctx) {
+      if (ctx.roomFlags.includes(RoomFlags.YAMA)) {
+        return [
+          { name: "alltiles", x: 64 * 15, y: 64 * 6, offY: -64 },
+          { name: "alltiles", x: 64 * 15, y: 64 * 7 },
+        ];
+      }
+      // Idol
+      return [{ name: "items", x: 960, y: 0, offX: 24, w: 80, h: 80 }];
+    },
   },
   "#": {
     images: [{ name: "alltiles", x: 448, y: 384 }],
   },
   "4": {
-    images: [{ name: "alltiles", x: 0, y: 0 }],
+    images: function (ctx) {
+      if (ctx.roomFlags.includes(RoomFlags.VLADS)) {
+        return [{ name: "alltiles", x: 64 * 16, y: 64 * 16 }];
+      }
+      return [{ name: "alltiles", x: 0, y: 0 }];
+    },
   },
   M: {
     images: [
@@ -143,18 +194,47 @@ export default {
     images: [{ name: "coffin", x: 0, y: 0, w: 128, h: 128, offY: -64 }],
   },
   X: {
-    images: [
-      {
-        name: "monstersbig2",
-        x: 0,
-        y: 0,
-        w: 160,
-        h: 160,
-        offY: -32,
-        offX: -8,
-        scale: 0.9,
-      },
-    ],
+    images: function (ctx) {
+      if (ctx.roomType == RoomType.YAMA_3_0) {
+        return [
+          {
+            name: "monstersbig4",
+            x: 0,
+            y: 80 * 8,
+            w: 160,
+            h: 160,
+            offY: -80,
+            offX: -40,
+            scale: 0.9,
+          },
+        ];
+      } else if (ctx.roomType == RoomType.YAMA_3_3) {
+        return [
+          {
+            name: "monstersbig4",
+            x: 0,
+            y: 80 * 20,
+            w: 160,
+            h: 160,
+            offY: -80,
+            offX: -40,
+            scale: 0.9,
+          },
+        ];
+      }
+      return [
+        {
+          name: "monstersbig2",
+          x: 0,
+          y: 0,
+          w: 160,
+          h: 160,
+          offY: -32,
+          offX: -8,
+          scale: 0.9,
+        },
+      ];
+    },
   },
   "9": {
     images: function (ctx) {
@@ -163,6 +243,8 @@ export default {
 
       if (ctx.area == "Jungle") {
         x = 256 * 2;
+      } else if (ctx.area == "Hell / Yama") {
+        y = 256 * 2;
       }
 
       if (ctx.roomFlags.includes(RoomFlags.ENTRANCE)) {
@@ -190,7 +272,7 @@ export default {
     images: [{ name: "alltiles", x: 256, y: 320 }],
   },
   "7": {
-    images: [{ name: "alltiles", x: 256, y: 384, alpha: 0.5 }],
+    images: getTerrainSpikesFunc(0.5),
     label: "33%",
   },
   b: {
@@ -225,11 +307,54 @@ export default {
   },
   w: {
     images: function (ctx) {
-      if (!["w", "v"].includes(ctx.above)) {
-        return [{ name: "water", x: 64, y: 128 }];
+      if (ctx.area == "Hell / Yama") {
+        if (!["w", "v"].includes(ctx.above)) {
+          return [{ name: "water", x: 64 * 3, y: 128 }];
+        }
+        return [{ name: "water", x: 64 * 3, y: 0 }];
+      } else {
+        if (!["w", "v"].includes(ctx.above)) {
+          return [{ name: "water", x: 64, y: 128 }];
+        }
+        return [{ name: "water", x: 64, y: 0 }];
       }
-      return [{ name: "water", x: 64, y: 0 }];
     },
   },
   t: { images: [{ name: "alltiles", x: 1536, y: 64 }] },
+  // Has many variants...
+  h: {
+    images: function (ctx) {
+      // Hell Bricks
+      return [{ name: "alltiles", x: 16 * 64, y: 17 * 64 }];
+    },
+  },
+  y: {
+    images: function (ctx) {
+      return [
+        // Hell Bricks
+        { name: "alltiles", x: 16 * 64, y: 17 * 64 },
+        // Rubies
+        { name: "items", x: 480, y: 0, w: 80, h: 80, offX: -8 },
+      ];
+    },
+  },
+  r: {
+    // Hell Bricks
+    images: [{ name: "alltiles", x: 16 * 64, y: 17 * 64, alpha: 0.5 }],
+    label: "50%",
+  },
+  s: {
+    images: getTerrainSpikesFunc(1),
+  },
+  f: {
+    images: function (ctx) {
+      if (ctx.area == "Hell / Yama") {
+        return [{ name: "alltiles", x: 64 * 23, y: 64 * 13 }];
+      }
+      return [{ name: "alltiles", x: 64 * 23, y: 64 * 5 }];
+    },
+  },
+  "&": {
+    label: "Spout",
+  },
 };

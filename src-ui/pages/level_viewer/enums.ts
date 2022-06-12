@@ -119,4 +119,6 @@ export const enum RoomFlags {
   KALI_ROOM = 5,
   NO_DAILY = 6,
   CHAR_UNLOCK = 7,
+  VLADS = 8,
+  YAMA = 9,
 }

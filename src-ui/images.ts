@@ -18,6 +18,7 @@ const imageSrcs = [
   { name: "monsters4", src: "/images/tiles/monsters4.png" },
   { name: "monsters5", src: "/images/tiles/monsters5.png" },
   { name: "monstersbig2", src: "/images/tiles/monstersbig2.png" },
+  { name: "monstersbig4", src: "/images/tiles/monstersbig4.png" },
   { name: "coffin", src: "/images/tiles/coffin.png" },
   { name: "doors", src: "/images/tiles/doors.png" },
   { name: "water", src: "/images/tiles/water.png" },
