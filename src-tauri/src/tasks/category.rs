@@ -437,10 +437,11 @@ impl RunState {
     }
 
     fn process_death(&mut self, gamestate: &GameState) {
-        // TODO: Handle Pacifist
-        self.run_labels.set_terminus(TerminusLabel::Death);
-
         self.update_ropes_end_of_run(gamestate);
+
+        if !self.run_labels.has_label(&Label::Pacifist) {
+            self.run_labels.set_terminus(TerminusLabel::Death);
+        }
     }
 
     fn update_no_gold(&mut self, gamestate: &GameState) {
@@ -451,8 +452,9 @@ impl RunState {
     }
 
     fn update_pacifist(&mut self, gamestate: &GameState) {
-        // TODO: Handle Olmec
-        if gamestate.player_data.total_kills > 0 {
+        if (gamestate.player_data.total_kills == 1 && !gamestate.player_data.one_is_olmec)
+            || gamestate.player_data.total_kills > 1
+        {
             self.run_labels.rm_label(&Label::Pacifist);
         }
     }

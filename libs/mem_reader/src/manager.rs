@@ -348,6 +348,7 @@ pub enum EntityType {
     VladsCape,
     VladsAmulet,
 
+    Olmec,
     KingYamaHead,
     KingYamaFist,
     Unknown(i32),
@@ -397,6 +398,7 @@ impl From<i32> for EntityType {
             531 => Self::BookOfTheDead,
             532 => Self::VladsCape,
             533 => Self::VladsAmulet,
+            1055 => Self::Olmec,
             1056 => Self::KingYamaHead,
             1057 => Self::KingYamaFist,
             _ => Self::Unknown(value),
@@ -610,6 +612,7 @@ pub struct PlayerData {
 
     pub held_item: EntityType,
     pub total_kills: u32,
+    pub one_is_olmec: bool,
 }
 
 fn get_player_data(process: &Process, addr: usize) -> Result<PlayerData, Failure> {
@@ -653,6 +656,9 @@ fn get_player_data(process: &Process, addr: usize) -> Result<PlayerData, Failure
         }
     }
 
+    let one_is_olmec =
+        EntityType::from(LE::read_i32(&player_data[0x98..0x98 + 4])) == EntityType::Olmec;
+
     Ok(PlayerData {
         health: LE::read_u32(&player_data[0..4]),
         bombs: LE::read_u32(&player_data[0x10..0x10 + 4]),
@@ -664,6 +670,7 @@ fn get_player_data(process: &Process, addr: usize) -> Result<PlayerData, Failure
 
         held_item: LE::read_i32(&player_data[0x88..0x88 + 4]).into(),
         total_kills: LE::read_u32(&player_data[0x90..0x90 + 4]),
+        one_is_olmec,
     })
 }
 
@@ -775,6 +782,7 @@ impl CategoryTrackerPayload {
 #[derive(Debug, Serialize, Clone, Default, PartialEq, Eq)]
 pub struct PacifistTrackerPayload {
     pub total_kills: u32,
+    pub one_is_olmec: bool,
 }
 
 impl PacifistTrackerPayload {
@@ -783,13 +791,34 @@ impl PacifistTrackerPayload {
             process.read_u32(process.base_addr + process.offsets.global_state)? as usize;
 
         let mut total_kills: u32 = 0;
+        let mut one_is_olmec = false;
 
         total_kills = total_kills.wrapping_add(process.read_u32(global_state + 0x440694 + 0x90)?);
         total_kills = total_kills.wrapping_add(process.read_u32(global_state + 0x441B38 + 0x90)?);
         total_kills = total_kills.wrapping_add(process.read_u32(global_state + 0x442FDC + 0x90)?);
         total_kills = total_kills.wrapping_add(process.read_u32(global_state + 0x444480 + 0x90)?);
 
-        Ok(Self { total_kills })
+        if EntityType::from(process.read_i32(global_state + 0x440694 + 0x98)?) == EntityType::Olmec
+        {
+            one_is_olmec = true;
+        }
+        if EntityType::from(process.read_i32(global_state + 0x441B38 + 0x98)?) == EntityType::Olmec
+        {
+            one_is_olmec = true;
+        }
+        if EntityType::from(process.read_i32(global_state + 0x442FDC + 0x98)?) == EntityType::Olmec
+        {
+            one_is_olmec = true;
+        }
+        if EntityType::from(process.read_i32(global_state + 0x444480 + 0x98)?) == EntityType::Olmec
+        {
+            one_is_olmec = true;
+        }
+
+        Ok(Self {
+            total_kills,
+            one_is_olmec,
+        })
     }
 }
 

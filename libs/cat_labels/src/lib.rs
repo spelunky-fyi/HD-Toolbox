@@ -262,6 +262,10 @@ impl RunLabels {
         }
     }
 
+    pub fn has_label(&self, label: &Label) -> bool {
+        self.labels.contains(label)
+    }
+
     pub fn terminus_requires_low(&self) -> bool {
         [
             TerminusLabel::TempleShortcut,

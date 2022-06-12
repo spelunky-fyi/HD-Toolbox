@@ -11,6 +11,7 @@ use super::trackers::Response;
 #[derive(Debug, Serialize, Clone, PartialEq, Eq)]
 pub struct PacifistResponse {
     pub total_kills: u32,
+    pub one_is_olmec: bool,
     pub show_kills: bool,
 }
 
@@ -52,6 +53,7 @@ impl TrackerTicker for PacifistTracker {
         };
         Response::Pacifist(PacifistResponse {
             total_kills: pacifist_data.total_kills,
+            one_is_olmec: pacifist_data.one_is_olmec,
             show_kills: config.show_kills,
         })
     }

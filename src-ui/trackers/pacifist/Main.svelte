@@ -18,7 +18,13 @@
     {#if $state === WebSocketState.Pending}
       <span class="pending">Connecting...</span>
     {:else if $data.show_kills}
-      <span class="output">{$data.total_kills}</span>
+      {#if $data.total_kills === 1 && $data.one_is_olmec}
+        <span class="output">0*</span>
+      {:else}
+        <span class="output">{$data.total_kills}</span>
+      {/if}
+    {:else if $data.total_kills === 1 && $data.one_is_olmec}
+      <span class="output pacifist">Pacifist*</span>
     {:else if $data.total_kills > 0}
       <span class="output murderer">MURDERER!</span>
     {:else}
