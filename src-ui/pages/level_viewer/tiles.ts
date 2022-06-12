@@ -330,7 +330,7 @@ export default {
         }
         return [{ name: "water", x: 64 * 3, y: 0 }];
       } else {
-        if (!["w", "v"].includes(ctx.above)) {
+        if (!["w", "v", ",", "J"].includes(ctx.above)) {
           return [{ name: "water", x: 64, y: 128 }];
         }
         return [{ name: "water", x: 64, y: 0 }];

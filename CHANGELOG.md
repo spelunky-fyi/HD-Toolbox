@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Updated names in Hell - Entrance - Drop to not be duplicates
-- Fix vine chunks to show 4th row
-- Fix vine preview to show bottom sprite when floor beneath
+- Level Viewer
+  - Updated names in Hell - Entrance - Drop to not be duplicates
+  - Fix vine chunks to show 4th row
+  - Fix vine preview to show bottom sprite when floor beneath
+  - Notes are now properly showing on Round Girl Coffin entries.
 
 ### Added
 

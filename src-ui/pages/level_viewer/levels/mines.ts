@@ -680,14 +680,14 @@ export default {
         },
         {
           name: "Round Girl Coffin",
-          note: "Not used on Daily Challenge",
+          notes: "Not used on Daily Challenge",
           data: "1111111111111X0X000211100000011111100g010120001111012000000000000122221111111111",
           type: RoomType.SPIDER_LAIR_1,
           flags: [RoomFlags.NO_DAILY, RoomFlags.CHAR_UNLOCK],
         },
         {
           name: "Round Girl Coffin - No Top",
-          note: "Not used on Daily Challenge",
+          notes: "Not used on Daily Challenge",
           data: "1v000000v11vvv00vvv1X00000vX00000010000000g0102222111110000000000022221111111111",
           type: RoomType.SPIDER_LAIR_1,
           flags: [RoomFlags.NO_DAILY, RoomFlags.CHAR_UNLOCK, RoomFlags.NO_TOP],
