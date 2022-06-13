@@ -11,6 +11,14 @@
   import TrackersIcon from "./TrackersIcon.svelte";
   import { configLoaded } from "./config";
   import { imagesLoaded } from "./images";
+  import { writable } from "svelte/store";
+  import { getVersion } from "@tauri-apps/api/app";
+
+  const version = writable("");
+  getVersion().then((data) => {
+    console.log(data);
+    version.set(data);
+  });
 
   function disableMenu() {
     // if (window.location.hostname !== "tauri.localhost") {
@@ -37,6 +45,11 @@
     <Row>
       <Section>
         <Title>HD Toolbox</Title>
+        {#if $version !== ""}
+          <span class="version">
+            v{$version}
+          </span>
+        {/if}
       </Section>
       <Section align="end" toolbar>
         <div class="icons">
@@ -62,5 +75,12 @@
   .icons {
     display: flex;
     align-items: center;
+  }
+
+  .version {
+    padding-left: 5px;
+    margin-top: 2px;
+    font-size: smaller;
+    font-style: italic;
   }
 </style>
