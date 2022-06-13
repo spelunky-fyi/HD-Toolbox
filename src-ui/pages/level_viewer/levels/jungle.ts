@@ -609,12 +609,12 @@ export default {
       name: "Dead are Restless",
       rooms: [
         {
-          name: "Castle Entrace - A",
+          name: "Castle Entrance - A",
           data: "000000000000000000000000h00000021t1t1200211t0t112011rtttr11011r101r11111rr0rr111",
           type: RoomType.DAR_CASTLE_ENTRANCE,
         },
         {
-          name: "Castle Entrace - B",
+          name: "Castle Entrance - B",
           data: "0000000000000000000000000h00000021t1t1200211t0t112011rtttr11111r101r11111rr0rr11",
           type: RoomType.DAR_CASTLE_ENTRANCE,
         },

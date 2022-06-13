@@ -15,6 +15,8 @@ function getTerrainFunc(alpha?: number) {
   return (ctx): ImageSpec[] => {
     if (ctx.area == "Jungle") {
       return [{ name: "alltiles", x: 512, y: 128, alpha: alpha }];
+    } else if (ctx.area == "Worm") {
+      return [{ name: "alltiles", x: 0, y: 17 * 64, alpha: alpha }];
     } else if (ctx.area == "Hell / Yama") {
       return [{ name: "alltiles", x: 16 * 64, y: 9 * 64, alpha: alpha }];
     }
@@ -28,6 +30,8 @@ function getTerrainSpikesFunc(alpha?: number) {
   return (ctx): ImageSpec[] => {
     if (ctx.area == "Jungle") {
       return [{ name: "alltiles", x: 64 * 13, y: 64 * 6, alpha: alpha }];
+    } else if (ctx.area == "Worm") {
+      return [{ name: "alltiles", x: 64 * 5, y: 64 * 22, alpha: alpha }];
     } else if (ctx.area == "Hell / Yama") {
       if (ctx.roomFlags.includes(RoomFlags.VLADS)) {
         return [{ name: "alltiles", x: 64 * 21, y: 64 * 23, alpha: alpha }];
@@ -61,11 +65,41 @@ export default {
     },
     label: "t/w",
   },
+  ",": {
+    images: function (ctx) {
+      let imgs = getTerrainFunc(1)(ctx);
+      imgs[0].w = 32;
+      imgs.push({ name: "alltiles", x: 1536 + 32, y: 1600, w: 32, offX: 32 });
+
+      return imgs;
+    },
+    label: ",",
+  },
+  e: {
+    images: function (ctx) {
+      // Beehive
+      return [{ name: "alltiles", x: 64 * 24, y: 64 * 17 }];
+    },
+  },
+  z: {
+    images: function (ctx) {
+      // Beehive
+      return [{ name: "alltiles", x: 64 * 24, y: 64 * 17, alpha: 0.5 }];
+    },
+  },
   q: {
     images: getTerrainFunc(),
     label: "q",
   },
-  T: { label: "Tree" },
+  T: {
+    images: [
+      { name: "alltiles", x: 64 * 0, y: 64 * 15 },
+      { name: "alltiles", x: 64 * 0, y: 64 * 14, offY: -64 },
+      { name: "alltiles", x: 64 * 3, y: 64 * 11, offY: -64 - 32 },
+    ],
+
+    label: "Grow",
+  },
   L: {
     images: function (ctx) {
       if (ctx.area == "Jungle") {
@@ -73,6 +107,11 @@ export default {
           return [{ name: "alltiles", x: 576, y: 0 }];
         }
         return [{ name: "alltiles", x: 960, y: 192 }];
+      } else if (ctx.area == "Worm") {
+        if (ctx.below != "L") {
+          return [{ name: "alltiles", x: 64 * 1, y: 64 * 16 }];
+        }
+        return [{ name: "alltiles", x: 64 * 2, y: 64 * 16 }];
       } else if (ctx.area == "Hell / Yama") {
         if (ctx.below != "L") {
           return [{ name: "alltiles", x: 64 * 17, y: 64 * 8 }];
@@ -82,12 +121,20 @@ export default {
       return [{ name: "alltiles", x: 128, y: 0 }];
     },
   },
+  G: {
+    images: [{ name: "alltiles", x: 128, y: 0 }],
+  },
   Q: {
     images: function (ctx) {
       if (ctx.area == "Jungle") {
         return [
           { name: "alltiles", x: 960, y: 192 },
           { name: "alltiles", x: 576, y: 0, offY: 64 },
+        ];
+      } else if (ctx.area == "Worm") {
+        return [
+          { name: "alltiles", x: 64 * 2, y: 64 * 16 },
+          { name: "alltiles", x: 64 * 1, y: 64 * 16, offY: 64 },
         ];
       } else if (ctx.area == "Hell / Yama") {
         return [
@@ -165,7 +212,12 @@ export default {
   },
   I: {
     images: function (ctx) {
-      if (ctx.roomFlags.includes(RoomFlags.YAMA)) {
+      if (
+        ctx.roomFlags.includes(RoomFlags.YAMA) ||
+        [RoomType.COFFIN_EXIT_LEFT, RoomType.COFFIN_EXIT_RIGHT].includes(
+          ctx.roomType
+        )
+      ) {
         return [
           { name: "alltiles", x: 64 * 15, y: 64 * 6, offY: -64 },
           { name: "alltiles", x: 64 * 15, y: 64 * 7 },
@@ -173,6 +225,11 @@ export default {
       }
       // Idol
       return [{ name: "items", x: 960, y: 0, offX: 24, w: 80, h: 80 }];
+    },
+  },
+  c: {
+    images: function (ctx) {
+      return [{ name: "items", x: 1040, y: 0, offX: 24, w: 80, h: 80 }];
     },
   },
   "#": {
@@ -260,6 +317,9 @@ export default {
 
       if (ctx.area == "Jungle") {
         x = 256 * 2;
+      } else if (ctx.area == "Worm") {
+        x = 256 * 2;
+        y = 256 * 2;
       } else if (ctx.area == "Hell / Yama") {
         y = 256 * 2;
       }
@@ -281,9 +341,13 @@ export default {
       ];
     },
   },
-  // Area specific, needs update for other biomes
   ":": {
-    images: [{ name: "monsters5", x: 0, y: 0, w: 80, h: 80 }],
+    images: function (ctx) {
+      if (ctx.area == "Jungle") {
+        return [{ name: "monsters5", x: 0, y: 80 * 3, w: 80, h: 80 }];
+      }
+      return [{ name: "monsters5", x: 0, y: 0, w: 80, h: 80 }];
+    },
   },
   "+": {
     images: [{ name: "alltiles", x: 256, y: 320 }],
@@ -341,8 +405,16 @@ export default {
   // Has many variants...
   h: {
     images: function (ctx) {
+      if (ctx.area == "Jungle") {
+        return [{ name: "alltiles", x: 12 * 64, y: 5 * 64 }];
+      }
       // Hell Bricks
       return [{ name: "alltiles", x: 16 * 64, y: 17 * 64 }];
+    },
+  },
+  B: {
+    images: function (ctx) {
+      return [{ name: "alltiles", x: 15 * 64, y: 5 * 64 }];
     },
   },
   y: {
@@ -377,6 +449,17 @@ export default {
       return [{ name: "alltiles", x: 64 * 23, y: 64 * 5 }];
     },
   },
+  d: {
+    images: function (ctx) {
+      if (ctx.area == "Worm") {
+        return [{ name: "alltiles", x: 64 * 20, y: 64 * 15 }];
+      }
+      return [{ name: "alltiles", x: 1536, y: 1600 }];
+    },
+
+    label: "d",
+  },
+
   "&": {
     label: "Spout",
   },

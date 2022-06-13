@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [0.3.2] - 2022-06-12
+
 - Level Viewer
   - Updated names in Hell - Entrance - Drop to not be duplicates
   - Fix vine chunks to show 4th row
@@ -22,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - All Worm Rooms
   - Growable Vine/Chain tile `Q`
   - Support for normal stone brick in `r`
+  - Huge number of new tiles supported for Jungle/Worm.
 
 ## [0.3.1] - 2022-06-11
 

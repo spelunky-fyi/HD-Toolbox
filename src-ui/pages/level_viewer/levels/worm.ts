@@ -333,11 +333,11 @@ export default {
   chunks: {
     door: [{ data: "009000111011111" }],
     ground: [
-      { data: "000000000022222", notes: "7/16 chance" },
-      { data: "000002222211111", notes: "7/16 chance" },
-      { data: "00000000000T022", notes: "1 / 24 chance" },
-      { data: "000000000020T02", notes: "1 / 24 chance" },
-      { data: "0000000000220T0", notes: "1 / 24 chance" },
+      { data: "000000000022222", notes: "Unused. 7/16 chance if used." },
+      { data: "000002222211111", notes: "Unused. 7/16 chance if used." },
+      { data: "00000000000T022", notes: "Unused. 1/24 chance if used." },
+      { data: "000000000020T02", notes: "Unused. 1/24 chance if used." },
+      { data: "0000000000220T0", notes: "Unused. 1/24 chance if used." },
     ],
     air: [
       { data: "111122222000000" },
