@@ -215,14 +215,14 @@ export default {
         {
           name: "Room 4 - Unused",
           notes:
-            "Unused. Can be written but is always overwritten but another PATH_NOTOP room.",
+            "Unused. Can be written but is always overwritten with another PATH_NOTOP room.",
           data: "0000000000000000000000000000002000001000wwwwww1100wwwwwww110wwwwww11201111111111",
           type: RoomType.PATH_NOTOP,
         },
         {
           name: "Room 5 - Unused",
           notes:
-            "Unused. Can be written but is always overwritten but another PATH_NOTOP room.",
+            "Unused. Can be written but is always overwritten with another PATH_NOTOP room.",
           data: "00000000000000000000000000000000010000020011wwwwww011wwwwwww0211wwwwww1111111111",
           type: RoomType.PATH_NOTOP,
         },
@@ -233,52 +233,61 @@ export default {
       rooms: [
         {
           name: "Room 1",
+          notes: "SIDE rooms aren't used in worm.",
           data: "00100001020111121101010000010221011101010201000002012101101101000100022111112121",
           type: RoomType.SIDE,
         },
 
         {
           name: "Room 2",
+          notes: "SIDE rooms aren't used in worm.",
           data: "00100001000111121121010000000221110111010200000200111010111020001000101212112112",
           type: RoomType.SIDE,
         },
 
         {
           name: "Room 3",
+          notes: "SIDE rooms aren't used in worm.",
           data: "0010000100011000011021wwwwww1221wwwwww12011wwww110021111112000000000001111111111",
           type: RoomType.SIDE,
         },
 
         {
           name: "Room 4 - A",
+          notes: "SIDE rooms aren't used in worm.",
           data: "0000000000111000000000L000000011L000000011L001110011L011Q11000001202101110120211",
           type: RoomType.SIDE,
         },
         {
           name: "Room 4 - B",
+          notes: "SIDE rooms aren't used in worm.",
           data: "000000000000000001110000000L000000000L110011100L11011Q110L1101202100001120210111",
           type: RoomType.SIDE,
         },
 
         {
           name: "Room 5",
+          notes: "SIDE rooms aren't used in worm.",
           data: "00000100000110011111011100011001100001100110001110011110011000001000001112111111",
           type: RoomType.SIDE,
         },
 
         {
           name: "Room 6 - A",
+          notes: "SIDE rooms aren't used in worm.",
           data: "00000000000021200000000L002120212L000Q000L0L0000000L0L0000000L000000000000000000",
           type: RoomType.SIDE,
         },
         {
           name: "Room 6 - B",
+          notes: "SIDE rooms aren't used in worm.",
           data: "00000000000000021200021200L00000Q000L212000000L0L0000000L0L000000000L00000000000",
           type: RoomType.SIDE,
         },
         {
           name: "Room 7 - Unused",
-          notes: "Unused.",
+          notes:
+            "SIDE rooms aren't used in worm but this room would be unused even if SIDE rooms were used due to an off-by-one error.",
           data: "11111111111111QQ1111110000001111110011111110000111110000001111002200111100000011",
           type: RoomType.SIDE,
         },

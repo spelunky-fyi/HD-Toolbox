@@ -7,9 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Level Viewer
+  - Black Market Rooms/Chunks
+
 ### Fixed
 
+- Level Viewer
+  - Fixed Typo in Worm room and Crysknife tilecode. Thanks Spencer!
+  - Updated all SIDE rooms in worm to explain SIDE rooms are unused in worm.
+
 ## [0.3.2] - 2022-06-12
+
+### Fixed
 
 - Level Viewer
   - Updated names in Hell - Entrance - Drop to not be duplicates
