@@ -11,6 +11,7 @@ const config: Level = {
           notes: "Unused as Entrance is always PATH_DROP.",
           data: "60000600000000000000000000000000000000000008000000000000000000000000000000000000",
           type: RoomType.PATH,
+          flags: [RoomFlags.ENTRANCE],
         },
 
         {
@@ -18,18 +19,21 @@ const config: Level = {
           notes: "Unused as Entrance is always PATH_DROP.",
           data: "11111111112222222222000000000000000000000008000000000000000000000000000000000000",
           type: RoomType.PATH,
+          flags: [RoomFlags.ENTRANCE],
         },
 
         {
           name: "Room 3 - Drop",
           data: "60000600000000000000000000000000000000000008000000000000000000000000000002112000",
           type: RoomType.PATH_DROP,
+          flags: [RoomFlags.ENTRANCE],
         },
 
         {
           name: "Room 4 - Drop",
           data: "11111111112222222222000000000000000000000008000000000000000000000000000002112000",
           type: RoomType.PATH_DROP,
+          flags: [RoomFlags.ENTRANCE],
         },
       ],
     },
@@ -41,6 +45,7 @@ const config: Level = {
           notes: "Only used when room above is PATH_DROP. So never.",
           data: "00000000000000000000000000000000000000000008000000000000000000000000001111111111",
           type: RoomType.PATH_NOTOP,
+          flags: [RoomFlags.EXIT],
         },
 
         {
@@ -49,18 +54,21 @@ const config: Level = {
 
           data: "00000000000011111100000000000000000000000008000000000000000000000000001111111111",
           type: RoomType.PATH_NOTOP,
+          flags: [RoomFlags.EXIT],
         },
 
         {
           name: "Room 3",
           data: "60000600000000000000000000000000000000000008000000000000000000000000001111111111",
           type: RoomType.PATH_NOTOP,
+          flags: [RoomFlags.EXIT],
         },
 
         {
           name: "Room 4",
           data: "11111111112222222222000000000000000000000008000000000000000000000000001111111111",
           type: RoomType.PATH_NOTOP,
+          flags: [RoomFlags.EXIT],
         },
       ],
     },
