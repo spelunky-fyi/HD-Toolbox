@@ -1,6 +1,7 @@
 import { RoomFlags, RoomType } from "../enums";
+import type { Level } from "../types";
 
-export default {
+const config: Level = {
   rooms: [
     {
       name: "Entrance",
@@ -810,3 +811,5 @@ export default {
     ],
   },
 };
+
+export default config;

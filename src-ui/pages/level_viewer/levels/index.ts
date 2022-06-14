@@ -10,8 +10,9 @@ import temple from "@hdt/pages/level_viewer/levels/temple";
 import olmecs_lair from "@hdt/pages/level_viewer/levels/olmecs_lair";
 import hell from "@hdt/pages/level_viewer/levels/hell";
 import tutorial from "@hdt/pages/level_viewer/levels/tutorial";
+import type { LevelConfig } from "../types";
 
-export default [
+const level_configs: LevelConfig[] = [
   { name: "Mines", data: mines, bg: "minebg" },
   { name: "Jungle", data: jungle, bg: "lushbg" },
   { name: "Worm", data: worm, bg: "wormbg" },
@@ -25,3 +26,5 @@ export default [
   { name: "Hell / Yama", data: hell, bg: "hellbg" },
   { name: "Tutorial", data: tutorial, bg: "minebg" },
 ];
+
+export default level_configs;

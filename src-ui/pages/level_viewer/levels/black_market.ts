@@ -1,20 +1,21 @@
 import { RoomFlags, RoomType } from "../enums";
+import type { Level } from "../types";
 
-export default {
+const config: Level = {
   rooms: [
     {
       name: "Entrance",
       rooms: [
         {
           name: "Room 1 - Unused",
-          notes: "Unused as Entrance is PATH_DROP.",
+          notes: "Unused as Entrance is always PATH_DROP.",
           data: "60000600000000000000000000000000000000000008000000000000000000000000000000000000",
           type: RoomType.PATH,
         },
 
         {
           name: "Room 2 - Unused",
-          notes: "Unused as Entrance is PATH_DROP.",
+          notes: "Unused as Entrance is always PATH_DROP.",
           data: "11111111112222222222000000000000000000000008000000000000000000000000000000000000",
           type: RoomType.PATH,
         },
@@ -26,7 +27,7 @@ export default {
         },
 
         {
-          name: "Room  - Drop",
+          name: "Room 4 - Drop",
           data: "11111111112222222222000000000000000000000008000000000000000000000000000002112000",
           type: RoomType.PATH_DROP,
         },
@@ -285,3 +286,5 @@ export default {
     ],
   },
 };
+
+export default config;

@@ -5,6 +5,8 @@
   import levels from "@hdt/pages/level_viewer/levels";
   import tiles from "@hdt/pages/level_viewer/tiles";
   import { images } from "@hdt/images";
+  import { RoomFlags, RoomType } from "./enums";
+  import type { Room } from "./types";
 
   let canvas;
   let ctx;
@@ -197,7 +199,7 @@
     return { name: `Chunk ${parts[1]}`, rooms: [] };
   }
 
-  function getCurrentLevel() {
+  function getCurrentLevel(): Room {
     let parts = typeAndRoomIndex.split(",");
     let variant = parts[0];
     let room = parseInt(parts[2], 10);
@@ -208,6 +210,7 @@
         levels[areaIndex].data[variant][roomType]?.rooms[room] ?? {
           name: "No Rooms...",
           data: "",
+          type: RoomType.UNSET,
         }
       );
     }
@@ -216,6 +219,7 @@
       levels[areaIndex].data[variant][parts[1]][room] ?? {
         name: "No Chunks...",
         data: "",
+        type: RoomType.UNSET,
       }
     );
   }
@@ -413,6 +417,11 @@
         {/each}
       </div>
     {/if}
+
+    <div style="padding-bottom: 10px;">
+      <h4>Room Type</h4>
+      {RoomType[currentLevel.type]}
+    </div>
 
     {#if currentLevel.notes}
       <div style="padding-bottom: 10px;">

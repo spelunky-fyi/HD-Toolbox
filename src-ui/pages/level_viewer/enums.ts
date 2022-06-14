@@ -1,4 +1,4 @@
-export const enum RoomType {
+export enum RoomType {
   SIDE = 0,
   PATH = 1,
   PATH_DROP = 2,
@@ -111,7 +111,7 @@ export const enum RoomType {
   UNSET = 4294967295,
 }
 
-export const enum RoomFlags {
+export enum RoomFlags {
   ENTRANCE = 1,
   EXIT = 2,
   NO_TOP = 3,
