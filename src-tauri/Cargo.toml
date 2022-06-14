@@ -13,7 +13,7 @@ version = "0.3.2"
 
 [build-dependencies]
 static-files = "0.2"
-tauri-build = {version = "1.0.0-rc.12", features = [] }
+tauri-build = {version = "1.0.0-rc.13", features = [] }
 
 [dependencies]
 anyhow = "1"
