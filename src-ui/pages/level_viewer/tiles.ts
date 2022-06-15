@@ -13,7 +13,7 @@ interface ImageSpec {
 
 function getTerrainFunc(alpha?: number) {
   return (ctx): ImageSpec[] => {
-    if (["Jungle", "Black Market"].includes(ctx.area)) {
+    if (["Jungle", "Black Market", "Haunted Castle"].includes(ctx.area)) {
       return [{ name: "alltiles", x: 512, y: 128, alpha: alpha }];
     } else if (ctx.area == "Worm") {
       return [{ name: "alltiles", x: 0, y: 17 * 64, alpha: alpha }];
@@ -28,7 +28,7 @@ function getTerrainFunc(alpha?: number) {
 
 function getTerrainSpikesFunc(alpha?: number) {
   return (ctx): ImageSpec[] => {
-    if (["Jungle", "Black Market"].includes(ctx.area)) {
+    if (["Jungle", "Black Market", "Haunted Castle"].includes(ctx.area)) {
       return [{ name: "alltiles", x: 64 * 13, y: 64 * 6, alpha: alpha }];
     } else if (ctx.area == "Worm") {
       return [{ name: "alltiles", x: 64 * 5, y: 64 * 22, alpha: alpha }];
@@ -102,7 +102,7 @@ export default {
   },
   L: {
     images: function (ctx) {
-      if (["Jungle", "Black Market"].includes(ctx.area)) {
+      if (["Jungle", "Black Market", "Haunted Castle"].includes(ctx.area)) {
         if (ctx.below != "L") {
           return [{ name: "alltiles", x: 576, y: 0 }];
         }
@@ -126,7 +126,7 @@ export default {
   },
   Q: {
     images: function (ctx) {
-      if (["Jungle", "Black Market"].includes(ctx.area)) {
+      if (["Jungle", "Black Market", "Haunted Castle"].includes(ctx.area)) {
         return [
           { name: "alltiles", x: 960, y: 192 },
           { name: "alltiles", x: 576, y: 0, offY: 64 },
@@ -191,10 +191,16 @@ export default {
     label: "=",
   },
   x: {
-    images: [
-      { name: "alltiles", x: 384, y: 576 },
-      { name: "alltiles", x: 384 + 64, y: 576, offX: 64 },
-    ],
+    images: function (ctx) {
+      if (ctx.area == "Haunted Castle") {
+        // Wall torches
+        return null;
+      }
+      return [
+        { name: "alltiles", x: 384, y: 576 },
+        { name: "alltiles", x: 384 + 64, y: 576, offX: 64 },
+      ];
+    },
   },
   A: {
     images: function (ctx) {
@@ -321,7 +327,7 @@ export default {
       let x = 0;
       let y = 0;
 
-      if (["Jungle", "Black Market"].includes(ctx.area)) {
+      if (["Jungle", "Black Market", "Haunted Castle"].includes(ctx.area)) {
         x = 256 * 2;
       } else if (ctx.area == "Worm") {
         x = 256 * 2;
@@ -349,7 +355,7 @@ export default {
   },
   ":": {
     images: function (ctx) {
-      if (["Jungle", "Black Market"].includes(ctx.area)) {
+      if (["Jungle", "Black Market", "Haunted Castle"].includes(ctx.area)) {
         return [{ name: "monsters5", x: 0, y: 80 * 3, w: 80, h: 80 }];
       }
       return [{ name: "monsters5", x: 0, y: 0, w: 80, h: 80 }];
@@ -413,6 +419,11 @@ export default {
     images: function (ctx) {
       if (["Jungle", "Black Market"].includes(ctx.area)) {
         return [{ name: "alltiles", x: 12 * 64, y: 5 * 64 }];
+      }
+
+      if (ctx.area == "Haunted Castle") {
+        // Kali Altar
+        return null;
       }
       // Hell Bricks
       return [{ name: "alltiles", x: 16 * 64, y: 17 * 64 }];

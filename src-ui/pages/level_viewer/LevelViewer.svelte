@@ -253,13 +253,14 @@
       if (tile) {
         let tileImages = tile.images ?? [];
         if (tileImages instanceof Function) {
-          tileImages = tileImages({
-            above: finalLevelFormat.charAt(idx - rowWidth),
-            below: finalLevelFormat.charAt(idx + rowWidth),
-            area: levels[areaIndex].name,
-            roomType: currentLevel.type,
-            roomFlags: currentLevel.flags ?? [],
-          });
+          tileImages =
+            tileImages({
+              above: finalLevelFormat.charAt(idx - rowWidth),
+              below: finalLevelFormat.charAt(idx + rowWidth),
+              area: levels[areaIndex].name,
+              roomType: currentLevel.type,
+              roomFlags: currentLevel.flags ?? [],
+            }) ?? [];
         }
         let label = tile.label;
 
