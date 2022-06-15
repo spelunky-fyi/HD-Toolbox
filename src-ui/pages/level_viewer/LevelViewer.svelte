@@ -21,7 +21,7 @@
   let rectHeight = 64;
   let rectWidth = 64;
 
-  const chunkCodes = ["5", "6", "8", "V"];
+  const chunkCodes = ["5", "6", "8", "V", "F"];
 
   function getNameOfChunk(tileCode) {
     switch (tileCode) {
@@ -33,6 +33,8 @@
         return "door";
       case "V":
         return "vine";
+      case "F":
+        return "ice";
     }
   }
 
@@ -63,20 +65,26 @@
     room[idx + 0] = type;
     room[idx + 1] = 0;
     room[idx + 2] = 0;
-    room[idx + 3] = 0;
-    room[idx + 4] = 0;
+    if (type !== "F") {
+      room[idx + 3] = 0;
+      room[idx + 4] = 0;
+    }
 
     room[idx + 10 + 0] = 0;
     room[idx + 10 + 1] = 0;
     room[idx + 10 + 2] = 0;
-    room[idx + 10 + 3] = 0;
-    room[idx + 10 + 4] = 0;
+    if (type !== "F") {
+      room[idx + 10 + 3] = 0;
+      room[idx + 10 + 4] = 0;
+    }
 
     room[idx + 20 + 0] = 0;
     room[idx + 20 + 1] = 0;
     room[idx + 20 + 2] = 0;
-    room[idx + 20 + 3] = 0;
-    room[idx + 20 + 4] = 0;
+    if (type !== "F") {
+      room[idx + 20 + 3] = 0;
+      room[idx + 20 + 4] = 0;
+    }
 
     if (type === "V") {
       room[idx + 30 + 0] = 0;
@@ -106,30 +114,39 @@
         usableChunks[chunkIdx].chunks[usableChunks[chunkIdx].index].data.split(
           ""
         );
-      room[idx + 0] = chunk[0];
-      room[idx + 1] = chunk[1];
-      room[idx + 2] = chunk[2];
-      room[idx + 3] = chunk[3];
-      room[idx + 4] = chunk[4];
 
-      room[idx + 10 + 0] = chunk[5];
-      room[idx + 10 + 1] = chunk[6];
-      room[idx + 10 + 2] = chunk[7];
-      room[idx + 10 + 3] = chunk[8];
-      room[idx + 10 + 4] = chunk[9];
+      let tileIdx = 0;
 
-      room[idx + 20 + 0] = chunk[10];
-      room[idx + 20 + 1] = chunk[11];
-      room[idx + 20 + 2] = chunk[12];
-      room[idx + 20 + 3] = chunk[13];
-      room[idx + 20 + 4] = chunk[14];
+      room[idx + 0] = chunk[tileIdx++];
+      room[idx + 1] = chunk[tileIdx++];
+      room[idx + 2] = chunk[tileIdx++];
+      if (value !== "F") {
+        room[idx + 3] = chunk[tileIdx++];
+        room[idx + 4] = chunk[tileIdx++];
+      }
+
+      room[idx + 10 + 0] = chunk[tileIdx++];
+      room[idx + 10 + 1] = chunk[tileIdx++];
+      room[idx + 10 + 2] = chunk[tileIdx++];
+      if (value !== "F") {
+        room[idx + 10 + 3] = chunk[tileIdx++];
+        room[idx + 10 + 4] = chunk[tileIdx++];
+      }
+
+      room[idx + 20 + 0] = chunk[tileIdx++];
+      room[idx + 20 + 1] = chunk[tileIdx++];
+      room[idx + 20 + 2] = chunk[tileIdx++];
+      if (value !== "F") {
+        room[idx + 20 + 3] = chunk[tileIdx++];
+        room[idx + 20 + 4] = chunk[tileIdx++];
+      }
 
       if (value == "V") {
-        room[idx + 30 + 0] = chunk[15];
-        room[idx + 30 + 1] = chunk[16];
-        room[idx + 30 + 2] = chunk[17];
-        room[idx + 30 + 3] = chunk[18];
-        room[idx + 30 + 4] = chunk[19];
+        room[idx + 30 + 0] = chunk[tileIdx++];
+        room[idx + 30 + 1] = chunk[tileIdx++];
+        room[idx + 30 + 2] = chunk[tileIdx++];
+        room[idx + 30 + 3] = chunk[tileIdx++];
+        room[idx + 30 + 4] = chunk[tileIdx++];
       }
       chunkIdx++;
     });
@@ -166,7 +183,9 @@
   function formatLevelString(levelStr: string) {
     let out = levelStr;
 
-    if (levelStr.length == 15 || levelStr.length == 20) {
+    if (levelStr.length == 9) {
+      out = levelStr.match(/.{3}/g).join("\n");
+    } else if (levelStr.length == 15 || levelStr.length == 20) {
       out = levelStr.match(/.{5}/g).join("\n");
     } else if (levelStr.length == 80) {
       out = levelStr.match(/.{10}/g).join("\n");
@@ -231,11 +250,15 @@
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     let idx = 0;
-    let numColumns = finalLevelFormat.length == 80 ? 10 : 5;
 
-    let rowWidth = 10;
-    if (typeAndRoomIndex.split(",")[0] != "rooms") {
-      rowWidth = 5;
+    let numColumns = 5;
+    switch (finalLevelFormat.length) {
+      case 80:
+        numColumns = 10;
+        break;
+      case 9:
+        numColumns = 3;
+        break;
     }
 
     for (const c of finalLevelFormat) {
@@ -255,8 +278,8 @@
         if (tileImages instanceof Function) {
           tileImages =
             tileImages({
-              above: finalLevelFormat.charAt(idx - rowWidth),
-              below: finalLevelFormat.charAt(idx + rowWidth),
+              above: finalLevelFormat.charAt(idx - numColumns),
+              below: finalLevelFormat.charAt(idx + numColumns),
               area: levels[areaIndex].name,
               roomType: currentLevel.type,
               roomFlags: currentLevel.flags ?? [],
@@ -296,14 +319,18 @@
         }
       } else if (chunkCodes.includes(c)) {
         let height = 3;
+        let width = 5;
         if (c == "V") {
           height = 4;
+        }
+        if (c == "F") {
+          width = 3;
         }
         drawTileLabel(
           x,
           y,
           getNameOfChunk(c),
-          rectWidth * 5,
+          rectWidth * width,
           rectHeight * height
         );
       } else {
