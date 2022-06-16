@@ -281,6 +281,7 @@
         let tileImages = tile.images ?? [];
 
         let tileContext: TileContext = {
+          here: c,
           above: finalLevelFormat.charAt(idx - numColumns),
           below: finalLevelFormat.charAt(idx + numColumns),
           area: levels[areaIndex].name,

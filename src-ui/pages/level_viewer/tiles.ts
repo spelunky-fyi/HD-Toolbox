@@ -41,6 +41,12 @@ function getTerrainFunc(alpha?: number) {
           alpha: alpha,
         },
       ];
+    } else if (ctx.area == "Mothership") {
+      if (ctx.here == "m") {
+        return [{ name: "alltiles", x: 64 * 5, y: 64 * 12, alpha: alpha }];
+      } else {
+        return [{ name: "alltiles", x: 64 * 19, y: 64 * 28, alpha: alpha }];
+      }
     } else if (ctx.area == "Hell / Yama") {
       return [{ name: "alltiles", x: 16 * 64, y: 9 * 64, alpha: alpha }];
     }
@@ -77,7 +83,12 @@ const config: { [key: string]: TileSpec } = {
   },
   m: {
     images: getTerrainFunc(),
-    label: "m",
+    label: function (ctx) {
+      if (ctx.area == "Mothership") {
+        return;
+      }
+      return "m";
+    },
   },
   "1": {
     images: getTerrainFunc(),
@@ -113,6 +124,19 @@ const config: { [key: string]: TileSpec } = {
   },
   z: {
     images: function (ctx) {
+      if (ctx.area == "Mothership") {
+        return [
+          {
+            name: "items",
+            x: 80 * 7,
+            y: 80 * 8,
+            w: 80,
+            h: 80,
+            offX: -10,
+            offY: -10,
+          },
+        ];
+      }
       // Beehive
       return [{ name: "alltiles", x: 64 * 24, y: 64 * 17, alpha: 0.5 }];
     },
@@ -165,6 +189,17 @@ const config: { [key: string]: TileSpec } = {
           return [{ name: "alltiles", x: 64 * 1, y: 64 * 16 }];
         }
         return [{ name: "alltiles", x: 64 * 2, y: 64 * 16 }];
+      } else if (ctx.area == "Mothership") {
+        return [
+          {
+            name: "items",
+            x: 80 * 5,
+            y: 80 * 8,
+            w: 80,
+            h: 80,
+            scale: 0.8,
+          },
+        ];
       } else if (ctx.area == "Hell / Yama") {
         if (ctx.below != "L") {
           return [{ name: "alltiles", x: 64 * 17, y: 64 * 8 }];
@@ -189,6 +224,19 @@ const config: { [key: string]: TileSpec } = {
           { name: "alltiles", x: 64 * 2, y: 64 * 16 },
           { name: "alltiles", x: 64 * 1, y: 64 * 16, offY: 64 },
         ];
+      } else if (ctx.area == "Mothership") {
+        return [
+          {
+            name: "monstersbig4",
+            x: 0,
+            y: 320 * 4,
+            w: 320,
+            h: 320,
+            offX: -((320 / 3) * 0.8),
+            offY: -((320 / 3) * 0.8),
+            scale: 0.8,
+          },
+        ];
       } else if (ctx.area == "Hell / Yama") {
         return [
           { name: "alltiles", x: 64 * 18, y: 64 * 8 },
@@ -197,7 +245,12 @@ const config: { [key: string]: TileSpec } = {
       }
       return [{ name: "alltiles", x: 128, y: 0 }];
     },
-    label: "Grow",
+    label: function (ctx) {
+      if (ctx.area == "Mothership") {
+        return;
+      }
+      return "Grow";
+    },
   },
   P: {
     images: [{ name: "alltiles", x: 192, y: 0 }],
@@ -287,6 +340,12 @@ const config: { [key: string]: TileSpec } = {
       // Idol
       return [{ name: "items", x: 960, y: 0, offX: 24, w: 80, h: 80 }];
     },
+  },
+  "*": {
+    images: [
+      { name: "items", x: 80 * 18, y: 80 * 3, offX: -10, w: 80, h: 80 },
+      { name: "alltiles", x: 64 * 19, y: 64 * 24, offY: 64 },
+    ],
   },
   c: {
     images: function (ctx) {
@@ -384,7 +443,7 @@ const config: { [key: string]: TileSpec } = {
             scale: 0.9,
           },
         ];
-      } else if (ctx.area == "Ice Caves") {
+      } else if (["Ice Caves", "Mothership"].includes(ctx.area)) {
         return [
           {
             name: "monstersbig5",
@@ -438,6 +497,8 @@ const config: { [key: string]: TileSpec } = {
         y = 256 * 2;
       } else if (["Ice Caves", "Wet Fur"].includes(ctx.area)) {
         y = 256 * 1;
+      } else if (["Mothership"].includes(ctx.area)) {
+        y = 256 * 3;
       } else if (ctx.area == "Hell / Yama") {
         y = 256 * 2;
       }
@@ -465,6 +526,11 @@ const config: { [key: string]: TileSpec } = {
         return [{ name: "monsters5", x: 0, y: 80 * 3, w: 80, h: 80 }];
       } else if (["Ice Caves", "Wet Fur"].includes(ctx.area)) {
         return [{ name: "monsters2", x: 0, y: 80 * 3, w: 80, h: 80 }];
+      } else if (ctx.area == "Mothership") {
+        return [
+          { name: "monsters", x: 0, y: 80 * 3, w: 40, h: 80 },
+          { name: "monsters2", x: 0 + 40, y: 80 * 3, w: 40, h: 80, offX: 40 },
+        ];
       }
       return [{ name: "monsters5", x: 0, y: 0, w: 80, h: 80 }];
     },
@@ -489,6 +555,18 @@ const config: { [key: string]: TileSpec } = {
   l: {
     images: [
       { name: "items", x: 1200, y: 0, w: 80, h: 80, offX: -8, offY: -8 },
+    ],
+  },
+  "~": {
+    images: [
+      {
+        name: "items",
+        x: 80 * 2,
+        y: 80 * 4,
+        w: 80,
+        h: 80,
+        scale: 0.8,
+      },
     ],
   },
   S: { label: "Item" },

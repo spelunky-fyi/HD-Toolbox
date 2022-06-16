@@ -39,6 +39,7 @@ export interface LevelConfig {
 }
 
 export interface TileContext {
+  here: string;
   above: string;
   below: string;
   area: string;
