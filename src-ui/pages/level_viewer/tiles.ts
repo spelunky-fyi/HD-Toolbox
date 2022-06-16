@@ -16,10 +16,12 @@ interface ImageSpec {
 type ImagesSpec = ImageSpec[] | ((ctx: TileContext) => ImageSpec[]);
 type LabelSpec = string | ((ctx: TileContext) => string);
 
-export interface TileSpec {
+type TileSpec = {
   images?: ImagesSpec;
   label?: LabelSpec;
-}
+};
+
+type TileSpecDyn = ((ctx: TileContext) => TileSpec) | TileSpec;
 
 function getTerrainFunc(alpha?: number) {
   return (ctx): ImageSpec[] => {
@@ -78,7 +80,7 @@ function getTerrainSpikesFunc(alpha?: number) {
   };
 }
 
-const config: { [key: string]: TileSpec } = {
+const config: { [key: string]: TileSpecDyn } = {
   ".": {
     images: getTerrainFunc(),
     label: ".",
@@ -344,10 +346,17 @@ const config: { [key: string]: TileSpec } = {
     },
   },
   "*": {
-    images: [
-      { name: "items", x: 80 * 18, y: 80 * 3, offX: -10, w: 80, h: 80 },
-      { name: "alltiles", x: 64 * 19, y: 64 * 24, offY: 64 },
-    ],
+    images: function (ctx) {
+      if (ctx.area == "Hell / Yama") {
+        return [{ name: "alltiles", x: 64 * 1, y: 64 * 9 }];
+      }
+
+      // Plasma Cannon
+      return [
+        { name: "items", x: 80 * 18, y: 80 * 3, offX: -10, w: 80, h: 80 },
+        { name: "alltiles", x: 64 * 19, y: 64 * 24, offY: 64 },
+      ];
+    },
   },
   c: {
     images: function (ctx) {
@@ -394,7 +403,12 @@ const config: { [key: string]: TileSpec } = {
     },
   },
   "-": {
-    images: [{ name: "alltiles", x: 64 * 0, y: 64 * 8 }],
+    images: function (ctx) {
+      if (ctx.area == "Hell / Yama") {
+        return null;
+      }
+      return [{ name: "alltiles", x: 64 * 0, y: 64 * 8 }];
+    },
   },
   R: {
     images: [{ name: "items", x: 480, y: 0, w: 80, h: 80, offX: -8 }],
@@ -475,17 +489,22 @@ const config: { [key: string]: TileSpec } = {
     },
   },
   Y: {
-    images: [
-      {
-        name: "monstersbig3",
-        x: 0,
-        y: 0,
-        w: 160,
-        h: 160,
-        offX: -10,
-        offY: -30,
-      },
-    ],
+    images: function (ctx) {
+      if (ctx.area == "Hell / Yama") {
+        return null;
+      }
+      return [
+        {
+          name: "monstersbig3",
+          x: 0,
+          y: 0,
+          w: 160,
+          h: 160,
+          offX: -10,
+          offY: -30,
+        },
+      ];
+    },
   },
   "9": {
     images: function (ctx) {
@@ -644,16 +663,23 @@ const config: { [key: string]: TileSpec } = {
       ];
     },
   },
-  r: {
-    images: function (ctx) {
-      if (ctx.area == "Hell / Yama") {
-        // Hell Bricks
-        return [{ name: "alltiles", x: 16 * 64, y: 17 * 64, alpha: 0.5 }];
-      }
+  r: function (ctx) {
+    // This is used as a chunk in this area.
+    if (ctx.area == "Temple / CoG") {
+      return;
+    }
 
-      return [{ name: "alltiles", x: 1536, y: 64 }];
-    },
-    label: "50%",
+    return {
+      images: function (ctx) {
+        if (ctx.area == "Hell / Yama") {
+          // Hell Bricks
+          return [{ name: "alltiles", x: 16 * 64, y: 17 * 64, alpha: 0.5 }];
+        }
+
+        return [{ name: "alltiles", x: 1536, y: 64 }];
+      },
+      label: "50%",
+    };
   },
   s: {
     images: getTerrainSpikesFunc(1),

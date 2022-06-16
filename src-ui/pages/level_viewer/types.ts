@@ -25,6 +25,7 @@ export interface Chunks {
   air?: Chunk[];
   vine?: Chunk[];
   ice?: Chunk[];
+  temple?: Chunk[];
 }
 
 export interface Level {

@@ -16,7 +16,6 @@
 
   const version = writable("");
   getVersion().then((data) => {
-    console.log(data);
     version.set(data);
   });
 

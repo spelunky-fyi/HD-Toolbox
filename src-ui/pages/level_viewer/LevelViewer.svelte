@@ -21,7 +21,8 @@
   let rectHeight = 64;
   let rectWidth = 64;
 
-  const chunkCodes = ["5", "6", "8", "V", "F"];
+  const baseChunkCodes = ["5", "6", "8", "V", "F"];
+  let chunkCodes = [...baseChunkCodes];
 
   function getNameOfChunk(tileCode) {
     switch (tileCode) {
@@ -35,10 +36,18 @@
         return "vine";
       case "F":
         return "ice";
+      case "r":
+        return "temple";
     }
   }
 
   function initChunks() {
+    // Temple re-uses r tilecode for chunks. :(
+    if (levels[areaIndex].name == "Temple / CoG") {
+      chunkCodes = ["r", ...baseChunkCodes];
+    } else {
+      chunkCodes = [...baseChunkCodes];
+    }
     usableChunks = [];
     let room = currentLevel.data.split("");
 
@@ -67,7 +76,9 @@
     room[idx + 2] = 0;
     if (type !== "F") {
       room[idx + 3] = 0;
-      room[idx + 4] = 0;
+      if (type !== "r") {
+        room[idx + 4] = 0;
+      }
     }
 
     room[idx + 10 + 0] = 0;
@@ -75,7 +86,9 @@
     room[idx + 10 + 2] = 0;
     if (type !== "F") {
       room[idx + 10 + 3] = 0;
-      room[idx + 10 + 4] = 0;
+      if (type !== "r") {
+        room[idx + 10 + 4] = 0;
+      }
     }
 
     room[idx + 20 + 0] = 0;
@@ -83,7 +96,9 @@
     room[idx + 20 + 2] = 0;
     if (type !== "F") {
       room[idx + 20 + 3] = 0;
-      room[idx + 20 + 4] = 0;
+      if (type !== "r") {
+        room[idx + 20 + 4] = 0;
+      }
     }
 
     if (type === "V") {
@@ -122,7 +137,9 @@
       room[idx + 2] = chunk[tileIdx++];
       if (value !== "F") {
         room[idx + 3] = chunk[tileIdx++];
-        room[idx + 4] = chunk[tileIdx++];
+        if (value !== "r") {
+          room[idx + 4] = chunk[tileIdx++];
+        }
       }
 
       room[idx + 10 + 0] = chunk[tileIdx++];
@@ -130,7 +147,9 @@
       room[idx + 10 + 2] = chunk[tileIdx++];
       if (value !== "F") {
         room[idx + 10 + 3] = chunk[tileIdx++];
-        room[idx + 10 + 4] = chunk[tileIdx++];
+        if (value !== "r") {
+          room[idx + 10 + 4] = chunk[tileIdx++];
+        }
       }
 
       room[idx + 20 + 0] = chunk[tileIdx++];
@@ -138,7 +157,9 @@
       room[idx + 20 + 2] = chunk[tileIdx++];
       if (value !== "F") {
         room[idx + 20 + 3] = chunk[tileIdx++];
-        room[idx + 20 + 4] = chunk[tileIdx++];
+        if (value !== "r") {
+          room[idx + 20 + 4] = chunk[tileIdx++];
+        }
       }
 
       if (value == "V") {
@@ -185,6 +206,8 @@
 
     if (levelStr.length == 9) {
       out = levelStr.match(/.{3}/g).join("\n");
+    } else if (levelStr.length == 12) {
+      out = levelStr.match(/.{4}/g).join("\n");
     } else if (levelStr.length == 15 || levelStr.length == 20) {
       out = levelStr.match(/.{5}/g).join("\n");
     } else if (levelStr.length == 80 || levelStr.length == 79) {
@@ -260,6 +283,9 @@
       case 80:
         numColumns = 10;
         break;
+      case 12:
+        numColumns = 4;
+        break;
       case 9:
         numColumns = 3;
         break;
@@ -277,17 +303,20 @@
       let y = row * rectHeight;
 
       let tile = tiles[c];
+      let tileContext: TileContext = {
+        here: c,
+        above: finalLevelFormat.charAt(idx - numColumns),
+        below: finalLevelFormat.charAt(idx + numColumns),
+        area: levels[areaIndex].name,
+        roomType: currentLevel.type,
+        roomFlags: currentLevel.flags ?? [],
+      };
+      if (tile instanceof Function) {
+        tile = tile(tileContext);
+      }
+
       if (tile) {
         let tileImages = tile.images ?? [];
-
-        let tileContext: TileContext = {
-          here: c,
-          above: finalLevelFormat.charAt(idx - numColumns),
-          below: finalLevelFormat.charAt(idx + numColumns),
-          area: levels[areaIndex].name,
-          roomType: currentLevel.type,
-          roomFlags: currentLevel.flags ?? [],
-        };
 
         if (tileImages instanceof Function) {
           tileImages = tileImages(tileContext) ?? [];
@@ -333,6 +362,9 @@
         let width = 5;
         if (c == "V") {
           height = 4;
+        }
+        if (c == "r") {
+          width = 4;
         }
         if (c == "F") {
           width = 3;

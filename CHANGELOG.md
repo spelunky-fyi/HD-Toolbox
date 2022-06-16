@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Display Room Type on room views
   - Support Room group notes that apply to all rooms in a grouping
   - Add support for 79 length level to display bugged levels
+- Version in tile so people can easily tell which version they're using.
 
 ### Fixed
 
