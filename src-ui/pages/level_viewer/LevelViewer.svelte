@@ -187,8 +187,11 @@
       out = levelStr.match(/.{3}/g).join("\n");
     } else if (levelStr.length == 15 || levelStr.length == 20) {
       out = levelStr.match(/.{5}/g).join("\n");
-    } else if (levelStr.length == 80) {
+    } else if (levelStr.length == 80 || levelStr.length == 79) {
       out = levelStr.match(/.{10}/g).join("\n");
+      if (out.length == 76) {
+        out = out.concat("\n", levelStr.slice(70));
+      }
     }
 
     return out;
@@ -253,6 +256,7 @@
 
     let numColumns = 5;
     switch (finalLevelFormat.length) {
+      case 79:
       case 80:
         numColumns = 10;
         break;
@@ -399,6 +403,11 @@
       <h4>
         {currentRoomType.name}
       </h4>
+      {#if currentRoomType.notes}
+        <div style="padding-bottom: 10px;">
+          <i>{currentRoomType.notes}</i>
+        </div>
+      {/if}
       <select
         bind:value={typeAndRoomIndex}
         on:change={updateRoom}
@@ -452,10 +461,12 @@
       </div>
     {/if}
 
-    <div style="padding-bottom: 10px;">
-      <h4>Room Type</h4>
-      {RoomType[currentLevel.type]}
-    </div>
+    {#if currentLevel.type}
+      <div style="padding-bottom: 10px;">
+        <h4>Room Type</h4>
+        {RoomType[currentLevel.type]} ({currentLevel.type})
+      </div>
+    {/if}
 
     {#if currentLevel.notes}
       <div style="padding-bottom: 10px;">

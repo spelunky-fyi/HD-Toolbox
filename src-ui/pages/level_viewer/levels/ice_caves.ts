@@ -168,6 +168,9 @@ const config: Level = {
     },
     {
       name: "Side",
+      notes:
+        "There's only a 50% chance these rooms are used for SIDE. Otherwise the Path / Drop / Side pool of rooms instead.",
+
       rooms: [
         {
           name: "Room 1",

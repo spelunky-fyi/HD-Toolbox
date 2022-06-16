@@ -401,6 +401,19 @@ const config: { [key: string]: TileSpec } = {
       ];
     },
   },
+  Y: {
+    images: [
+      {
+        name: "monstersbig3",
+        x: 0,
+        y: 0,
+        w: 160,
+        h: 160,
+        offX: -10,
+        offY: -30,
+      },
+    ],
+  },
   "9": {
     images: function (ctx) {
       let x = 0;
@@ -438,7 +451,7 @@ const config: { [key: string]: TileSpec } = {
     images: function (ctx) {
       if (["Jungle", "Black Market", "Haunted Castle"].includes(ctx.area)) {
         return [{ name: "monsters5", x: 0, y: 80 * 3, w: 80, h: 80 }];
-      } else if (ctx.area == "Ice Caves") {
+      } else if (["Ice Caves", "Wet Fur"].includes(ctx.area)) {
         return [{ name: "monsters2", x: 0, y: 80 * 3, w: 80, h: 80 }];
       }
       return [{ name: "monsters5", x: 0, y: 0, w: 80, h: 80 }];
