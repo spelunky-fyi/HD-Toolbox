@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Ice Caves Rooms/Chunks
   - Wet Fur Rooms/Chunks
   - Mothership Rooms/Chunks
+  - Olmec's Lair Rooms/Chunks
   - Display Room Type on room views
   - Support Room group notes that apply to all rooms in a grouping
   - Add support for 79 length level to display bugged levels

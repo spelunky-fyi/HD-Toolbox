@@ -47,6 +47,8 @@ function getTerrainFunc(alpha?: number) {
       } else {
         return [{ name: "alltiles", x: 64 * 19, y: 64 * 28, alpha: alpha }];
       }
+    } else if (["Temple / CoG", "Olmec's Lair"].includes(ctx.area)) {
+      return [{ name: "alltiles", x: 64 * 24, y: 64 * 1, alpha: alpha }];
     } else if (ctx.area == "Hell / Yama") {
       return [{ name: "alltiles", x: 16 * 64, y: 9 * 64, alpha: alpha }];
     }
