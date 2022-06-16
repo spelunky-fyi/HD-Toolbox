@@ -131,16 +131,15 @@ const config: { [key: string]: TileSpecDyn } = {
   },
   e: {
     images: function (ctx) {
-      // Beehive
-      return [{ name: "alltiles", x: 64 * 24, y: 64 * 17 }];
+      if (ctx.area == "Jungle") {
+        // Beehive
+        return [{ name: "alltiles", x: 64 * 24, y: 64 * 17 }];
+      }
+      return;
     },
   },
   z: {
     images: function (ctx) {
-      if (ctx.roomFlags.includes(RoomFlags.CoG)) {
-        return;
-      }
-
       if (ctx.area == "Mothership") {
         return [
           {
@@ -155,7 +154,11 @@ const config: { [key: string]: TileSpecDyn } = {
         ];
       }
       // Beehive
-      return [{ name: "alltiles", x: 64 * 24, y: 64 * 17, alpha: 0.5 }];
+      if (ctx.area == "Jungle") {
+        return [{ name: "alltiles", x: 64 * 24, y: 64 * 17, alpha: 0.5 }];
+      }
+
+      return;
     },
     label: function (ctx) {
       if (ctx.roomFlags.includes(RoomFlags.CoG)) {
@@ -301,7 +304,7 @@ const config: { [key: string]: TileSpecDyn } = {
   v: {
     images: function (ctx) {
       // Wood block in mines
-      if (ctx.area == "Mines") {
+      if (["Mines", "Tutorial"].includes(ctx.area)) {
         return [{ name: "alltiles", x: 1536, y: 1600 }];
       }
 
@@ -389,7 +392,12 @@ const config: { [key: string]: TileSpecDyn } = {
     },
   },
   "#": {
-    images: [{ name: "alltiles", x: 448, y: 384 }],
+    images: function (ctx) {
+      if (ctx.roomFlags.includes(RoomFlags.CoG)) {
+        return [{ name: "items", x: 80 * 5, y: 80 * 9, w: 80, h: 80 }];
+      }
+      return [{ name: "alltiles", x: 448, y: 384 }];
+    },
   },
   "4": {
     images: function (ctx) {
@@ -678,6 +686,11 @@ const config: { [key: string]: TileSpecDyn } = {
         // Kali Altar
         return null;
       }
+
+      if (ctx.area == "Tutorial") {
+        return null;
+      }
+
       // Hell Bricks
       return [{ name: "alltiles", x: 16 * 64, y: 17 * 64 }];
     },
@@ -688,13 +701,27 @@ const config: { [key: string]: TileSpecDyn } = {
     },
   },
   i: {
-    images: [{ name: "alltiles", x: 64 * 6, y: 64 * 11 }],
+    images: function (ctx) {
+      if (ctx.area == "Jungle") {
+        // Firepot+terrain+torch
+        return;
+      }
+      return [{ name: "alltiles", x: 64 * 6, y: 64 * 11 }];
+    },
   },
   j: {
     label: "n/a",
   },
   y: {
     images: function (ctx) {
+      if (ctx.area == "Temple / CoG") {
+        return [
+          // Bricks
+          { name: "alltiles", x: 64 * 24, y: 64 * 1 },
+          // Rubies
+          { name: "items", x: 480, y: 0, w: 80, h: 80, offX: -8 },
+        ];
+      }
       return [
         // Hell Bricks
         { name: "alltiles", x: 16 * 64, y: 17 * 64 },
@@ -736,6 +763,9 @@ const config: { [key: string]: TileSpecDyn } = {
     images: function (ctx) {
       if (ctx.area == "Worm") {
         return [{ name: "alltiles", x: 64 * 20, y: 64 * 15 }];
+      }
+      if (ctx.area == "Temple / CoG") {
+        return [{ name: "alltiles", x: 512, y: 128 }];
       }
       return [{ name: "alltiles", x: 1536, y: 1600 }];
     },

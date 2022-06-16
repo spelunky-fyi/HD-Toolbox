@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Wet Fur Rooms/Chunks
   - Mothership Rooms/Chunks
   - Olmec's Lair Rooms/Chunks
+  - Temple/CoG Rooms/Chunks
   - Display Room Type on room views
   - Support Room group notes that apply to all rooms in a grouping
   - Add support for 79 length level to display bugged levels
@@ -27,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed Typo in Worm room and Crysknife tilecode. Thanks Spencer!
   - Updated all SIDE rooms in worm to explain SIDE rooms are unused in worm.
   - Typo for double/triple hired hand chances
+  - Wood blocks in Tutorial instead of terrain
 
 ## [0.3.2] - 2022-06-12
 
