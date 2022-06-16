@@ -10,6 +10,7 @@ export interface Room {
 
 export interface RoomKind {
   name: string;
+  notes?: string;
   rooms: Room[];
 }
 
@@ -35,4 +36,12 @@ export interface LevelConfig {
   name: string;
   data: Level;
   bg: string;
+}
+
+export interface TileContext {
+  above: string;
+  below: string;
+  area: string;
+  roomType: RoomType;
+  roomFlags: RoomFlags[];
 }

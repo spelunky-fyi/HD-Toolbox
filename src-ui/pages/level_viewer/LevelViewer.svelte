@@ -6,7 +6,7 @@
   import tiles from "@hdt/pages/level_viewer/tiles";
   import { images } from "@hdt/images";
   import { RoomFlags, RoomType } from "./enums";
-  import type { Room } from "./types";
+  import type { Room, TileContext } from "./types";
 
   let canvas;
   let ctx;
@@ -275,17 +275,23 @@
       let tile = tiles[c];
       if (tile) {
         let tileImages = tile.images ?? [];
+
+        let tileContext: TileContext = {
+          above: finalLevelFormat.charAt(idx - numColumns),
+          below: finalLevelFormat.charAt(idx + numColumns),
+          area: levels[areaIndex].name,
+          roomType: currentLevel.type,
+          roomFlags: currentLevel.flags ?? [],
+        };
+
         if (tileImages instanceof Function) {
-          tileImages =
-            tileImages({
-              above: finalLevelFormat.charAt(idx - numColumns),
-              below: finalLevelFormat.charAt(idx + numColumns),
-              area: levels[areaIndex].name,
-              roomType: currentLevel.type,
-              roomFlags: currentLevel.flags ?? [],
-            }) ?? [];
+          tileImages = tileImages(tileContext) ?? [];
         }
+
         let label = tile.label;
+        if (label instanceof Function) {
+          label = label(tileContext);
+        }
 
         if (!tileImages.length && !label) {
           drawTileLabel(x, y, c);

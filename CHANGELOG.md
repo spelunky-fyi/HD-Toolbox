@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Level Viewer
   - Black Market Rooms/Chunks
   - Haunted Castle Rooms/Chunks
+  - Ice Caves Rooms/Chunks
   - Display Room Type on room views
 
 ### Fixed
@@ -19,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Level Viewer
   - Fixed Typo in Worm room and Crysknife tilecode. Thanks Spencer!
   - Updated all SIDE rooms in worm to explain SIDE rooms are unused in worm.
+  - Typo for double/triple hired hand chances
 
 ## [0.3.2] - 2022-06-12
 

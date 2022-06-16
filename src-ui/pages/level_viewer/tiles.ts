@@ -1,4 +1,5 @@
 import { RoomFlags, RoomType } from "./enums";
+import type { TileContext } from "./types";
 
 interface ImageSpec {
   name: string;
@@ -9,6 +10,15 @@ interface ImageSpec {
   h?: number;
   offX?: number;
   offY?: number;
+  scale?: number;
+}
+
+type ImagesSpec = ImageSpec[] | ((ctx: TileContext) => ImageSpec[]);
+type LabelSpec = string | ((ctx: TileContext) => string);
+
+export interface TileSpec {
+  images?: ImagesSpec;
+  label?: LabelSpec;
 }
 
 function getTerrainFunc(alpha?: number) {
@@ -17,6 +27,8 @@ function getTerrainFunc(alpha?: number) {
       return [{ name: "alltiles", x: 512, y: 128, alpha: alpha }];
     } else if (ctx.area == "Worm") {
       return [{ name: "alltiles", x: 0, y: 17 * 64, alpha: alpha }];
+    } else if (["Ice Caves", "Wet Fur"].includes(ctx.area)) {
+      return [{ name: "alltiles", x: 64 * 16, y: 64 * 1, alpha: alpha }];
     } else if (ctx.area == "Hell / Yama") {
       return [{ name: "alltiles", x: 16 * 64, y: 9 * 64, alpha: alpha }];
     }
@@ -32,6 +44,8 @@ function getTerrainSpikesFunc(alpha?: number) {
       return [{ name: "alltiles", x: 64 * 13, y: 64 * 6, alpha: alpha }];
     } else if (ctx.area == "Worm") {
       return [{ name: "alltiles", x: 64 * 5, y: 64 * 22, alpha: alpha }];
+    } else if (["Ice Caves", "Wet Fur"].includes(ctx.area)) {
+      return [{ name: "alltiles", x: 64 * 21, y: 64 * 6, alpha: alpha }];
     } else if (ctx.area == "Hell / Yama") {
       if (ctx.roomFlags.includes(RoomFlags.VLADS)) {
         return [{ name: "alltiles", x: 64 * 21, y: 64 * 23, alpha: alpha }];
@@ -44,10 +58,14 @@ function getTerrainSpikesFunc(alpha?: number) {
   };
 }
 
-export default {
+const config: { [key: string]: TileSpec } = {
   ".": {
     images: getTerrainFunc(),
     label: ".",
+  },
+  m: {
+    images: getTerrainFunc(),
+    label: "m",
   },
   "1": {
     images: getTerrainFunc(),
@@ -92,13 +110,36 @@ export default {
     label: "q",
   },
   T: {
-    images: [
-      { name: "alltiles", x: 64 * 0, y: 64 * 15 },
-      { name: "alltiles", x: 64 * 0, y: 64 * 14, offY: -64 },
-      { name: "alltiles", x: 64 * 3, y: 64 * 11, offY: -64 - 32 },
-    ],
+    images: function (ctx) {
+      if (ctx.area == "Ice Caves") {
+        return [
+          {
+            name: "doors",
+            x: 0,
+            y: 256 * 3,
+            w: 256,
+            h: 256,
+            offX: -64 - 32,
+            offY: -128 + 44,
+          },
+          { name: "alltiles", x: 64 * 19, y: 64 * 28, offY: 64 },
+        ];
+      }
 
-    label: "Grow",
+      // Tree
+      return [
+        { name: "alltiles", x: 64 * 0, y: 64 * 15 },
+        { name: "alltiles", x: 64 * 0, y: 64 * 14, offY: -64 },
+        { name: "alltiles", x: 64 * 3, y: 64 * 11, offY: -64 - 32 },
+      ];
+    },
+    label: function (ctx) {
+      if (ctx.area == "Ice Caves") {
+        return;
+      }
+
+      return "Grow";
+    },
   },
   L: {
     images: function (ctx) {
@@ -184,6 +225,8 @@ export default {
     images: function (ctx) {
       if (ctx.area == "Hell / Yama") {
         return [{ name: "alltiles", x: 16 * 64, y: 17 * 64 }];
+      } else if (ctx.area == "Ice Caves") {
+        return [{ name: "alltiles", x: 64 * 19, y: 64 * 28 }];
       }
       return [{ name: "alltiles", x: 1536, y: 1600 }];
     },
@@ -256,10 +299,29 @@ export default {
     },
   },
   M: {
-    images: [
-      { name: "alltiles", x: 0, y: 128 },
-      { name: "items", x: 1680, y: 480, w: 80, h: 80 },
-    ],
+    images: function (ctx) {
+      let images = getTerrainFunc(1)(ctx);
+
+      if (ctx.area == "Mines") {
+        // Mattock
+        images.push({ name: "items", x: 1680, y: 480, w: 80, h: 80 });
+      } else if (ctx.area == "Ice Caves") {
+        // Jetpack
+        images.push({
+          name: "items",
+          x: 80 * 13,
+          y: 80 * 1,
+          w: 80,
+          h: 80,
+          offX: -10,
+          offY: -10,
+        });
+      }
+      return images;
+    },
+  },
+  "-": {
+    images: [{ name: "alltiles", x: 64 * 0, y: 64 * 8 }],
   },
   R: {
     images: [{ name: "items", x: 480, y: 0, w: 80, h: 80, offX: -8 }],
@@ -278,6 +340,9 @@ export default {
   },
   g: {
     images: [{ name: "coffin", x: 0, y: 0, w: 128, h: 128, offY: -64 }],
+  },
+  O: {
+    images: [{ name: "icesmallbg", x: 0, y: 256 * 2, w: 192, h: 256 }],
   },
   X: {
     images: function (ctx) {
@@ -307,7 +372,21 @@ export default {
             scale: 0.9,
           },
         ];
+      } else if (ctx.area == "Ice Caves") {
+        return [
+          {
+            name: "monstersbig5",
+            x: 0,
+            y: 0,
+            w: 160,
+            h: 160,
+            offX: -11,
+            offY: -5,
+            scale: 0.9,
+          },
+        ];
       }
+
       return [
         {
           name: "monstersbig2",
@@ -332,6 +411,8 @@ export default {
       } else if (ctx.area == "Worm") {
         x = 256 * 2;
         y = 256 * 2;
+      } else if (["Ice Caves", "Wet Fur"].includes(ctx.area)) {
+        y = 256 * 1;
       } else if (ctx.area == "Hell / Yama") {
         y = 256 * 2;
       }
@@ -357,12 +438,20 @@ export default {
     images: function (ctx) {
       if (["Jungle", "Black Market", "Haunted Castle"].includes(ctx.area)) {
         return [{ name: "monsters5", x: 0, y: 80 * 3, w: 80, h: 80 }];
+      } else if (ctx.area == "Ice Caves") {
+        return [{ name: "monsters2", x: 0, y: 80 * 3, w: 80, h: 80 }];
       }
       return [{ name: "monsters5", x: 0, y: 0, w: 80, h: 80 }];
     },
   },
   "+": {
-    images: [{ name: "alltiles", x: 256, y: 320 }],
+    images: function (ctx) {
+      if (ctx.area == "Ice Caves") {
+        return [{ name: "alltiles", x: 64 * 19, y: 64 * 28 }];
+      }
+      // Wood Background
+      return [{ name: "alltiles", x: 256, y: 320 }];
+    },
   },
   "7": {
     images: getTerrainSpikesFunc(0.5),
@@ -434,6 +523,12 @@ export default {
       return [{ name: "alltiles", x: 15 * 64, y: 5 * 64 }];
     },
   },
+  i: {
+    images: [{ name: "alltiles", x: 64 * 6, y: 64 * 11 }],
+  },
+  j: {
+    label: "n/a",
+  },
   y: {
     images: function (ctx) {
       return [
@@ -481,3 +576,5 @@ export default {
     label: "Spout",
   },
 };
+
+export default config;

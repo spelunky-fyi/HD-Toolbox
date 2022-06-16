@@ -914,13 +914,13 @@ const config: Level = {
         },
         {
           name: "Right Facing - Double Hired Hand",
-          notes: "1/100",
+          notes: "1/20",
           data: "11111111111111..111111..22...111.l0002.....000W0.0...00000k0..K0S0S000bbbbbbbbbb",
           type: RoomType.SHOP_RIGHT_FACING,
         },
         {
           name: "Right Facing - Triple Hired Hand",
-          notes: "1/20",
+          notes: "1/100",
           data: "11111111111111..111111..22...111.l0002.....000W0.0...00000k0..K0SSS000bbbbbbbbbb",
           type: RoomType.SHOP_RIGHT_FACING,
         },
@@ -941,13 +941,13 @@ const config: Level = {
         },
         {
           name: "Left Facing - Double Hired Hand",
-          notes: "1/100",
+          notes: "1/20",
           data: "11111111111111..11111...22..11..2000l.110.W0000...0k00000...000S0S0K..bbbbbbbbbb",
           type: RoomType.SHOP_LEFT_FACING,
         },
         {
           name: "Left Facing - Triple Hired Hand",
-          notes: "1/20",
+          notes: "1/100",
           data: "11111111111111..11111...22..11..2000l.110.W0000...0k00000...000SSS0K..bbbbbbbbbb",
           type: RoomType.SHOP_LEFT_FACING,
         },
