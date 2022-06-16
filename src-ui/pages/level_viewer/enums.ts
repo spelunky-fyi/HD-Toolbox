@@ -123,4 +123,5 @@ export enum RoomFlags {
   YAMA = 9,
   TIKI_VILLAGE = 10,
   BEEHIVE = 11,
+  CoG = 12,
 }

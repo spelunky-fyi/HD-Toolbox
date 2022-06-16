@@ -50,7 +50,11 @@ function getTerrainFunc(alpha?: number) {
         return [{ name: "alltiles", x: 64 * 19, y: 64 * 28, alpha: alpha }];
       }
     } else if (["Temple / CoG", "Olmec's Lair"].includes(ctx.area)) {
-      return [{ name: "alltiles", x: 64 * 24, y: 64 * 1, alpha: alpha }];
+      if (ctx.roomFlags.includes(RoomFlags.CoG)) {
+        return [{ name: "alltiles", x: 64 * 8, y: 64 * 9, alpha: alpha }];
+      } else {
+        return [{ name: "alltiles", x: 64 * 24, y: 64 * 1, alpha: alpha }];
+      }
     } else if (ctx.area == "Hell / Yama") {
       return [{ name: "alltiles", x: 16 * 64, y: 9 * 64, alpha: alpha }];
     }
@@ -105,7 +109,12 @@ const config: { [key: string]: TileSpecDyn } = {
     images: function (ctx) {
       let imgs = getTerrainFunc(0.5)(ctx);
       imgs[0].w = 32;
-      imgs.push({ name: "water", x: 64 + 32, y: 0, w: 32, offX: 32 });
+
+      if (["Hell / Yama", "Temple / CoG"].includes(ctx.area)) {
+        imgs.push({ name: "water", x: 64 * 3, y: 0, w: 32, offX: 32 });
+      } else {
+        imgs.push({ name: "water", x: 64 + 32, y: 0, w: 32, offX: 32 });
+      }
       return imgs;
     },
     label: "t/w",
@@ -128,6 +137,10 @@ const config: { [key: string]: TileSpecDyn } = {
   },
   z: {
     images: function (ctx) {
+      if (ctx.roomFlags.includes(RoomFlags.CoG)) {
+        return;
+      }
+
       if (ctx.area == "Mothership") {
         return [
           {
@@ -143,6 +156,12 @@ const config: { [key: string]: TileSpecDyn } = {
       }
       // Beehive
       return [{ name: "alltiles", x: 64 * 24, y: 64 * 17, alpha: 0.5 }];
+    },
+    label: function (ctx) {
+      if (ctx.roomFlags.includes(RoomFlags.CoG)) {
+        return "Deco";
+      }
+      return;
     },
   },
   q: {
@@ -376,6 +395,8 @@ const config: { [key: string]: TileSpecDyn } = {
     images: function (ctx) {
       if (ctx.roomFlags.includes(RoomFlags.VLADS)) {
         return [{ name: "alltiles", x: 64 * 16, y: 64 * 16 }];
+      } else if (ctx.roomFlags.includes(RoomFlags.CoG)) {
+        return [{ name: "alltiles", x: 64 * 8, y: 64 * 8 }];
       }
       return [{ name: "alltiles", x: 0, y: 0 }];
     },
@@ -493,6 +514,19 @@ const config: { [key: string]: TileSpecDyn } = {
       if (ctx.area == "Hell / Yama") {
         return null;
       }
+      if (ctx.area == "Temple / CoG") {
+        return [
+          {
+            name: "monstersbig",
+            x: 0,
+            y: 0,
+            w: 160,
+            h: 160,
+            offY: -60,
+            scale: 0.8,
+          },
+        ];
+      }
       return [
         {
           name: "monstersbig3",
@@ -520,6 +554,12 @@ const config: { [key: string]: TileSpecDyn } = {
         y = 256 * 1;
       } else if (["Mothership"].includes(ctx.area)) {
         y = 256 * 3;
+      } else if (ctx.area == "Temple / CoG") {
+        x = 256 * 2;
+        y = 256 * 1;
+        if (ctx.roomFlags.includes(RoomFlags.CoG)) {
+          y = 256 * 3;
+        }
       } else if (ctx.area == "Hell / Yama") {
         y = 256 * 2;
       }
@@ -613,7 +653,7 @@ const config: { [key: string]: TileSpecDyn } = {
   },
   w: {
     images: function (ctx) {
-      if (ctx.area == "Hell / Yama") {
+      if (["Hell / Yama", "Temple / CoG"].includes(ctx.area)) {
         if (!["w", "v"].includes(ctx.above)) {
           return [{ name: "water", x: 64 * 3, y: 128 }];
         }
