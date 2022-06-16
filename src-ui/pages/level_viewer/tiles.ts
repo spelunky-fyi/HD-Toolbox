@@ -27,8 +27,20 @@ function getTerrainFunc(alpha?: number) {
       return [{ name: "alltiles", x: 512, y: 128, alpha: alpha }];
     } else if (ctx.area == "Worm") {
       return [{ name: "alltiles", x: 0, y: 17 * 64, alpha: alpha }];
-    } else if (["Ice Caves", "Wet Fur"].includes(ctx.area)) {
+    } else if (["Ice Caves"].includes(ctx.area)) {
       return [{ name: "alltiles", x: 64 * 16, y: 64 * 1, alpha: alpha }];
+    } else if (["Wet Fur"].includes(ctx.area)) {
+      return [
+        { name: "alltiles", x: 64 * 6, y: 64 * 11, w: 50, alpha: alpha },
+        {
+          name: "alltiles",
+          x: 64 * 16 + 50,
+          y: 64 * 1,
+          w: 16,
+          offX: 50,
+          alpha: alpha,
+        },
+      ];
     } else if (ctx.area == "Hell / Yama") {
       return [{ name: "alltiles", x: 16 * 64, y: 9 * 64, alpha: alpha }];
     }
