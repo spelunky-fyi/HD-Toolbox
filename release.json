@@ -1,11 +1,11 @@
 {
-  "version": "v0.3.2",
-  "notes": "Level Viewer - Finished Jungle / Added Worm",
-  "pub_date": "2022-06-13T05:55:31Z",
+  "version": "v0.3.3",
+  "notes": "Level Viewer - Has all rooms!",
+  "pub_date": "2022-06-17T00:18:46Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWG9paldZTklLcHZQQUlYSHA5ZzZacXdBNEVuWTl1REx6V1hmQlZJcEF3bEVkeHlETEEwbm14VnZpazBtMnBjczNVazhQSHlLUGxLOXJwMENJbHFibFFvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjU1MDk5Mzc3CWZpbGU6RDpcYVxIRC1Ub29sYm94XEhELVRvb2xib3hcdGFyZ2V0XHJlbGVhc2VcYnVuZGxlL21zaS9IRCBUb29sYm94XzAuMy4yX3g2NF9lbi1VUy5tc2kuemlwCkNuazRkb3lTRWpqUTdCVS9zcnBJL25pWm5LRTR6ek9UeEVyK2ZqQ1lybU90YWVESHVibituK0RkblhsTjk2RGQ1bUd1ajJweWZ1QVY0TWNBdHJXMkJBPT0K",
-      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.3.2/HD.Toolbox_0.3.2_x64_en-US.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWG4xNkNJZUMzMXhFamt1cklDNHM5ZFBGOGlnVmc1RHlyTExyaDFxQUpBRkt4SWRlN25VakVDSXJ0b0NkRUhUVUt1Y1hSUDdaczJmQWtyNGlDc04zbFE0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjU1NDI0ODUzCWZpbGU6RDpcYVxIRC1Ub29sYm94XEhELVRvb2xib3hcdGFyZ2V0XHJlbGVhc2VcYnVuZGxlL21zaS9IRCBUb29sYm94XzAuMy4zX3g2NF9lbi1VUy5tc2kuemlwCm5sVHJIR3dweVYyRXZoYklpcVFGZ2lxbnhCMXJZUlZkb0FFOUdsMFNoekRRMmZIU1Y4SEtJdmVLbjgwalBjcWtFbnpqZlJpK1loNTNWQ3FCelpjM0JnPT0K",
+      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.3.3/HD.Toolbox_0.3.3_x64_en-US.msi.zip"
     }
   }
 }
