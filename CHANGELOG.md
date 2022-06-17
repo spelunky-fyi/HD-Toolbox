@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Level Viewer
   - Remove mentioned of SIDE from beehive notes as it was incorrect.
+  - `r` tilecode now shows half brick / half terrain in area 2
+  - `.` tilecode now shows a more obvious marker since "." was mostly invisible
+  - Fixed temple `air` chunks which has accidentally been a copy/paste of `temple` chunk
+  - Fixed typo in Haunted Castle rooms that said "Caster" instead of "Castle"
 
 ## [0.3.3] - 2022-06-16
 

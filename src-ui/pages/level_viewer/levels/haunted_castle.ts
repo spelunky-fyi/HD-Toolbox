@@ -141,45 +141,45 @@ const config: Level = {
       rooms: [
         {
           name: "Room 1 - Unused",
-          notes: "PATH_NOTOP aren't used in Haunted Caster",
+          notes: "PATH_NOTOP aren't used in Haunted Castle",
           data: "00000000000000000000000000000000000000000050000000000000000000000000001111111111",
           type: RoomType.PATH_NOTOP,
         },
         {
           name: "Room 2 - Unused",
-          notes: "PATH_NOTOP aren't used in Haunted Caster",
+          notes: "PATH_NOTOP aren't used in Haunted Castle",
           data: "00000000000000000000000000000000000000005000050000000000000000000000001111111111",
           type: RoomType.PATH_NOTOP,
         },
         {
           name: "Room 3 - Unused",
-          notes: "PATH_NOTOP aren't used in Haunted Caster",
+          notes: "PATH_NOTOP aren't used in Haunted Castle",
           data: "00000000000000000000000000000050000500000000000000000000000011111111111111111111",
           type: RoomType.PATH_NOTOP,
         },
         {
           name: "Room 4 - Unused",
-          notes: "PATH_NOTOP aren't used in Haunted Caster",
+          notes: "PATH_NOTOP aren't used in Haunted Castle",
           data: "00000000000000000000000000000000000000000002222220001111111011111111111111111111",
           type: RoomType.PATH_NOTOP,
         },
 
         {
           name: "Room 5 - Unused",
-          notes: "PATH_NOTOP aren't used in Haunted Caster",
+          notes: "PATH_NOTOP aren't used in Haunted Castle",
           data: "00000000000000000000000000000000000000000000000221000002211100002211111111111111",
           type: RoomType.PATH_NOTOP,
         },
 
         {
           name: "Room 6 - Unused",
-          notes: "PATH_NOTOP aren't used in Haunted Caster",
+          notes: "PATH_NOTOP aren't used in Haunted Castle",
           data: "000000000000000000000000000000013wwww310013wwww310113wwww31111133331111111111111",
           type: RoomType.PATH_NOTOP,
         },
         {
           name: "Room 7 - Unused",
-          notes: "PATH_NOTOP aren't used in Haunted Caster",
+          notes: "PATH_NOTOP aren't used in Haunted Castle",
           data: "0000000000006000000000000000000000000000013wwww310113wwww31111133331111111111111",
           type: RoomType.PATH_NOTOP,
         },

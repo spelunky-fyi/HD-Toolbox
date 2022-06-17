@@ -86,8 +86,21 @@ function getTerrainSpikesFunc(alpha?: number) {
 
 const config: { [key: string]: TileSpecDyn } = {
   ".": {
-    images: getTerrainFunc(),
-    label: ".",
+    images: function (ctx) {
+      let images = getTerrainFunc()(ctx);
+      images.push({
+        name: "items",
+        w: 80,
+        h: 80,
+        x: 80 * 22,
+        y: 80 * 9,
+        offX: 15,
+        offY: 15,
+        alpha: 0.7,
+        scale: 0.35,
+      });
+      return images;
+    },
   },
   m: {
     images: getTerrainFunc(),
@@ -743,9 +756,27 @@ const config: { [key: string]: TileSpecDyn } = {
           return [{ name: "alltiles", x: 16 * 64, y: 17 * 64, alpha: 0.5 }];
         }
 
+        if (["Jungle", "Haunted Castle", "Black Market"].includes(ctx.area)) {
+          let images = getTerrainFunc()(ctx);
+          images[0].w = 32;
+          images.push({
+            name: "alltiles",
+            x: 1536 + 32,
+            y: 64,
+            w: 32,
+            offX: 32,
+          });
+          return images;
+        }
+
         return [{ name: "alltiles", x: 1536, y: 64 }];
       },
-      label: "50%",
+      label: function (ctx) {
+        if (["Jungle", "Haunted Castle", "Black Market"].includes(ctx.area)) {
+          return;
+        }
+        return "50%";
+      },
     };
   },
   s: {
