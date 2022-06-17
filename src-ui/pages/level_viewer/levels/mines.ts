@@ -705,6 +705,7 @@ export const config: Level = {
         },
         {
           name: "Right Facing - Single NPC",
+          notes: "Used for Single HH or Damsel.",
           data: "11111111111111..111111..22...111.l0002.....000W0.0...00000k0..K00S0000bbbbbbbbbb",
           type: RoomType.SHOP_RIGHT_FACING,
         },
@@ -732,6 +733,7 @@ export const config: Level = {
         },
         {
           name: "Left Facing - Single NPC",
+          notes: "Used for Single HH or Damsel.",
           data: "11111111111111..11111...22..11..2000l.110.W0000...0k00000...0000S00K..bbbbbbbbbb",
           type: RoomType.SHOP_LEFT_FACING,
         },
