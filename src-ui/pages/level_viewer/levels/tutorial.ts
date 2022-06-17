@@ -1,4 +1,4 @@
-import { RoomType } from "../enums";
+import { RoomFlags, RoomType } from "../enums";
 import type { Level } from "../types";
 
 const config: Level = {
@@ -10,6 +10,7 @@ const config: Level = {
           name: "0-0",
           data: "11111111111111111122121111120010222220001000000000100000000010090000001111111111",
           type: RoomType.TUTORIAL_0_0,
+          flags: [RoomFlags.ENTRANCE],
         },
         {
           name: "0-1",
@@ -110,6 +111,7 @@ const config: Level = {
           name: "0-3",
           data: "111111111100000000010EEEE000010vvvv0090100vv001111ssvvss111111vv1111111111111111",
           type: RoomType.TUTORIAL_0_3,
+          flags: [RoomFlags.ENTRANCE],
         },
         {
           name: "1-0",
@@ -180,6 +182,7 @@ const config: Level = {
           name: "0-0",
           data: "1111111111vvvvvv2222v0000v0000v009000000v====v000011111100vv11111111vv1111111111",
           type: RoomType.TUTORIAL_0_0,
+          flags: [RoomFlags.ENTRANCE],
         },
         {
           name: "0-1",

@@ -1,4 +1,4 @@
-import { RoomType } from "../enums";
+import { RoomFlags, RoomType } from "../enums";
 import type { Level } from "../types";
 
 const config: Level = {
@@ -10,21 +10,25 @@ const config: Level = {
           name: "Room 1",
           data: "60000600000000000000000000000000000000000008000000000000000000000000001111111111",
           type: RoomType.PATH,
+          flags: [RoomFlags.ENTRANCE],
         },
         {
           name: "Room 2",
           data: "11111111112222222222000000000000000000000008000000000000000000000000001111111111",
           type: RoomType.PATH,
+          flags: [RoomFlags.ENTRANCE],
         },
         {
           name: "Room 3 - Drop",
           data: "60000600000000000000000000000000000000000008000000000000000000000000000000111000",
           type: RoomType.PATH_DROP,
+          flags: [RoomFlags.ENTRANCE],
         },
         {
           name: "Room 4 - Drop",
           data: "11111111112222222222000000000000000000000008000000000000000000000000000000111000",
           type: RoomType.PATH_DROP,
+          flags: [RoomFlags.ENTRANCE],
         },
       ],
     },
@@ -36,34 +40,40 @@ const config: Level = {
           notes: "Due to off-by-1 this room is never used.",
           data: "00000000006000060000000000000000000000000008000000000000000000000000001111111111",
           type: RoomType.PATH,
+          flags: [RoomFlags.EXIT],
         },
         {
           name: "Room 2",
           notes: "Used only if room above is Drop",
           data: "00000000000000000000000000000000000000000008000000000000000000000000001111111111",
           type: RoomType.PATH,
+          flags: [RoomFlags.EXIT],
         },
         {
           name: "Room 3",
           data: "00000000000010021110001001111000110111129012000000111111111021111111201111111111",
           type: RoomType.PATH,
+          flags: [RoomFlags.EXIT],
         },
         {
           name: "Room 4",
           data: "00000000000111200100011110010021111011000000002109011111111102111111121111111111",
           type: RoomType.PATH,
+          flags: [RoomFlags.EXIT],
         },
         {
           name: "Room 5",
           notes: "Used only if room above is not Drop",
           data: "60000600000000000000000000000000000000000008000000000000000000000000001111111111",
           type: RoomType.PATH,
+          flags: [RoomFlags.EXIT],
         },
         {
           name: "Room 6",
           notes: "Used only if room above is not Drop",
           data: "11111111112222222222000000000000000000000008000000000000000000000000001111111111",
           type: RoomType.PATH,
+          flags: [RoomFlags.EXIT],
         },
       ],
     },
