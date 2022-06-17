@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- Level Viewer
+  - Remove mentioned of SIDE from beehive notes as it was incorrect.
+
 ## [0.3.3] - 2022-06-16
 
 ### Added
