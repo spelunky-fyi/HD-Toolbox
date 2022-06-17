@@ -631,7 +631,7 @@ const config: Level = {
       rooms: [
         {
           name: "Room 1",
-          notes: "Left is Crystal Idol, SIDE, or PATH. Right is BEEHIVE.",
+          notes: "Left is Crystal Idol or PATH. Right is BEEHIVE.",
           data: "11eeeeeeeeeeezzzzzzzeez000000000000000000000000000eez0000000eeezzzzzzz11eeeeeeee",
           type: RoomType.BEEHIVE_LEFT_RIGHT_OPEN,
           flags: [RoomFlags.BEEHIVE],
@@ -639,22 +639,21 @@ const config: Level = {
         {
           name: "Room 2",
           notes:
-            "Left is Crystal Idol, SIDE, or PATH. Right is not BEEHIVE, Crystal Idol, SIDE, or PATH.",
+            "Left is Crystal Idol or PATH. Right is not BEEHIVE, Crystal Idol, or PATH.",
           data: "11eeeeeee1eeezzzzzeeeez00000ze00000000ze00000000zeeez00000zeeeezzzzzee11eeeeeee1",
           type: RoomType.BEEHIVE_LEFT_RIGHT_OPEN,
           flags: [RoomFlags.BEEHIVE],
         },
         {
           name: "Room 3",
-          notes:
-            "Left is Crystal Idol, SIDE, or PATH. Right is Crystal Idol, SIDE, or PATH.",
+          notes: "Left is Crystal Idol or PATH. Right is Crystal Idol or PATH.",
           data: "11eeeeee11eeezzzzeeeeez0000zee00000000000000000000eez0000zeeeeezzzzeee11eeeeee11",
           type: RoomType.BEEHIVE_LEFT_RIGHT_OPEN,
           flags: [RoomFlags.BEEHIVE],
         },
         {
           name: "Room 4",
-          notes: "Right is Crystal Idol, SIDE, or PATH. Left is BEEHIVE.",
+          notes: "Right is Crystal Idol or PATH. Left is BEEHIVE.",
           data: "eeeeeeee11zzzzzzzeee0000000zee000000000000000000000000000zeezzzzzzzeeeeeeeeeee11",
           type: RoomType.BEEHIVE_LEFT_RIGHT_OPEN,
           flags: [RoomFlags.BEEHIVE],
@@ -662,7 +661,7 @@ const config: Level = {
         {
           name: "Room 5",
           notes:
-            "Right is Crystal Idol, SIDE, or PATH. Left is not BEEHIVE, Crystal Idol, SIDE, or PATH.",
+            "Right is Crystal Idol or PATH. Left is not BEEHIVE, Crystal Idol, or PATH.",
           data: "1eeeeeee11eezzzzzeeeez00000zeeez00000000ez00000000ez00000zeeeezzzzzeee1eeeeeee11",
           type: RoomType.BEEHIVE_LEFT_RIGHT_OPEN,
           flags: [RoomFlags.BEEHIVE],
@@ -681,6 +680,13 @@ const config: Level = {
           type: RoomType.BEEHIVE_LEFT_RIGHT_OPEN,
           flags: [RoomFlags.BEEHIVE],
         },
+        {
+          name: "Room 8",
+          notes: "Fall-through when none of the rooms above can happen.",
+          data: "11eeeeee11eeezzzzeeeeez0000zee00000000000000000000ez000000zeeezz00zzeeeeee00eeee",
+          type: RoomType.BEEHIVE_LEFT_RIGHT_OPEN,
+          flags: [RoomFlags.BEEHIVE],
+        },
       ],
     },
     {
@@ -689,7 +695,7 @@ const config: Level = {
         {
           name: "Room 1",
           notes:
-            "Left is not Crystal Idol, SIDE, or PATH. Right is not Crystal Idol, SIDE, or PATH. No Top.",
+            "Left is not Crystal Idol or PATH. Right is not Crystal Idol or PATH. No Top.",
           data: "11ee00ee11eeez00zeeeeez0000zeeez000000zeez000000zeeez0000zeeeeezzzzeee11eeeeee11",
           type: RoomType.BEEHIVE_SIDE_UP_OPEN,
           flags: [RoomFlags.BEEHIVE],
@@ -697,7 +703,7 @@ const config: Level = {
         {
           name: "Room 2",
           notes:
-            "Left is not Crystal Idol, SIDE, or PATH. Right is not Crystal Idol, SIDE, or PATH.",
+            "Left is not Crystal Idol or PATH. Right is not Crystal Idol or PATH.",
           data: "ez000000zeez00zz00zeez00zz00zeez000000zeez000000zeeez0000zeeeeezzzzeee11eeeeee11",
           type: RoomType.BEEHIVE_SIDE_UP_OPEN,
           flags: [RoomFlags.BEEHIVE],
@@ -711,43 +717,42 @@ const config: Level = {
         },
         {
           name: "Room 4",
-          notes: "Left is not Crystal Idol, SIDE, or PATH. No Top.",
+          notes: "Left is not Crystal Idol or PATH. No Top.",
           data: "11ee00ee11eeez00zeeeeez0000zeeez00000000ez00000000eez0000zeeeeezzzzeee11eeeeee11",
           type: RoomType.BEEHIVE_SIDE_UP_OPEN,
           flags: [RoomFlags.BEEHIVE],
         },
         {
           name: "Room 5",
-          notes: "Left is not Crystal Idol, SIDE, or PATH",
+          notes: "Left is not Crystal Idol or PATH",
           data: "ez000000zeez00zz00zeez00zz00zeez00000000ez00000000eez0000zeeeeezzzzeee11eeeeee11",
           type: RoomType.BEEHIVE_SIDE_UP_OPEN,
           flags: [RoomFlags.BEEHIVE],
         },
         {
           name: "Room 6",
-          notes:
-            "Right is not Crystal Idol, SIDE, or PATH. Right is BEEHIVE. No Top.",
+          notes: "Right is not Crystal Idol or PATH. Right is BEEHIVE. No Top.",
           data: "11ee00eeeeeeez00zzzzeez000000000000000000000000000eez0000000eeezzzzzzz11eeeeeeee",
           type: RoomType.BEEHIVE_SIDE_UP_OPEN,
           flags: [RoomFlags.BEEHIVE],
         },
         {
           name: "Room 7",
-          notes: "Right is not Crystal Idol, SIDE, or PATH. No Top.",
+          notes: "Right is not Crystal Idol or PATH. No Top.",
           data: "11ee00ee11eeez00zeeeeez0000zee00000000ze00000000zeeez0000zeeeeezzzzeee11eeeeee11",
           type: RoomType.BEEHIVE_SIDE_UP_OPEN,
           flags: [RoomFlags.BEEHIVE],
         },
         {
           name: "Room 8",
-          notes: "Right is not Crystal Idol, SIDE, or PATH.",
+          notes: "Right is not Crystal Idol or PATH.",
           data: "ez000000zeez00zz00zeez00zz00ze00000000ze00000000zeeez0000zeeeeezzzzeee11eeeeee11",
           type: RoomType.BEEHIVE_SIDE_UP_OPEN,
           flags: [RoomFlags.BEEHIVE],
         },
         {
           name: "Room 9",
-          notes: "Right is not Crystal Idol, SIDE, or PATH. No Top.",
+          notes: "Right is not Crystal Idol or PATH. No Top.",
           data: "11ee00ee11eeez00zeeeeez0000zee00000000000000000000eez0000zeeeeezzzzeee11eeeeee11",
           type: RoomType.BEEHIVE_SIDE_UP_OPEN,
           flags: [RoomFlags.BEEHIVE],
@@ -787,7 +792,7 @@ const config: Level = {
         {
           name: "Room 4",
           notes:
-            "Left is not Crystal Idol, SIDE, or PATH. Right is not Crystal Idol, SIDE, or PATH.",
+            "Left is not Crystal Idol or PATH. Right is not Crystal Idol or PATH.",
           data: "11ee00ee11eeez00zeeeeez0000zeeez000000zeez000000zeez00zz00zeez00zz00zeez000000ze",
           type: RoomType.BEEHIVE_SIDE_DOWN_OPEN,
           flags: [RoomFlags.BEEHIVE, RoomFlags.NO_TOP],
@@ -795,7 +800,7 @@ const config: Level = {
 
         {
           name: "Room 5",
-          notes: "Left is not Crystal Idol, SIDE, or PATH.",
+          notes: "Left is not Crystal Idol or PATH.",
           data: "11ee00ee11eeez00zeeeeez0000zeeez00000000ez00000000ez00zz00zeez00zz00zeez000000ze",
           type: RoomType.BEEHIVE_SIDE_DOWN_OPEN,
           flags: [RoomFlags.BEEHIVE, RoomFlags.NO_TOP],
@@ -829,7 +834,7 @@ const config: Level = {
         {
           name: "Room 3",
           notes:
-            "Left is not Crystal Idol, SIDE, or PATH. Right is not Crystal Idol, SIDE, or PATH. Below not BEEHIVE",
+            "Left is not Crystal Idol or PATH. Right is not Crystal Idol or PATH. Below not BEEHIVE",
           data: "11eeeeee11eeezzzzeeeeez0000zeeez000000zeez000000zeez000000zeeezz00zzeeeeee00eeee",
           type: RoomType.BEEHIVE_SIDE_DOWN_OPEN,
           flags: [RoomFlags.BEEHIVE],
@@ -837,7 +842,7 @@ const config: Level = {
         {
           name: "Room 4",
           notes:
-            "Left is not Crystal Idol, SIDE, or PATH. Right is not Crystal Idol, SIDE, or PATH.",
+            "Left is not Crystal Idol or PATH. Right is not Crystal Idol or PATH.",
           data: "11eeeeee11eeezzzzeeeeez0000zeeez000000zeez000000zeez00zz00zeez00zz00zeez000000ze",
           type: RoomType.BEEHIVE_SIDE_DOWN_OPEN,
           flags: [RoomFlags.BEEHIVE],
@@ -851,14 +856,14 @@ const config: Level = {
         },
         {
           name: "Room 6",
-          notes: "Left is not Crystal Idol, SIDE, or PATH. Below not BEEHIVE.",
+          notes: "Left is not Crystal Idol or PATH. Below not BEEHIVE.",
           data: "1eeeeeee11eezzzzzeeeez00000zeeez00000000ez00000000ez000000zeeezz00zzeeeeee00eeee",
           type: RoomType.BEEHIVE_SIDE_DOWN_OPEN,
           flags: [RoomFlags.BEEHIVE],
         },
         {
           name: "Room 7",
-          notes: "Left is not Crystal Idol, SIDE, or PATH.",
+          notes: "Left is not Crystal Idol or PATH.",
           data: "1eeeeeee11eezzzzzeeeez00000zeeez00000000ez00000000ez00zz00zeez00zz00zeez000000ze",
           type: RoomType.BEEHIVE_SIDE_DOWN_OPEN,
           flags: [RoomFlags.BEEHIVE],
@@ -872,14 +877,14 @@ const config: Level = {
         },
         {
           name: "Room 9",
-          notes: "Right is not Crystal Idol, SIDE, or PATH. Below not BEEHIVE.",
+          notes: "Right is not Crystal Idol or PATH. Below not BEEHIVE.",
           data: "11eeeeeee1eeezzzzzeeeez00000ze00000000ze00000000zeez000000zeeezz00zzeeeeee00eeee",
           type: RoomType.BEEHIVE_SIDE_DOWN_OPEN,
           flags: [RoomFlags.BEEHIVE],
         },
         {
           name: "Room 10",
-          notes: "Right is not Crystal Idol, SIDE, or PATH",
+          notes: "Right is not Crystal Idol or PATH",
           data: "11eeeeeee1eeezzzzzeeeez00000ze00000000ze00000000zeez00zz00zeez00zz00zeez000000ze",
           type: RoomType.BEEHIVE_SIDE_DOWN_OPEN,
           flags: [RoomFlags.BEEHIVE],
