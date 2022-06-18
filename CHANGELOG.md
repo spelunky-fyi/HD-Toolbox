@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed temple `air` chunks which has accidentally been a copy/paste of `temple` chunk
   - Fixed typo in Haunted Castle rooms that said "Caster" instead of "Castle"
   - Use closed door for Mothership, Ice Caves, Wet Fur, and Tutorial Entrance
+  - `q` in Hell / Yama now uses hell bricks instead of terrain.
 
 ### Added
 

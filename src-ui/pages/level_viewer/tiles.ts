@@ -181,7 +181,12 @@ const config: { [key: string]: TileSpecDyn } = {
     },
   },
   q: {
-    images: getTerrainFunc(),
+    images: function (ctx) {
+      if (ctx.area == "Hell / Yama") {
+        return [{ name: "alltiles", x: 16 * 64, y: 17 * 64 }];
+      }
+      return getTerrainFunc()(ctx);
+    },
     label: "q",
   },
   T: {
