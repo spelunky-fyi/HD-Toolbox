@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.3.5] - 2022-06-18
+
+### Fixed
+
+- Category Tracker
+  - No% no longer removed when going through level transition without an item.
+
+### Added
+
+- Trackers
+  - Tracker windows can now be resized to a smaller size and text should scale to accomodate that.
+
 ## [0.3.4] - 2022-06-17
 
 ### Fixed

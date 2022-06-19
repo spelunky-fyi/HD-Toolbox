@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { showKills } from "@hdt/pages/trackers/configs/pacifist";
   import { WebSocketState } from "../websockets";
   import { state, data } from "./stores";
 
@@ -34,15 +33,12 @@
 </main>
 
 <style>
-  main {
-    font-size: 70px;
-    font-weight: bold;
-  }
-
   .wrapper {
     display: table;
     table-layout: fixed;
     width: 100%;
+    font-size: 14vw;
+    font-weight: bold;
   }
 
   .output {

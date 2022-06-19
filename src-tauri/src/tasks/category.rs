@@ -312,9 +312,8 @@ impl RunState {
             if held_item.entity_type == EntityType::Player {
                 return;
             }
+            self.run_labels.rm_label(&Label::No);
         }
-
-        self.run_labels.rm_label(&Label::No);
     }
 
     fn fail_hell(&mut self) {

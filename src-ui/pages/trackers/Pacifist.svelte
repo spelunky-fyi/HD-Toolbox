@@ -15,28 +15,34 @@
   export let enabled;
 
   let dialogOpen = writable(false);
-  let minWidth = 520;
-  let minHeight = 120;
+  let width = 520;
+  let height = 120;
 
+  const label = "PacifistTracker";
   const url = derived(trackerPort, ($trackerPort) => {
     return `http://localhost:${$trackerPort}/pacifist.html`;
   });
 
-  function openTracker() {
-    let window = new WebviewWindow("PacifistTracker", {
-      url: $url,
-      title: "HD Toolbox - Pacifist Tracker",
-      minHeight: minHeight,
-      height: minHeight,
-      minWidth: minWidth,
-      width: minWidth,
-      visible: false,
-    });
-    window
-      .requestUserAttention(UserAttentionType.Informational)
-      .catch((_reason) => {});
-    window.unminimize().catch((_reason) => {});
-    window.setFocus().catch((_reason) => {});
+  async function openTracker() {
+    let window = WebviewWindow.getByLabel(label);
+
+    if (!window) {
+      window = new WebviewWindow(label, {
+        url: $url,
+        title: "HD Toolbox - Pacifist Tracker",
+        minHeight: height / 2,
+        height: height,
+        maxHeight: height * 2,
+        minWidth: width / 2,
+        width: width,
+        maxWidth: width * 2,
+        visible: false,
+      });
+    } else {
+      await window.requestUserAttention(UserAttentionType.Informational);
+      await window.unminimize();
+      await window.setFocus();
+    }
   }
 </script>
 
@@ -68,13 +74,7 @@
   <div>Loading...</div>
 {/if}
 
-<HelpDialog
-  title="Pacifist Tracker"
-  open={dialogOpen}
-  {url}
-  width={minWidth}
-  height={minHeight}
->
+<HelpDialog title="Pacifist Tracker" open={dialogOpen} {url} {width} {height}>
   <h4>Custom CSS</h4>
   <code>text-align: right;</code> - Useful when aligning OBS Scene on right side.
 </HelpDialog>

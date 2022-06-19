@@ -24,15 +24,12 @@
 </main>
 
 <style>
-  main {
-    font-size: 70px;
-    font-weight: bold;
-  }
-
   .wrapper {
     display: table;
     table-layout: fixed;
     width: 100%;
+    font-size: 4vw;
+    font-weight: bold;
   }
 
   .output {
