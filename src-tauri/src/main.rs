@@ -53,6 +53,7 @@ async fn run_mem_manager() -> ManagerHandle {
 
 fn main() -> anyhow::Result<()> {
     let main_config = StoreBuilder::new(MAIN_CONFIG.parse()?).build();
+    let specs_config = StoreBuilder::new("specs.config".parse()?).build();
     let mut tracker_pacifist_config = StoreBuilder::new("tracker-pacifist.config".parse()?).build();
     let mut tracker_category_config = StoreBuilder::new("tracker-category.config".parse()?).build();
 
@@ -75,6 +76,7 @@ fn main() -> anyhow::Result<()> {
                     main_config,
                     tracker_pacifist_config,
                     tracker_category_config,
+                    specs_config,
                 ])
                 .freeze()
                 .build(),

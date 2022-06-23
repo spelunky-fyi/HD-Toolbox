@@ -9,6 +9,7 @@
   import LevelViewer from "@hdt/pages/level_viewer/LevelViewer.svelte";
   import MemoryUpdater from "./pages/memory_updater/MemoryUpdater.svelte";
   import { activeTab, selectPage } from "./config";
+  import Specs from "./pages/specs/Specs.svelte";
 
   function launch_spelunky_hd() {
     invoke("launch_spelunky_hd")
@@ -21,6 +22,7 @@
     "Level Viewer": LevelViewer,
     Trackers: Trackers,
     "Memory Updater": MemoryUpdater,
+    Specs: Specs,
   };
 </script>
 
