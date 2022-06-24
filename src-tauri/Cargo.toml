@@ -33,7 +33,7 @@ static-files = "0.2"
 tauri = {version = "1.0.0", features = ["api-all", "updater"] }
 tauri-plugin-log = {git = "https://github.com/tauri-apps/tauri-plugin-log", branch = "release"}
 tauri-plugin-store = {git = "https://github.com/gmjosack/tauri-plugin-store", branch = "tokio-watch"}
-tauri-plugin-window-state = {git = "https://github.com/tauri-apps/tauri-plugin-window-state", branch = "release"}
+tauri-plugin-window-state = "0.1.0"
 tokio = {version = "1", features = ["full"] }
 winapi = {version = "0.3.9", features = [
   "handleapi",
