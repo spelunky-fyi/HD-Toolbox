@@ -49,4 +49,8 @@ impl Process {
     pub fn still_active(&self) -> bool {
         true
     }
+
+    pub fn inject_dll(&mut self, dll_path: &PathBuf) -> Result<(), Failure> {
+        Ok(())
+    }
 }

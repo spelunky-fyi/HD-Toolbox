@@ -22,6 +22,9 @@ pub enum Failure {
     #[error("Failed to write memory.")]
     WriteMemoryError(#[from] WriteMemoryError),
 
+    #[error("Failed to inject DLL.")]
+    InjectDllError(#[from] InjectDllError),
+
     #[error("Unknown failure")]
     Unknown(String),
 }
@@ -69,6 +72,18 @@ pub enum ReadMemoryError {
 
     #[error("Read less memory than expected.")]
     ShortRead,
+}
+
+#[derive(Error, Debug, Clone, Serialize, PartialEq, Eq)]
+pub enum InjectDllError {
+    #[error("Can't find kernel32.dll")]
+    CantFindKernel32,
+
+    #[error("Can't find LoadLibraryA rva")]
+    CantFindLoadLibraryA,
+
+    #[error("Failed to inject DLL")]
+    Failed,
 }
 
 #[derive(Error, Debug, Clone, Serialize, PartialEq, Eq)]

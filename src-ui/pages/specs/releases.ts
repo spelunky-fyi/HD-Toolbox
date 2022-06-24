@@ -10,6 +10,7 @@ import { join, appDir } from "@tauri-apps/api/path";
 import { fetch, Response, ResponseType } from "@tauri-apps/api/http";
 import { LoadMethod } from "./config";
 import { cachedReleases, type Release } from "./stores";
+import { invoke } from "@tauri-apps/api/tauri";
 
 const RELEASES_URL =
   "https://api.github.com/repos/spelunky-fyi/SpecsHD/releases";
@@ -161,8 +162,9 @@ async function launchSpecs(
     localDll = await join(await appDir(), localDll);
   }
 
-  // TODO: LAUNCH
-  console.log(localDll);
+  invoke("inject_specs", { dll: localDll })
+    .then((msg) => console.log("Success"))
+    .catch((err) => console.log("Error:", err));
 }
 
 async function writeLastCacheTimestamp(cachePath?: string) {

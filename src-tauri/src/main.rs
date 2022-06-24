@@ -7,6 +7,7 @@ mod config;
 mod state;
 mod tasks;
 
+use std::path::PathBuf;
 use std::{collections::HashMap, thread};
 
 use log::{debug, LevelFilter};
@@ -30,6 +31,18 @@ static MAIN_CONFIG: &str = "hd-toolbox.config";
 fn launch_spelunky_hd() -> Result<String, String> {
     open::that("steam://run/239350").map_err(|_| "Failed to launch!")?;
     Ok("Launched!".into())
+}
+
+#[tauri::command]
+fn inject_specs(dll: String) -> Result<(), String> {
+    debug!("Injecting DLL: {}", dll);
+    thread::spawn(move || {
+        let path = PathBuf::from(dll);
+        let mut process = hdt_mem_reader::process::Process::new().unwrap();
+        process.inject_dll(&path).unwrap();
+    });
+
+    Ok(())
 }
 
 async fn run_mem_manager() -> ManagerHandle {
@@ -65,6 +78,7 @@ fn main() -> anyhow::Result<()> {
         .level_for("attohttpc", log::LevelFilter::Warn)
         .level_for("mio::poll", log::LevelFilter::Warn)
         .level_for("tungstenite::protocol", log::LevelFilter::Warn)
+        .level_for("goblin::pe", log::LevelFilter::Warn)
         .level(LOG_LEVEL)
         .build();
 
@@ -124,6 +138,7 @@ fn main() -> anyhow::Result<()> {
         })
         .invoke_handler(tauri::generate_handler![
             launch_spelunky_hd,
+            inject_specs,
             tasks::start_task,
             tasks::stop_task,
             tasks::fix_slowlook,

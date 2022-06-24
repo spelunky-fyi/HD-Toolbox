@@ -110,11 +110,54 @@
         {/if}
       </div>
     </Cell>
+    <Cell span={12}>
+      <div style="margin-top: -15px;">
+        {#if $activeMethod == LoadMethod.LATEST}
+          <i>
+            Always use the most recent version of Specs HD. You can hit refresh
+            to check if new versions are available.
+          </i>
+        {:else if $activeMethod == LoadMethod.SPECIFIC_VERSION}
+          <i>
+            Choose a specific version of Specs HD. You can hit refresh to check
+            if new versions are available.
+          </i>
+        {:else if $activeMethod == LoadMethod.FILE}
+          <i>
+            Browse to a local dll. This is useful for development or if you
+            downloaded a version manually. Not typical for most users.
+          </i>
+        {/if}
+      </div>
+    </Cell>
   </LayoutGrid>
   <hr />
   <LayoutGrid>
     <Cell span={12}>
-      <i>TODO: Instructions Here. :X</i>
+      <p style="margin-top: 0px;">
+        <b>Specs HD</b> is a tool for doing science, practice, and fun in
+        Spelunky HD. In order to use Specs HD just click the Launch button above
+        after you've started Spelunky HD. We recommend you run
+        <code>Latest</code>
+        unless you know what you're doing. Once you've launched with
+        <b>Specs HD</b> you'll need to restart the game to unload it.
+      </p>
+      <h4>Keyboard Shortcuts</h4>
+      <ul>
+        <li>
+          <code>Insert</code> - Toggle visibility of the main tool window.
+        </li>
+      </ul>
+
+      <h4>Mouse Controls</h4>
+      <ul>
+        <li>
+          <code>Right Click</code> - Teleport your spelunker
+        </li>
+        <li>
+          <code>Middle Click</code> - Select Entity
+        </li>
+      </ul>
     </Cell>
   </LayoutGrid>
 </div>

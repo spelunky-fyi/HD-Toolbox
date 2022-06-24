@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.4.0] - 2022-06-23
+
+### Added
+
+- Specs HD is now integrated into HD Toolbox.
+
 ## [0.3.5] - 2022-06-18
 
 ### Fixed
