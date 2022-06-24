@@ -1,11 +1,11 @@
 {
-  "version": "v0.3.5",
-  "notes": "Bug Fixes for Trackers",
-  "pub_date": "2022-06-19T02:56:29Z",
+  "version": "v0.4.0",
+  "notes": "Specs HD!",
+  "pub_date": "2022-06-24T02:04:28Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWHZoeHRHR0VCeWUrcEp0L1Y2a1IrQytCeExJQU5ic3ZIUkNxeVNtNlJSVzM2NDhvaGZlRnEvSG9FZ0IrM0twelNsUUpCZlFhR1lkNG1GQ3RwU0UrYmdzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjU1NjA3MzQ1CWZpbGU6RDpcYVxIRC1Ub29sYm94XEhELVRvb2xib3hcdGFyZ2V0XHJlbGVhc2VcYnVuZGxlL21zaS9IRCBUb29sYm94XzAuMy41X3g2NF9lbi1VUy5tc2kuemlwCmtUUVBNbHpnNi9wUEdwMjF3RE01dFVzcnhMQng0RU1YazROR1k0dTBmbUh3NVQ4QnZFMHdMQWlIRkJlbjFTT2Z6bGNnN084dERNZVo4eGExWElLdkFRPT0K",
-      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.3.5/HD.Toolbox_0.3.5_x64_en-US.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWHY0dUdkUjlDTURSdkhoQjNFbVh3SmJPRlBuVlM5TjFuWVRjd2VseGdkRWJ1S2hKYUxwUVc4YllLTjJMVnB1Wm1kYmdyOXgzYXdrZHNjeUNFMHV2ZWc4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjU2MDM2MTYwCWZpbGU6RDpcYVxIRC1Ub29sYm94XEhELVRvb2xib3hcdGFyZ2V0XHJlbGVhc2VcYnVuZGxlL21zaS9IRCBUb29sYm94XzAuNC4wX3g2NF9lbi1VUy5tc2kuemlwCnA4dVBzblF6dENGZTg4NlUzVExxbFZ2U0VVa0FsS25OYVRrQ29lZUJiMGlNUCsxWW1QVjkzdmZRSW5NY0xzRlkyTnF2TklGME9FUk8vSGtTd0g1akRRPT0K",
+      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.4.0/HD.Toolbox_0.4.0_x64_en-US.msi.zip"
     }
   }
 }
