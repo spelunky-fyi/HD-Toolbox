@@ -31,7 +31,7 @@
         alt="Auto-Fixer Icon"
         on:click={handleClick}
       />
-      <Tooltip yPos="below">Slow Look Auto-Fixer</Tooltip>
+      <Tooltip yPos="below">Auto-Fixer</Tooltip>
     </Wrapper>
   {/if}
 </div>

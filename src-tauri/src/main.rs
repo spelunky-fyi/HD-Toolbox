@@ -10,7 +10,7 @@ mod tasks;
 use std::path::PathBuf;
 use std::{collections::HashMap, thread};
 
-use log::{debug, LevelFilter};
+use log::{debug, warn, LevelFilter};
 use tasks::trackers::{TrackerManager, TrackerType};
 use tauri::{Manager, WindowEvent};
 use tauri_plugin_log::LoggerBuilder;
@@ -38,8 +38,22 @@ fn inject_specs(dll: String) -> Result<(), String> {
     debug!("Injecting DLL: {}", dll);
     thread::spawn(move || {
         let path = PathBuf::from(dll);
-        let mut process = hdt_mem_reader::process::Process::new().unwrap();
-        process.inject_dll(&path).unwrap();
+
+        let mut process = match hdt_mem_reader::process::Process::new() {
+            Ok(process) => process,
+            Err(err) => {
+                warn!("Failed to find process: {}", err);
+                return;
+            }
+        };
+
+        match process.inject_dll(&path) {
+            Ok(_) => {}
+            Err(err) => {
+                warn!("Failed to inject dll: {}", err);
+                return;
+            }
+        };
     });
 
     Ok(())
@@ -67,9 +81,12 @@ async fn run_mem_manager() -> ManagerHandle {
 fn main() -> anyhow::Result<()> {
     let main_config = StoreBuilder::new(MAIN_CONFIG.parse()?).build();
     let specs_config = StoreBuilder::new("specs.config".parse()?).build();
+
+    let mut autofix_config = StoreBuilder::new("auto-fixer.config".parse()?).build();
+    let autofix_config_watcher = autofix_config.get_watcher();
+
     let mut tracker_pacifist_config = StoreBuilder::new("tracker-pacifist.config".parse()?).build();
     let mut tracker_category_config = StoreBuilder::new("tracker-category.config".parse()?).build();
-
     let mut tracker_configs = HashMap::new();
     tracker_configs.insert(TrackerType::Pacifist, tracker_pacifist_config.get_watcher());
     tracker_configs.insert(TrackerType::Category, tracker_category_config.get_watcher());
@@ -91,6 +108,7 @@ fn main() -> anyhow::Result<()> {
                     tracker_pacifist_config,
                     tracker_category_config,
                     specs_config,
+                    autofix_config,
                 ])
                 .freeze()
                 .build(),
@@ -132,7 +150,11 @@ fn main() -> anyhow::Result<()> {
                 let tracker_manager =
                     TrackerManager::run_in_background(memory_manager.clone(), tracker_configs)
                         .await;
-                handle.manage(state::State::new(memory_manager, tracker_manager));
+                handle.manage(state::State::new(
+                    memory_manager,
+                    tracker_manager,
+                    autofix_config_watcher,
+                ));
             });
             Ok(())
         })

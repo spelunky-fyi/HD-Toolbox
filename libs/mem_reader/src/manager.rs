@@ -97,14 +97,14 @@ impl MemoryUpdaterPayload {
 
 #[derive(Debug, Serialize, Clone, PartialEq, Eq)]
 pub enum AutoFixerState {
-    NoSlowLook,
-    SlowLookWaiting,
-    SlowLookFixed,
+    NoAction,
+    FixPending,
+    FixApplied,
 }
 
 impl Default for AutoFixerState {
     fn default() -> Self {
-        AutoFixerState::NoSlowLook
+        AutoFixerState::NoAction
     }
 }
 
@@ -114,37 +114,82 @@ pub struct AutoFixerPayload {
 }
 
 impl AutoFixerPayload {
-    fn from_process(process: &Process) -> Result<Self, Failure> {
-        let base_addr = process.base_addr;
-        let other_state_offset =
-            process.read_u32(base_addr + process.offsets.other_state)? as usize;
-        let camera_speed = process.read_u32(other_state_offset + 0x38)?;
-
-        if camera_speed == 0x3F800000 {
-            return Ok(Self {
-                state: AutoFixerState::NoSlowLook,
-            });
+    fn need_action(
+        process: &Process,
+        config: &AutoFixerPayloadConfig,
+        global_state_offset: usize,
+        camera_state_offset: usize,
+    ) -> Result<bool, Failure> {
+        if config.auto_fix_slow_look {
+            let camera_speed = process.read_u32(camera_state_offset + 0x38)?;
+            if camera_speed != 0x3F800000 {
+                return Ok(true);
+            }
+        }
+        if config.auto_fix_characters {
+            let char_offset = global_state_offset + 0x4459c8 + 0xa24;
+            let chars: Vec<u32> = process
+                .read_n_bytes(char_offset, 4 * 16)?
+                .chunks(4)
+                .map(|bytes| LE::read_u32(bytes))
+                .collect();
+            if chars != config.desired_characters {
+                return Ok(true);
+            }
         }
 
+        Ok(false)
+    }
+
+    fn from_process(process: &Process, config: AutoFixerPayloadConfig) -> Result<Self, Failure> {
+        let base_addr = process.base_addr;
+        let camera_state_offset =
+            process.read_u32(base_addr + process.offsets.other_state)? as usize;
         let global_state_offset =
             process.read_u32(base_addr + process.offsets.global_state)? as usize;
-        let screen_state = process.read_u32(global_state_offset + 0x58)? as usize;
 
-        // Gameplay Screen States
-        if screen_state <= 11 {
+        if !AutoFixerPayload::need_action(
+            process,
+            &config,
+            global_state_offset,
+            camera_state_offset,
+        )? {
             return Ok(Self {
-                state: AutoFixerState::SlowLookWaiting,
+                state: AutoFixerState::NoAction,
             });
         }
 
-        let mut bytes = vec![0; 4];
-        LE::write_u32(&mut bytes, 0x3F800000);
+        let screen_state = process.read_u32(global_state_offset + 0x58)? as usize;
 
-        process.write_n_bytes(other_state_offset + 0x38, bytes)?;
+        let allowed_screens = [
+            30, // Death Screen
+            17, // Choose Character
+            18, 19, 20, // Victory
+            22, // Hub/Camps
+        ];
+        // Gameplay Screen States
+        if !allowed_screens.contains(&(screen_state as i32)) {
+            return Ok(Self {
+                state: AutoFixerState::FixPending,
+            });
+        }
 
+        if config.auto_fix_slow_look {
+            let mut bytes = vec![0; 4];
+            LE::write_u32(&mut bytes, 0x3F800000);
+            process.write_n_bytes(camera_state_offset + 0x38, bytes)?;
+        }
+
+        if config.auto_fix_characters {
+            let mut bytes = vec![0; 16 * 4];
+            for (idx, char) in config.desired_characters.iter().enumerate() {
+                LE::write_u32(&mut bytes[idx * 4..idx * 4 + 4], *char);
+            }
+            process.write_n_bytes(global_state_offset + 0x4459c8 + 0xa24, bytes)?;
+        }
         // PayloadResponse::Success
         Ok(Self {
-            state: AutoFixerState::SlowLookFixed,
+            state: AutoFixerState::FixApplied,
         })
     }
 }
@@ -823,9 +868,16 @@ impl PacifistTrackerPayload {
 }
 
 #[derive(Debug)]
+pub struct AutoFixerPayloadConfig {
+    pub auto_fix_slow_look: bool,
+    pub auto_fix_characters: bool,
+    pub desired_characters: Vec<u32>,
+}
+
+#[derive(Debug)]
 pub enum PayloadRequest {
     MemoryUpdater,
-    AutoFixer,
+    AutoFixer(AutoFixerPayloadConfig),
     CategoryTracker,
     PacifistTracker,
 
@@ -961,10 +1013,12 @@ impl Manager {
                         Err(err) => PayloadResponse::Failure(err),
                     }
                 }
-                PayloadRequest::AutoFixer => match AutoFixerPayload::from_process(process) {
-                    Ok(payload) => PayloadResponse::AutoFixer(payload),
-                    Err(err) => PayloadResponse::Failure(err),
-                },
+                PayloadRequest::AutoFixer(config) => {
+                    match AutoFixerPayload::from_process(process, config) {
+                        Ok(payload) => PayloadResponse::AutoFixer(payload),
+                        Err(err) => PayloadResponse::Failure(err),
+                    }
+                }
                 PayloadRequest::CategoryTracker => {
                     match CategoryTrackerPayload::from_process(process) {
                         Ok(payload) => PayloadResponse::CategoryTracker(payload),

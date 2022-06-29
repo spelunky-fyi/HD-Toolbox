@@ -33,3 +33,21 @@ impl Default for CategoryConfig {
         }
     }
 }
+
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all = "kebab-case")]
+pub struct AutoFixerConfig {
+    pub auto_fix_slow_look: bool,
+    pub auto_fix_characters: bool,
+    pub desired_characters: Vec<u32>,
+}
+
+impl Default for AutoFixerConfig {
+    fn default() -> Self {
+        Self {
+            auto_fix_slow_look: true,
+            auto_fix_characters: false,
+            desired_characters: Vec::new(),
+        }
+    }
+}

@@ -6,3 +6,4 @@ export type Release = {
 };
 
 export const cachedReleases: Writable<Release[]> = writable([]);
+export const cachedDocs = writable("");

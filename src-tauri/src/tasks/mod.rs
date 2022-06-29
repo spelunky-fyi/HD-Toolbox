@@ -80,8 +80,11 @@ pub async fn start_task(
         TaskStart::AutoFixer => {
             if tasks.auto_fixer.is_none() {
                 let mem_manager = state.mem_manager.clone();
-                let (mut task, shutdown_tx) =
-                    auto_fixer::AutoFixerTask::new(mem_manager, app_handle);
+                let (mut task, shutdown_tx) = auto_fixer::AutoFixerTask::new(
+                    mem_manager,
+                    app_handle,
+                    state.autofix_config_watcher.clone(),
+                );
                 tauri::async_runtime::spawn(async move {
                     task.run().await;
                 });

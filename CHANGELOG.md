@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.5.0] - 2022-06-28
+
+### Added
+
+- Support for Locking characters with the auto-fixer
+- Persist config changes immediately rather than waiting for shutdown
+- Specs docs are now dynamically pulled so they're always up to date
+
+### Fixed
+
+- Specs should no longer crash HD Toolbox when Spelunky isn't running.
+
 ## [0.4.0] - 2022-06-23
 
 ### Added

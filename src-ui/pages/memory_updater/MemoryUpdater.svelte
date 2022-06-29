@@ -11,6 +11,7 @@
     Task,
     TaskState,
   } from "@hdt/tasks";
+  import AutoFixer from "./AutoFixer.svelte";
 
   const connectingText = "Looking for running Spelunky.exe...";
 
@@ -43,6 +44,7 @@
   </Cell>
   <Cell span={5}>
     <SlowLook connecting={$memoryUpdaterState == TaskState.Pending} />
+    <AutoFixer connecting={$memoryUpdaterState == TaskState.Pending} />
   </Cell>
 </LayoutGrid>
 

@@ -1,5 +1,6 @@
 <script type="ts">
   import LayoutGrid, { Cell } from "@smui/layout-grid";
+  import SvelteMarkdown from "svelte-markdown";
 
   import { onDestroy, onMount } from "svelte";
   import Latest from "./Latest.svelte";
@@ -16,7 +17,8 @@
     selectedFile,
     selectedVersion,
   } from "./config";
-  import { cachedReleases } from "./stores";
+  import { cachedReleases, cachedDocs } from "./stores";
+  import docs from "./docs";
 
   let loadMethods = {
     [LoadMethod.LATEST]: Latest,
@@ -30,6 +32,7 @@
 
   async function run() {
     await releases.cacheReleases();
+    await docs.cacheDocs();
 
     if (mounted) {
       timeout = setTimeout(run, timeoutAmount);
@@ -40,6 +43,7 @@
     mounted = true;
     await run();
     await releases.loadCachedReleases();
+    await docs.loadDocs();
   });
 
   onDestroy(() => {
@@ -102,7 +106,10 @@
               color="primary"
               variant="raised"
               id="refresh-specs"
-              on:click={() => releases.cacheReleases(true)}
+              on:click={() => {
+                releases.cacheReleases(true);
+                docs.cacheDocs(true);
+              }}
             >
               <RefreshCwIcon />
             </Button>
@@ -134,30 +141,19 @@
   <hr />
   <LayoutGrid>
     <Cell span={12}>
-      <p style="margin-top: 0px;">
-        <b>Specs HD</b> is a tool for doing science, practice, and fun in
-        Spelunky HD. In order to use Specs HD just click the Launch button above
-        after you've started Spelunky HD. We recommend you run
-        <code>Latest</code>
-        unless you know what you're doing. Once you've launched with
-        <b>Specs HD</b> you'll need to restart the game to unload it.
-      </p>
-      <h4>Keyboard Shortcuts</h4>
-      <ul>
-        <li>
-          <code>Insert</code> - Toggle visibility of the main tool window.
-        </li>
-      </ul>
-
-      <h4>Mouse Controls</h4>
-      <ul>
-        <li>
-          <code>Right Click</code> - Teleport your spelunker
-        </li>
-        <li>
-          <code>Middle Click</code> - Select Entity
-        </li>
-      </ul>
+      <div style="text-align: right; margin-top: -30px; margin-bottom: 20px;">
+        <small>
+          The docs below auto-update but you can alway check the most up to date
+          version
+          <a
+            href="https://github.com/spelunky-fyi/SpecsHD/blob/main/DOCS.md"
+            target="_blank"
+          >
+            here
+          </a>
+        </small>
+      </div>
+      <SvelteMarkdown source={$cachedDocs} />
     </Cell>
   </LayoutGrid>
 </div>

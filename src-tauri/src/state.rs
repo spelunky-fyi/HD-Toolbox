@@ -3,8 +3,11 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use hdt_mem_reader::manager::ManagerHandle;
+use serde_json::Value as JsonValue;
 use static_files::Resource;
+use tokio::sync::watch;
+
+use hdt_mem_reader::manager::ManagerHandle;
 
 use crate::tasks::trackers::Handle as TrackerHandle;
 
@@ -15,10 +18,15 @@ pub struct State {
     pub tasks: Arc<Mutex<crate::tasks::Tasks>>,
     pub tracker_manager: TrackerHandle,
     pub tracker_resources: Arc<HashMap<&'static str, Resource>>,
+    pub autofix_config_watcher: watch::Receiver<HashMap<String, JsonValue>>,
 }
 
 impl State {
-    pub fn new(mem_manager: ManagerHandle, tracker_manager: TrackerHandle) -> Self {
+    pub fn new(
+        mem_manager: ManagerHandle,
+        tracker_manager: TrackerHandle,
+        autofix_config_watcher: watch::Receiver<HashMap<String, JsonValue>>,
+    ) -> Self {
         State {
             mem_manager,
             tracker_manager,
@@ -28,6 +36,7 @@ impl State {
                 auto_fixer: None,
                 web_server: None,
             })),
+            autofix_config_watcher,
         }
     }
 }

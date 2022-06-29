@@ -24,6 +24,7 @@ function setupSubscribers() {
   for (const [key, store] of Object.entries(configMapping)) {
     subscriptions[key] = store.subscribe((value) => {
       tauriStore.set(key, value);
+      tauriStore.save();
     });
   }
 }
