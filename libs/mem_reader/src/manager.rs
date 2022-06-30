@@ -1045,6 +1045,29 @@ impl Manager {
                             }
                         } as usize;
 
+                    let global_state_offset =
+                        match process.read_u32(base_addr + process.offsets.global_state) {
+                            Ok(offset) => offset,
+                            Err(err) => {
+                                let _ = response.send(PayloadResponse::Failure(err.into()));
+                                return;
+                            }
+                        } as usize;
+
+                    let screen_state = match process.read_u32(global_state_offset + 0x58) {
+                        Ok(offset) => offset,
+                        Err(err) => {
+                            let _ = response.send(PayloadResponse::Failure(err.into()));
+                            return;
+                        }
+                    } as usize;
+
+                    // Do nothing if you're not in an existing run
+                    if screen_state <= 11 {
+                        let _ = response.send(PayloadResponse::Success);
+                        return;
+                    }
+
                     if let Err(err) = process.write_n_bytes(other_state_offset + 0x38, bytes) {
                         let _ = response.send(PayloadResponse::Failure(err.into()));
                         return;
@@ -1079,6 +1102,20 @@ impl Manager {
                                 return;
                             }
                         } as usize;
+
+                    let screen_state = match process.read_u32(global_state_offset + 0x58) {
+                        Ok(offset) => offset,
+                        Err(err) => {
+                            let _ = response.send(PayloadResponse::Failure(err.into()));
+                            return;
+                        }
+                    } as usize;
+
+                    // Do nothing if you're not in an existing run
+                    if screen_state <= 11 {
+                        let _ = response.send(PayloadResponse::Success);
+                        return;
+                    }
 
                     let char_offset = global_state_offset + 0x4459c8 + 0xa24 + (index * 4);
                     if let Err(err) = process.write_n_bytes(char_offset, bytes) {

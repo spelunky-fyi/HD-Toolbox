@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- Don't allow manual slowlook fixer or character toggles during runs
+- Disable characters toggles when frozen with auto-fixer.
+
 ## [0.5.0] - 2022-06-28
 
 ### Added

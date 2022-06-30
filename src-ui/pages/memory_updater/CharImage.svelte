@@ -7,6 +7,8 @@
   import { memoryUpdaterData } from "@hdt/tasks";
   import { invoke } from "@tauri-apps/api/tauri";
 
+  import { autoFixCharacters } from "@hdt/pages/memory_updater/config";
+
   export let x;
   export let y;
   export let charIdx: number;
@@ -41,6 +43,9 @@
   });
 
   function handleClick(ev) {
+    if (connecting || $autoFixCharacters) {
+      return;
+    }
     memoryUpdaterData.update((values) => {
       let newValue = +!$unlocked;
       values.chars[charIdx] = newValue;
@@ -66,7 +71,7 @@
     {height}
   />
   <Switch
-    disabled={connecting}
+    disabled={connecting || $autoFixCharacters}
     checked={$unlocked}
     on:SMUISwitch:change={handleClick}
   />
