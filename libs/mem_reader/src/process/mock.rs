@@ -1,6 +1,9 @@
+use std::path::PathBuf;
+
 use byteorder::ByteOrder;
 use byteorder::LittleEndian;
 
+use super::Failure;
 use super::{OpenProcessError, ReadMemoryError, Version, WriteMemoryError};
 use crate::constants::{Offsets, EXE_NAME, KALI_ACCEPTS};
 
@@ -50,7 +53,7 @@ impl Process {
         true
     }
 
-    pub fn inject_dll(&mut self, dll_path: &PathBuf) -> Result<(), Failure> {
+    pub fn inject_dll(&mut self, _dll_path: &PathBuf) -> Result<(), Failure> {
         Ok(())
     }
 }
