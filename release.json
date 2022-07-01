@@ -1,11 +1,11 @@
 {
-  "version": "v0.5.0",
-  "notes": "Auto-Fixer for Characters, Dynamic Specs Docs, and more!",
-  "pub_date": "2022-06-29T05:00:52Z",
+  "version": "v0.5.1",
+  "notes": "Fixes for auto-fixer",
+  "pub_date": "2022-07-01T06:06:45Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWG90aG5Oc0hWK2hKVm00OFAyZFFHQnJHOE9pcml2RWZzQ0tTUzJkb3oyQ0xNTmQrYUd5RVFTbUI0RzhuZ0REV2lnbldQM2JvbHdjS3Rmd1FiQmZ5WFFZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjU2NDc4NjQzCWZpbGU6RDpcYVxIRC1Ub29sYm94XEhELVRvb2xib3hcdGFyZ2V0XHJlbGVhc2VcYnVuZGxlL21zaS9IRCBUb29sYm94XzAuNS4wX3g2NF9lbi1VUy5tc2kuemlwCm9EeUhmUnQvTnRlNnZBbTI4akVpRUVRRkhzcGUwckY2dDJkUXhXZUg3My84TCtlTGg0TWsrNFFoNEwyYnROR2RBRDhkUnlrZUFpdklFTy9zWURLcUNRPT0K",
-      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.5.0/HD.Toolbox_0.5.0_x64_en-US.msi.zip" 
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWG14MEREaldodGlQVERJYTVIZWpnSEs1OGk3M0pJUktxZzYvSU1DdXdCdEdNaExlVVhHQVFOdzU0NTBGTFlXSVd3bEhDbisrZlNFaWRKNmZ0MWI4dFFjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjU2NjU1NTI0CWZpbGU6SEQgVG9vbGJveF8wLjUuMV94NjRfZW4tVVMubXNpLnppcApkQWtXUkt5ckNDZmJUMVp3YzR4a1dmWEh1RE1mSjF3ZVRpOEg2VDlnMUNMN1JScFZpa0k3YTFkdDFuZGdndkNGRnB1MFdEOGU4ZGVvZWlONXBqTjZDdz09Cg==",
+      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.5.1/HD.Toolbox_0.5.1_x64_en-US.msi.zip"
     }
   }
 }
