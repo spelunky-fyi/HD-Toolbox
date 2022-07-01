@@ -28,6 +28,18 @@ struct Trackers {
     tracker_resources: Arc<HashMap<&'static str, Resource>>,
 }
 
+impl Trackers {
+    fn bad_request(
+        text: &'static str,
+    ) -> Pin<Box<dyn Future<Output = Result<Response<Body>, hyper::http::Error>> + Send>> {
+        Box::pin(async move {
+            Response::builder()
+                .status(StatusCode::BAD_REQUEST)
+                .body(Body::from(text))
+        })
+    }
+}
+
 impl Service<Request<Body>> for Trackers {
     type Response = Response<Body>;
     type Error = hyper::http::Error;
@@ -55,6 +67,29 @@ impl Service<Request<Body>> for Trackers {
 
         // Handle Websockets
         if path.starts_with("/ws/") && hyper_tungstenite::is_upgrade_request(&req) {
+            let headers = req.headers();
+            let host = match headers.get("host") {
+                Some(host) => host,
+                None => return Trackers::bad_request("Host header is missing."),
+            };
+            let origin = match headers.get("origin") {
+                Some(origin) => origin,
+                None => return Trackers::bad_request("Origin header is missing."),
+            };
+
+            let host = match host.to_str() {
+                Ok(host) => host,
+                Err(_) => return Trackers::bad_request("Invalid Host header"),
+            };
+            let origin = match origin.to_str() {
+                Ok(origin) => origin,
+                Err(_) => return Trackers::bad_request("Invalid Origin header"),
+            };
+
+            if origin != format!("http://{}", host) {
+                return Trackers::bad_request("Request made from invalid origin");
+            }
+
             let name: String = path.strip_prefix("/ws/").unwrap().into();
             if !["category", "pacifist"].contains(&name.as_ref()) {
                 return Box::pin(async {
