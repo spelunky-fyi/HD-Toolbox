@@ -37,7 +37,7 @@
     "rollup-plugin-terser": "^7.0.0",
     "sirv-cli": "^2.0.0",
     "smui-theme": "^6.0.0-beta.16",
-    "svelte": "^3.0.0",
+    "svelte": "^3.49.0",
     "svelte-check": "^2.7.2",
     "svelte-feather-icons": "^4.0.0",
     "svelte-markdown": "^0.2.2",
