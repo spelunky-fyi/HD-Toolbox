@@ -4,7 +4,7 @@ Toolbox full of tools for Spelunky HD
 
 ## Potential Functionality
 
-- [ ] Level Viewer (In Progress)
+- [x] Level Viewer
 - [x] Game Launcher
 - [x] Overlay + Injector for Science / Practice (Specs HD)
 - [x] Trackers
