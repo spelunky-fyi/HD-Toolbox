@@ -6,7 +6,7 @@ Toolbox full of tools for Spelunky HD
 
 - [ ] Level Viewer (In Progress)
 - [x] Game Launcher
-- [ ] Overlay + Injector for Science / Practice
+- [x] Overlay + Injector for Science / Practice (Specs HD)
 - [x] Trackers
   - [x] Category
   - [x] Kill Counter
