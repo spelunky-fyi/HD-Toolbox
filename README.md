@@ -2,6 +2,11 @@
 
 Toolbox full of tools for Spelunky HD
 
+## Installation
+
+Grab the latest msi installer [here](https://github.com/spelunky-fyi/HD-Toolbox/releases/latest)
+
+
 ## Potential Functionality
 
 - [x] Level Viewer
