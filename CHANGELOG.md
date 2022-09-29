@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.5.2] - 2022-09-29
+
+### Fixed
+
+- Category Tracker should be more resilient to fast down inputs which should avoid invalidating low% when picking up the sceptre.
+- Process connections should be more resilient to Windows case inconsistencies. This should fix the case where Slow Look, Trackers, Specs, etc didn't work for some users.
+
 ## [0.5.1] - 2022-06-30
 
 ### Changed
