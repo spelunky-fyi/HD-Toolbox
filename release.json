@@ -1,11 +1,11 @@
 {
-  "version": "v0.5.1",
-  "notes": "Fixes for auto-fixer",
-  "pub_date": "2022-07-01T06:06:45Z",
+  "version": "v0.5.2",
+  "notes": "Fixes for cat tracker and process connector",
+  "pub_date": "2022-09-29T17:47:41Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWG14MEREaldodGlQVERJYTVIZWpnSEs1OGk3M0pJUktxZzYvSU1DdXdCdEdNaExlVVhHQVFOdzU0NTBGTFlXSVd3bEhDbisrZlNFaWRKNmZ0MWI4dFFjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjU2NjU1NTI0CWZpbGU6SEQgVG9vbGJveF8wLjUuMV94NjRfZW4tVVMubXNpLnppcApkQWtXUkt5ckNDZmJUMVp3YzR4a1dmWEh1RE1mSjF3ZVRpOEg2VDlnMUNMN1JScFZpa0k3YTFkdDFuZGdndkNGRnB1MFdEOGU4ZGVvZWlONXBqTjZDdz09Cg==",
-      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.5.1/HD.Toolbox_0.5.1_x64_en-US.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWGpRaC9kZ2g0T3RrOEZrL2pZcGtTeHdWRmJGSWk1TXpLUkpGR1FEdTJWczBjR3lDSXdVQXJHVHAzQnZDZnNHTC94YjlMQnRnU1FDV0dnYUtQZTlaVHdBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjY0NDczNTYyCWZpbGU6SEQgVG9vbGJveF8wLjUuMl94NjRfZW4tVVMubXNpLnppcApuaDk5SGZoU0dMWmgyeitDUGwwdFZFQWV4RHFHMndLaUJPdlducDBaSXRxN0FzY1NBU29nbnFrd1hZTFJTZHFVeVBLVXFiSzFuVVByNXI4UGhLOTNDUT09Cg==",
+      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.5.2/HD.Toolbox_0.5.2_x64_en-US.msi.zip"
     }
   }
 }
