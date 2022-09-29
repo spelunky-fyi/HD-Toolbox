@@ -36,7 +36,7 @@ use winapi::um::winnt::PROCESS_VM_WRITE;
 use winapi::um::winnt::{PROCESS_QUERY_INFORMATION, PROCESS_VM_READ};
 use winapi::um::wow64apiset::GetSystemWow64DirectoryW;
 
-use crate::constants::{self, Offsets, EXE_NAME};
+use crate::constants::{self, Offsets};
 use crate::process::{FindProcessError, OpenProcessError, ReadMemoryError, Version};
 
 use super::Failure;
@@ -198,7 +198,8 @@ impl Process {
         }
 
         loop {
-            if &process.szExeFile[..EXE_NAME.len()] == EXE_NAME {
+            let process_name = win_bytes_to_string(&process.szExeFile);
+            if process_name == "Spelunky.exe" {
                 if pid.is_some() {
                     unsafe { CloseHandle(process_snap) };
                     return Err(FindProcessError::MultipleProcessesFound);
@@ -236,6 +237,8 @@ impl Process {
                 "Failed to get process module name...".into(),
             ));
         }
+        let process_image_string = win_bytes_to_string(&process_image_filename).to_lowercase();
+        println!("Base Module Named: {:?}", process_image_string);
 
         // Get handles for all modules in process.
         let mut module_handles: [HMODULE; 1024] = [0 as HMODULE; 1024];
@@ -263,6 +266,7 @@ impl Process {
 
         let num_modules = bytes_written as usize / hmodule_size;
 
+        println!("Checking {:?} possible modules", num_modules);
         // Enumerate Modules to find handle for EXE module
         for idx in 0..num_modules {
             let mut module_filename = [0; MAX_PATH];
@@ -280,7 +284,9 @@ impl Process {
                 continue;
             }
 
-            if module_filename != process_image_filename {
+            let module_string = win_bytes_to_string(&module_filename).to_lowercase();
+            println!("Module Found: {}", module_string);
+            if module_string != process_image_string {
                 continue;
             }
 
@@ -413,6 +419,15 @@ impl Drop for Process {
             CloseHandle(self.handle);
         };
     }
+}
+
+fn win_bytes_to_string(bytes: &[i8]) -> String {
+    let process_bytes: Vec<u8> = bytes
+        .iter()
+        .map(|c| *c as u8)
+        .take_while(|c| *c != 0)
+        .collect();
+    String::from_utf8_lossy(&process_bytes).into()
 }
 
 fn get_load_library_rva() -> Result<usize, InjectDllError> {

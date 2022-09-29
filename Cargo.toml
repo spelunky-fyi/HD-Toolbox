@@ -5,6 +5,7 @@ members = [
   "libs/cat_labels",
   "libs/mem_reader",
   "libs/wad_wix",
+  "libs/show_procs",
 ]
 
 [profile.release]

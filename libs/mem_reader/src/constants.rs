@@ -17,10 +17,6 @@ pub(crate) static SPELUNKY_1_4_OFFSETS: Offsets = Offsets {
 pub(crate) static KALI_ACCEPTS: &'static [u8; 26] = &[
     75, 0, 65, 0, 76, 0, 73, 0, 95, 0, 65, 0, 67, 0, 67, 0, 69, 0, 80, 0, 84, 0, 83, 0, 0, 0,
 ];
-pub(crate) static EXE_NAME: &'static [i8; 13] = &[
-    'S' as i8, 'p' as i8, 'e' as i8, 'l' as i8, 'u' as i8, 'n' as i8, 'k' as i8, 'y' as i8,
-    '.' as i8, 'e' as i8, 'x' as i8, 'e' as i8, '\0' as i8,
-];
 
 pub struct Offsets {
     pub kali_accepts: usize,

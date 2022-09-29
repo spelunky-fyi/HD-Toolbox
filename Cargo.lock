@@ -2761,6 +2761,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "show_procs"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "hdt_mem_reader",
+ "winapi",
+]
+
+[[package]]
 name = "signal-hook-registry"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

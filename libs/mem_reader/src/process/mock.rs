@@ -5,7 +5,7 @@ use byteorder::LittleEndian;
 
 use super::Failure;
 use super::{OpenProcessError, ReadMemoryError, Version, WriteMemoryError};
-use crate::constants::{Offsets, EXE_NAME, KALI_ACCEPTS};
+use crate::constants::{Offsets, KALI_ACCEPTS};
 
 pub struct Process {
     pub base_addr: usize,
@@ -17,7 +17,6 @@ impl Process {
     pub fn new() -> Result<Self, OpenProcessError> {
         // Shut up constants about not being used when not on windows.
         let _ = KALI_ACCEPTS;
-        let _ = EXE_NAME;
         return Ok(Process {
             base_addr: 0,
             version: Version::Spelunky147,
