@@ -238,7 +238,6 @@ impl Process {
             ));
         }
         let process_image_string = win_bytes_to_string(&process_image_filename).to_lowercase();
-        println!("Base Module Named: {:?}", process_image_string);
 
         // Get handles for all modules in process.
         let mut module_handles: [HMODULE; 1024] = [0 as HMODULE; 1024];
@@ -266,7 +265,6 @@ impl Process {
 
         let num_modules = bytes_written as usize / hmodule_size;
 
-        println!("Checking {:?} possible modules", num_modules);
         // Enumerate Modules to find handle for EXE module
         for idx in 0..num_modules {
             let mut module_filename = [0; MAX_PATH];
@@ -285,7 +283,6 @@ impl Process {
             }
 
             let module_string = win_bytes_to_string(&module_filename).to_lowercase();
-            println!("Module Found: {}", module_string);
             if module_string != process_image_string {
                 continue;
             }
