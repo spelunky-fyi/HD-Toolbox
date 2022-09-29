@@ -7,7 +7,7 @@ use winapi::um::tlhelp32::{
     CreateToolhelp32Snapshot, Process32First, Process32Next, PROCESSENTRY32, TH32CS_SNAPPROCESS,
 };
 
-fn get_lunky_procs() -> Result<Vec<String>, anyhow::Error> {
+fn _get_lunky_procs() -> Result<Vec<String>, anyhow::Error> {
     let mut procs = vec![];
 
     let process_snap = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) };

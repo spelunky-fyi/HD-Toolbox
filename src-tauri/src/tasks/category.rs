@@ -42,6 +42,8 @@ struct RunState {
     hell_failed: bool,
     max_failed: bool,
     failed_low_if_not_hell: bool,
+
+    frames_since_down: u32,
 }
 
 impl Default for RunState {
@@ -69,6 +71,8 @@ impl Default for RunState {
             hell_failed: false,
             max_failed: false,
             failed_low_if_not_hell: false,
+
+            frames_since_down: 0,
         }
     }
 }
@@ -82,19 +86,31 @@ impl RunState {
     }
 
     fn update(&mut self, prev_gamestate: &GameState, gamestate: &GameState) {
+        self.update_down_state(gamestate);
         self.update_on_level_start(prev_gamestate, gamestate);
         self.update_no_gold(gamestate);
         self.update_pacifist(gamestate);
         self.update_starting_resources(prev_gamestate, gamestate);
         self.update_has_item(gamestate);
         self.update_held_item(gamestate);
-        self.update_used_item(gamestate);
+        self.update_used_item(prev_gamestate, gamestate);
         self.update_no_transition(gamestate);
         self.update_visited(gamestate);
         self.update_hell(gamestate);
         self.update_max(gamestate);
 
         self.process_victory(gamestate);
+    }
+
+    fn update_down_state(&mut self, gamestate: &GameState) {
+        if Self::is_ducking(gamestate) || gamestate.inputs.contains(&Input::Down) {
+            self.frames_since_down = 0
+        } else {
+            if self.frames_since_down == u32::MAX {
+                return;
+            }
+            self.frames_since_down += 1
+        }
     }
 
     fn update_on_level_start(&mut self, prev_gamestate: &GameState, gamestate: &GameState) {
@@ -272,7 +288,7 @@ impl RunState {
         }
     }
 
-    fn update_used_item(&mut self, gamestate: &GameState) {
+    fn update_used_item(&mut self, prev_gamestate: &GameState, gamestate: &GameState) {
         let banned_low_items = [
             EntityType::Mattock,
             EntityType::Boomerang,
@@ -293,14 +309,31 @@ impl RunState {
 
         if banned_low_items.contains(&held_entity.entity_type)
             && gamestate.inputs.contains(&Input::Whip)
-            && !gamestate.player_ducking
+            && !Self::is_ducking(gamestate)
+            && !Self::is_ducking(prev_gamestate)
             && !gamestate.player_ledge_grabbing
+            && self.frames_since_down > 8
         {
             self.fail_low();
             if &held_entity.entity_type == &EntityType::Teleporter {
                 self.run_labels.rm_label(&Label::NoTeleporter);
             }
         }
+    }
+
+    fn is_ducking(gamestate: &GameState) -> bool {
+        if gamestate.player_ducking {
+            return true;
+        }
+
+        // 25 - Ducking
+        // 6 - Ducked
+        // 7 - Crawling
+        if [25, 6, 7].contains(&gamestate.player_animation_type) {
+            return true;
+        }
+
+        return false;
     }
 
     fn update_no_transition(&mut self, gamestate: &GameState) {

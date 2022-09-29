@@ -501,6 +501,8 @@ pub struct GameState {
     pub player_data: PlayerData,
     pub player_ducking: bool,
     pub player_ledge_grabbing: bool,
+    pub player_animation_type: u32,
+    pub player_animation_frame: u32,
     pub player_held_entity: Option<PartialEntity>,
 
     pub inputs: HashSet<Input>,
@@ -769,6 +771,8 @@ impl CategoryTrackerPayload {
         } as usize;
         let player_data_offset = global_state_offset + (0x440694 + (0x14a4 * active_player));
         let player_data = get_player_data(process, player_data_offset)?;
+        let player_animation_type = process.read_u32(player_ptr + 0x134)?;
+        let player_animation_frame = process.read_u32(player_ptr + 0x138)?;
         let player_ducking = process.read_u8(player_ptr + 0x206)? != 0;
         let player_ledge_grabbing = process.read_u8(player_ptr + 0x207)? != 0;
         let player_held_entity =
@@ -813,6 +817,8 @@ impl CategoryTrackerPayload {
             total_money,
             respawn_level,
 
+            player_animation_type,
+            player_animation_frame,
             player_ducking,
             player_ledge_grabbing,
             player_held_entity,
