@@ -36,7 +36,7 @@
         minWidth: width / 2,
         width: width,
         maxWidth: width * 2,
-        visible: false,
+        visible: true,
       });
     } else {
       await window.requestUserAttention(UserAttentionType.Informational);

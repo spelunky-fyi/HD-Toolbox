@@ -4,8 +4,8 @@ use async_trait::async_trait;
 
 use hdt_cat_labels::{Label, LabelType, RunLabels, TerminusLabel};
 use hdt_mem_reader::manager::{
-    CategoryTrackerPayload, EntityType, GameState, Input, ManagerHandle, PayloadResponse,
-    PlayState, ScreenState,
+    CategoryTrackerPayload, EntityType, GameState, Input, ManagerHandle, PartialEntity,
+    PayloadResponse, PlayState, ScreenState,
 };
 use serde::Serialize;
 
@@ -289,6 +289,25 @@ impl RunState {
     }
 
     fn update_used_item(&mut self, prev_gamestate: &GameState, gamestate: &GameState) {
+        let held_entity = match &gamestate.player_held_entity {
+            Some(entity) => entity,
+            None => return,
+        };
+
+        if self.used_low_banned_item(prev_gamestate, gamestate, held_entity) {
+            self.fail_low();
+            if &held_entity.entity_type == &EntityType::Teleporter {
+                self.run_labels.rm_label(&Label::NoTeleporter);
+            }
+        }
+    }
+
+    fn used_low_banned_item(
+        &mut self,
+        prev_gamestate: &GameState,
+        gamestate: &GameState,
+        held_entity: &PartialEntity,
+    ) -> bool {
         let banned_low_items = [
             EntityType::Mattock,
             EntityType::Boomerang,
@@ -302,23 +321,32 @@ impl RunState {
             EntityType::Sceptre,
         ];
 
-        let held_entity = match &gamestate.player_held_entity {
-            Some(entity) => entity,
-            None => return,
-        };
-
-        if banned_low_items.contains(&held_entity.entity_type)
-            && gamestate.inputs.contains(&Input::Whip)
-            && !Self::is_ducking(gamestate)
-            && !Self::is_ducking(prev_gamestate)
-            && !gamestate.player_ledge_grabbing
-            && self.frames_since_down > 8
-        {
-            self.fail_low();
-            if &held_entity.entity_type == &EntityType::Teleporter {
-                self.run_labels.rm_label(&Label::NoTeleporter);
-            }
+        // Doesn't have banned item held
+        if !banned_low_items.contains(&held_entity.entity_type) {
+            return false;
         }
+
+        // Didn't press Whip button.
+        if !gamestate.inputs.contains(&Input::Whip) {
+            return false;
+        }
+
+        // Player is hanging on a ledge. Can't use an item.
+        if gamestate.player_ledge_grabbing {
+            return false;
+        }
+
+        // Ducking. Can't use item.
+        if Self::is_ducking(gamestate) || Self::is_ducking(prev_gamestate) {
+            return false;
+        }
+
+        // If standing on the ground
+        if gamestate.player_on_floor && self.frames_since_down > 5 {
+            return false;
+        }
+
+        return true;
     }
 
     fn is_ducking(gamestate: &GameState) -> bool {

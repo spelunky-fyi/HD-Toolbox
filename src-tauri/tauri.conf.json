@@ -57,13 +57,17 @@
     "allowlist": {
       "all": true,
       "fs": {
-        "scope": ["$APP/specs/*"]
+        "scope": [
+          "$APP/specs/*"
+        ]
       },
       "http": {
         "scope": [
-          "https://api.github.com/repos/spelunky-fyi/*","https://github.com/spelunky-fyi/*","https://raw.githubusercontent.com/spelunky-fyi/*" ]
+          "https://api.github.com/repos/spelunky-fyi/*",
+          "https://github.com/spelunky-fyi/*",
+          "https://raw.githubusercontent.com/spelunky-fyi/*"
+        ]
       }
-
     },
     "windows": [
       {
