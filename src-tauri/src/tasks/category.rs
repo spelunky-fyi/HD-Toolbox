@@ -342,7 +342,7 @@ impl RunState {
         }
 
         // If standing on the ground
-        if gamestate.player_on_floor && self.frames_since_down > 5 {
+        if gamestate.player_on_floor && self.frames_since_down < 5 {
             return false;
         }
 
