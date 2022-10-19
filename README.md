@@ -25,7 +25,7 @@ Grab the latest msi installer [here](https://github.com/spelunky-fyi/HD-Toolbox/
 - [ ] Mod Management
 - [ ] External Tool Managment
   - [ ] RTA Tracker
-  - [ ] Frozlunky
+  - [x] Frozlunky
 - [x] Memory Shenanigans
   - [x] Character Unlock Manager
   - [x] Slowlook Fix Tool
