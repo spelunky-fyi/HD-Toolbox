@@ -58,12 +58,14 @@
       "all": true,
       "fs": {
         "scope": [
-          "$APP/specs/*"
+          "$APP/specs/*",
+          "$APP/frozlunky/*"
         ]
       },
       "http": {
         "scope": [
           "https://api.github.com/repos/spelunky-fyi/*",
+          "https://api.github.com/repos/sashavol/Frozlunky/releases",
           "https://github.com/spelunky-fyi/*",
           "https://raw.githubusercontent.com/spelunky-fyi/*"
         ]

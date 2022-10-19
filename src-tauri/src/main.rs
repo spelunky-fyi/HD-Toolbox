@@ -59,6 +59,14 @@ fn inject_specs(dll: String) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+fn launch_frozlunky(app_handle: tauri::AppHandle, exe: String) -> Result<(), String> {
+    debug!("Launching: {}", exe);
+    tauri::api::shell::open(&app_handle.shell_scope(), exe, None)
+        .map_err(|err| format!("{:?}", err))?;
+    Ok(())
+}
+
 async fn run_mem_manager() -> ManagerHandle {
     debug!("Spawning thread for Memory Manager");
     let (tx, rx) = oneshot::channel::<ManagerHandle>();
@@ -81,6 +89,7 @@ async fn run_mem_manager() -> ManagerHandle {
 fn main() -> anyhow::Result<()> {
     let main_config = StoreBuilder::new(MAIN_CONFIG.parse()?).build();
     let specs_config = StoreBuilder::new("specs.config".parse()?).build();
+    let frozlunky_config = StoreBuilder::new("frozlunky.config".parse()?).build();
 
     let mut autofix_config = StoreBuilder::new("auto-fixer.config".parse()?).build();
     let autofix_config_watcher = autofix_config.get_watcher();
@@ -108,6 +117,7 @@ fn main() -> anyhow::Result<()> {
                     tracker_pacifist_config,
                     tracker_category_config,
                     specs_config,
+                    frozlunky_config,
                     autofix_config,
                 ])
                 .freeze()
@@ -161,6 +171,7 @@ fn main() -> anyhow::Result<()> {
         .invoke_handler(tauri::generate_handler![
             launch_spelunky_hd,
             inject_specs,
+            launch_frozlunky,
             tasks::start_task,
             tasks::stop_task,
             tasks::fix_slowlook,
