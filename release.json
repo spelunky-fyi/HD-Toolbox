@@ -1,11 +1,11 @@
-{                     
-  "version": "v0.5.3",
-  "notes": "Bug fix for cat tracker",
-  "pub_date": "2022-10-09T01:35:05Z",
+{
+  "version": "v0.6.0",
+  "notes": "Add Frozlunky Management",
+  "pub_date": "2022-10-19T07:02:24Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWHR6RnBpWTF6SS9UZ2Znc3lHUHc1UHlyVEtkdjRFQnIxRWxVemlkM3BJWHg3YmQvODdtMnd4dXhHSjhaQ3BoK3NOTzFSQXQ5YUpOWnpITlYwSWxHa1FFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjY1Mjc5MjY4CWZpbGU6SEQgVG9vbGJveF8wLjUuM194NjRfZW4tVVMubXNpLnppcApLS0R5QWxXZSt4WFVvTm5RYWRBK2plR2R6M294UEl4cnVUSE4vR0xkOUdjUFJkcVArUGhuTFNDZStDeEs0V1lFeElEMGRRTlVoQ0ZvaXd1eVNEVVNEZz09Cg==",
-      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.5.3/HD.Toolbox_0.5.3_x64_en-US.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWHNmdGF6YzFQeHpCaFhMSHZtQ3MwQ0l1aUxDQWhJTFF1eWZlVUJJb1p1MjUyZDJQR0Zaby9iNS9WVFR6dGZLUGJrNXcyT3lxUSswWFZvcVovc2tGYXdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjY2MTYyODA4CWZpbGU6SEQgVG9vbGJveF8wLjYuMF94NjRfZW4tVVMubXNpLnppcAoxOG5wRkpDelo4VHJFd2NZMkVHQ3Zhb1BtdXlpTUpBYkp6UWREMGp1dDR4QzNTTDZkY2NaNG5FOFhOcEQ4V2hIRVNWd0NhaEVRckJkeUJkSnNIdWtDQT09Cg==",
+      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.6.0/HD.Toolbox_0.6.0_x64_en-US.msi.zip"
     }
   }
 }
