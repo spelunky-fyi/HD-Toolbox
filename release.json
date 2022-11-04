@@ -1,11 +1,11 @@
 {
-  "version": "v0.6.0",
-  "notes": "Add Frozlunky Management",
-  "pub_date": "2022-10-19T07:02:24Z",
+  "version": "v0.7.0",
+  "notes": "Updates for bookskip in tracker and other fixes",
+  "pub_date": "2022-11-04T22:12:59Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWHNmdGF6YzFQeHpCaFhMSHZtQ3MwQ0l1aUxDQWhJTFF1eWZlVUJJb1p1MjUyZDJQR0Zaby9iNS9WVFR6dGZLUGJrNXcyT3lxUSswWFZvcVovc2tGYXdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjY2MTYyODA4CWZpbGU6SEQgVG9vbGJveF8wLjYuMF94NjRfZW4tVVMubXNpLnppcAoxOG5wRkpDelo4VHJFd2NZMkVHQ3Zhb1BtdXlpTUpBYkp6UWREMGp1dDR4QzNTTDZkY2NaNG5FOFhOcEQ4V2hIRVNWd0NhaEVRckJkeUJkSnNIdWtDQT09Cg==",
-      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.6.0/HD.Toolbox_0.6.0_x64_en-US.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWHNkTjZOTjAxUlZVaWxsMFYrTlBKTUkvODdrbFVGWGZkbUFuQWN1ZWFqZUpwd1cxc013cGJ2QTVpdWFXdkxqU2ovd3FKaWVJajFCeWFRUCtNcFNsUlF3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjY3NTk5OTEwCWZpbGU6SEQgVG9vbGJveF8wLjcuMF94NjRfZW4tVVMubXNpLnppcAo3R3crTHFjWnU1eUF1UDZIbzJSVTRpeG4xenlaY0t0U05OTHpZN29YVHE2bXlZeDZCWUN2MzQvSkFNdDJFTU8vSjdPNVlobWV4S0g0b2d0RVdhb1NBQT09Cg==",
+      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.7.0/HD.Toolbox_0.7.0_x64_en-US.msi.zip"
     }
   }
 }

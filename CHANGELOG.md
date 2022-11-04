@@ -9,14 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.7.0] - 2022-11-04
 
-### Changed
-
 ### Added
 
 #### Category Tracker
 
 - Support for Bookskip/Chain
 - Support for funny Jungle Shortcut categories because why not.
+
+### Fixed
+
+#### Category Tracker
+
+- No Gold and Low should no longer be invalidated on Victory screen
+
+### Changed
 
 #### Category Tracker
 
