@@ -9,7 +9,6 @@
   import { UserAttentionType, WebviewWindow } from "@tauri-apps/api/window";
 
   import {
-    altNames,
     configLoaded,
     hideEarly,
     showNo,
@@ -87,13 +86,6 @@
           <Checkbox bind:checked={$showPacifist} />
           <span slot="label">Pacifist</span>
         </FormField>
-        <hr />
-        <div>
-          <FormField>
-            <Checkbox bind:checked={$altNames} />
-            <span slot="label">Alternative Name Order</span>
-          </FormField>
-        </div>
       </Content>
     </Card>
   </div>

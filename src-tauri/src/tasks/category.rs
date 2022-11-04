@@ -571,11 +571,10 @@ impl CategoryTracker {
     fn active_response(&mut self, config: &CategoryConfig) -> Response {
         let exclude_labels = Self::get_excluded_labels(config);
         Response::Category(CategoryResponse {
-            category: self.run_state.run_labels.get_text(
-                !self.should_show_modifiers(config),
-                &exclude_labels,
-                config.alt_names,
-            ),
+            category: self
+                .run_state
+                .run_labels
+                .get_text(!self.should_show_modifiers(config), &exclude_labels),
         })
     }
 

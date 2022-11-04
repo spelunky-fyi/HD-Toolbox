@@ -9,14 +9,12 @@ export const hideEarly = writable(false);
 export const showNo = writable(false);
 export const showNoGold = writable(true);
 export const showPacifist = writable(true);
-export const altNames = writable(false);
 
 let configMapping = {
   "hide-early": hideEarly,
   "show-no": showNo,
   "show-no-gold": showNoGold,
   "show-pacifist": showPacifist,
-  "alt-names": altNames,
 };
 
 let subscriptions = {};
