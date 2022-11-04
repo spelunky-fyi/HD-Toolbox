@@ -39,6 +39,7 @@ struct RunState {
     is_shield: bool,
     is_eggy: bool,
 
+    chain_hell_started: bool,
     chain_hell_failed: bool,
     max_failed: bool,
     failed_low_if_not_chain_hell: bool,
@@ -68,6 +69,7 @@ impl Default for RunState {
             is_shield: false,
             is_eggy: false,
 
+            chain_hell_started: false,
             chain_hell_failed: false,
             max_failed: false,
             failed_low_if_not_chain_hell: false,
@@ -245,21 +247,25 @@ impl RunState {
             if !self.chain_hell_failed {
                 match item {
                     EntityType::UdjatEye => {
+                        self.chain_hell_started = true;
                         self.run_labels.add_label(Label::Chain);
                         self.run_labels.set_terminus(TerminusLabel::Hell);
                     }
                     EntityType::Ankh => {
                         self.got_ankh = true;
+                        self.chain_hell_started = true;
                         self.run_labels.add_label(Label::Chain);
                         self.run_labels.set_terminus(TerminusLabel::Hell);
                     }
                     EntityType::Hedjet => {
                         self.got_hedjet = true;
+                        self.chain_hell_started = true;
                         self.run_labels.add_label(Label::Chain);
                         self.run_labels.set_terminus(TerminusLabel::Hell);
                     }
                     EntityType::BookOfTheDead => {
                         self.got_book_of_the_dead = true;
+                        self.chain_hell_started = true;
                         self.run_labels.add_label(Label::Chain);
                         self.run_labels.set_terminus(TerminusLabel::Hell);
                     }
@@ -285,7 +291,9 @@ impl RunState {
                     self.run_labels.add_label(Label::Shield);
 
                     if !self.chain_hell_failed {
-                        self.run_labels.add_label(Label::Chain);
+                        if self.chain_hell_started {
+                            self.run_labels.add_label(Label::Chain);
+                        }
                         self.run_labels.rm_label(&Label::Bookskip);
                     } else {
                         self.run_labels.add_label(Label::Bookskip);
@@ -299,7 +307,9 @@ impl RunState {
                         self.run_labels.add_label(Label::Eggplant);
 
                         if !self.chain_hell_failed {
-                            self.run_labels.add_label(Label::Chain);
+                            if self.chain_hell_started {
+                                self.run_labels.add_label(Label::Chain);
+                            }
                             self.run_labels.rm_label(&Label::Bookskip);
                         } else {
                             self.run_labels.add_label(Label::Bookskip);

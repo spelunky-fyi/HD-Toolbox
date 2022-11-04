@@ -415,6 +415,9 @@ impl RunLabels {
                             }
                         }
                         Label::Bookskip => {
+                            if visible.contains(&LabelType::Label(Label::Low)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
                             if visible.contains(&LabelType::Label(Label::TempleShortcut)) {
                                 visible.remove(&label_metadata.label_type);
                             }

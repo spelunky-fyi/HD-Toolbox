@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.7.1] - 2022-11-04
+
+### Fixed
+
+#### Category Tracker
+
+- Don't infer Chain/Bookskip until chain is started or failed
+- Don't show Bookskip on Low% Hell runs
+
 ## [0.7.0] - 2022-11-04
 
 ### Added
