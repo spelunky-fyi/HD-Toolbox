@@ -7,12 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.7.0] - 2022-11-04
+
+### Changed
+
+### Added
+
+#### Category Tracker
+
+- Support for Bookskip/Chain
+- Support for funny Jungle Shortcut categories because why not.
+
+#### Category Tracker
+
+- Updated name orders to match current MossRanking order
+- Shortcut categories no longer turn Invalid, instead using any% and such.
+
 ## [0.6.0] - 2022-10-18
 
 ### Added
 
 - Support for managing Frozlunky downloads/launching
-
 
 ## [0.5.3] - 2022-10-08
 
