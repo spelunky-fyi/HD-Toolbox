@@ -1,11 +1,11 @@
 {
-  "version": "v0.7.0",
-  "notes": "Updates for bookskip in tracker and other fixes",
-  "pub_date": "2022-11-04T22:12:59Z",
+  "version": "v0.7.1",
+  "notes": "cat tracker bug fixes",
+  "pub_date": "2022-11-04T23:26:02Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWHNkTjZOTjAxUlZVaWxsMFYrTlBKTUkvODdrbFVGWGZkbUFuQWN1ZWFqZUpwd1cxc013cGJ2QTVpdWFXdkxqU2ovd3FKaWVJajFCeWFRUCtNcFNsUlF3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjY3NTk5OTEwCWZpbGU6SEQgVG9vbGJveF8wLjcuMF94NjRfZW4tVVMubXNpLnppcAo3R3crTHFjWnU1eUF1UDZIbzJSVTRpeG4xenlaY0t0U05OTHpZN29YVHE2bXlZeDZCWUN2MzQvSkFNdDJFTU8vSjdPNVlobWV4S0g0b2d0RVdhb1NBQT09Cg==",
-      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.7.0/HD.Toolbox_0.7.0_x64_en-US.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWG9IcCtianNTdEVWd1hWNGFRbUd3bldqNGtxYUVzaHhjeFRTWi9pSlQ4aUJyN2NhR2xndjBoWU5WU0wyY3dXME9lM0VmTTU3NVhlaFllVllGN1pEd0FZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjY3NjA0MzE1CWZpbGU6SEQgVG9vbGJveF8wLjcuMV94NjRfZW4tVVMubXNpLnppcApKbTFRRlU1eWxvRkVMT0RQcExTbzRtNGp0aHFrdVpXMkZrSXdtQWJCS1RSaURsYzJzazZWd1k5UUtlb2p4RjVZN2lqOVVKazc2SFg1Mms0NkVJbm5CUT09Cg==",
+      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.7.1/HD.Toolbox_0.7.1_x64_en-US.msi.zip"
     }
   }
 }
