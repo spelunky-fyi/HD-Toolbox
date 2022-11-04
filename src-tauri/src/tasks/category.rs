@@ -39,9 +39,9 @@ struct RunState {
     is_shield: bool,
     is_eggy: bool,
 
-    hell_failed: bool,
+    chain_hell_failed: bool,
     max_failed: bool,
-    failed_low_if_not_hell: bool,
+    failed_low_if_not_chain_hell: bool,
 
     frames_since_down: u32,
 }
@@ -68,9 +68,9 @@ impl Default for RunState {
             is_shield: false,
             is_eggy: false,
 
-            hell_failed: false,
+            chain_hell_failed: false,
             max_failed: false,
-            failed_low_if_not_hell: false,
+            failed_low_if_not_chain_hell: false,
 
             frames_since_down: 0,
         }
@@ -88,6 +88,8 @@ impl RunState {
     fn update(&mut self, prev_gamestate: &GameState, gamestate: &GameState) {
         self.update_down_state(gamestate);
         self.update_on_level_start(prev_gamestate, gamestate);
+        self.update_chain_hell(gamestate);
+        self.update_hell(gamestate);
         self.update_no_gold(gamestate);
         self.update_pacifist(gamestate);
         self.update_starting_resources(prev_gamestate, gamestate);
@@ -96,7 +98,6 @@ impl RunState {
         self.update_used_item(prev_gamestate, gamestate);
         self.update_no_transition(gamestate);
         self.update_visited(gamestate);
-        self.update_hell(gamestate);
         self.update_max(gamestate);
 
         self.process_victory(gamestate);
@@ -170,48 +171,60 @@ impl RunState {
             }
         }
     }
+
     fn update_hell(&mut self, gamestate: &GameState) {
-        if self.hell_failed {
+        if gamestate.level > 16 {
+            if self.chain_hell_failed {
+                self.run_labels.add_label(Label::Bookskip)
+            } else {
+                self.run_labels.add_label(Label::Chain)
+            }
+            self.run_labels.set_terminus(TerminusLabel::Hell);
+        }
+    }
+
+    fn update_chain_hell(&mut self, gamestate: &GameState) {
+        if self.chain_hell_failed {
             return;
         }
 
         if self.level_started {
             // Last Level of Jungle
             if gamestate.level == 8 && !gamestate.is_black_market && !self.got_ankh {
-                self.fail_hell();
+                self.fail_chain_hell();
             }
 
             // Start of Ice Caves
             if gamestate.level == 9 && !self.got_ankh {
-                self.fail_hell();
+                self.fail_chain_hell();
             }
 
             // Last Level of Ice Caves
             if gamestate.level == 12 && !self.visit_worm && !self.got_hedjet {
-                self.fail_hell();
+                self.fail_chain_hell();
             }
 
             // Start of Temple
             if gamestate.level == 13 && !self.got_hedjet {
-                self.fail_hell();
+                self.fail_chain_hell();
             }
 
             // Temple 4-2
             if gamestate.level == 14 && !self.someone_holding(gamestate, EntityType::Sceptre) {
-                self.fail_hell();
+                self.fail_chain_hell();
             }
 
             if gamestate.level == 15 && !gamestate.is_city_of_gold {
-                self.fail_hell();
+                self.fail_chain_hell();
             }
 
             if gamestate.level == 16 && !self.got_book_of_the_dead {
-                self.fail_hell();
+                self.fail_chain_hell();
             }
         }
 
         if gamestate.play_state == PlayState::UsingAnkh && !gamestate.moai_spawned {
-            self.fail_hell();
+            self.fail_chain_hell();
         }
     }
 
@@ -224,26 +237,30 @@ impl RunState {
 
         for item in &gamestate.player_data.has_item {
             if low_hell_items.contains(item) {
-                self.failed_low_if_not_hell = true;
+                self.failed_low_if_not_chain_hell = true;
             } else {
                 self.fail_low();
             }
 
-            if !self.hell_failed {
+            if !self.chain_hell_failed {
                 match item {
                     EntityType::UdjatEye => {
+                        self.run_labels.add_label(Label::Chain);
                         self.run_labels.set_terminus(TerminusLabel::Hell);
                     }
                     EntityType::Ankh => {
                         self.got_ankh = true;
+                        self.run_labels.add_label(Label::Chain);
                         self.run_labels.set_terminus(TerminusLabel::Hell);
                     }
                     EntityType::Hedjet => {
                         self.got_hedjet = true;
+                        self.run_labels.add_label(Label::Chain);
                         self.run_labels.set_terminus(TerminusLabel::Hell);
                     }
                     EntityType::BookOfTheDead => {
                         self.got_book_of_the_dead = true;
+                        self.run_labels.add_label(Label::Chain);
                         self.run_labels.set_terminus(TerminusLabel::Hell);
                     }
                     _ => {}
@@ -253,24 +270,43 @@ impl RunState {
     }
 
     fn update_held_item(&mut self, gamestate: &GameState) {
-        let held_entity = match &gamestate.player_held_entity {
-            Some(entity) => entity,
-            None => return,
-        };
-
-        if self.is_low_percent && held_entity.entity_type == EntityType::Shield {
-            self.fail_low();
+        if self.is_victory(gamestate) {
+            return;
         }
 
-        if !self.hell_failed {
+        if let Some(held_entity) = &gamestate.player_held_entity {
+            if self.is_low_percent && held_entity.entity_type == EntityType::Shield {
+                self.fail_low();
+            }
+
             match held_entity.entity_type {
                 EntityType::Shield => {
                     self.is_shield = true;
                     self.run_labels.add_label(Label::Shield);
+
+                    if !self.chain_hell_failed {
+                        self.run_labels.add_label(Label::Chain);
+                        self.run_labels.rm_label(&Label::Bookskip);
+                    } else {
+                        self.run_labels.add_label(Label::Bookskip);
+                        self.run_labels.rm_label(&Label::Chain);
+                    }
+                    self.run_labels.set_terminus(TerminusLabel::Hell);
                 }
                 EntityType::Eggplant => {
-                    self.is_eggy = true;
-                    self.run_labels.add_label(Label::Eggplant);
+                    if !self.is_eggy {
+                        self.is_eggy = true;
+                        self.run_labels.add_label(Label::Eggplant);
+
+                        if !self.chain_hell_failed {
+                            self.run_labels.add_label(Label::Chain);
+                            self.run_labels.rm_label(&Label::Bookskip);
+                        } else {
+                            self.run_labels.add_label(Label::Bookskip);
+                            self.run_labels.rm_label(&Label::Chain);
+                        }
+                        self.run_labels.set_terminus(TerminusLabel::Hell);
+                    }
                 }
                 _ => {}
             }
@@ -280,10 +316,20 @@ impl RunState {
             if self.is_shield && !self.someone_holding(gamestate, EntityType::Shield) {
                 self.is_shield = false;
                 self.run_labels.rm_label(&Label::Shield);
+                if self.chain_hell_failed || gamestate.level <= 16 {
+                    self.run_labels.rm_label(&Label::Bookskip);
+                    self.run_labels.rm_label(&Label::Chain);
+                    self.run_labels.set_terminus(TerminusLabel::Any);
+                }
             }
             if self.is_eggy && !self.someone_holding(gamestate, EntityType::Eggplant) {
                 self.is_eggy = false;
                 self.run_labels.rm_label(&Label::Eggplant);
+                if self.chain_hell_failed || gamestate.level <= 16 {
+                    self.run_labels.rm_label(&Label::Bookskip);
+                    self.run_labels.rm_label(&Label::Chain);
+                    self.run_labels.set_terminus(TerminusLabel::Any);
+                }
             }
         }
     }
@@ -377,20 +423,22 @@ impl RunState {
         }
     }
 
-    fn fail_hell(&mut self) {
-        if self.hell_failed {
+    fn fail_chain_hell(&mut self) {
+        if self.chain_hell_failed {
             return;
         }
 
-        self.hell_failed = true;
+        self.chain_hell_failed = true;
 
-        self.run_labels.rm_label(&Label::Eggplant);
-        self.run_labels.rm_label(&Label::Shield);
-        if !self.run_labels.terminus_requires_low() {
+        self.run_labels.rm_label(&Label::Chain);
+        if self.run_labels.has_label(&Label::Eggplant) || self.run_labels.has_label(&Label::Shield)
+        {
+            self.run_labels.add_label(Label::Bookskip);
+        } else {
             self.run_labels.set_terminus(TerminusLabel::Any);
         }
 
-        if self.failed_low_if_not_hell {
+        if self.failed_low_if_not_chain_hell {
             self.fail_low();
         }
     }
@@ -402,11 +450,6 @@ impl RunState {
 
         self.max_failed = true;
         self.run_labels.rm_label(&Label::Max);
-
-        let current_terminus = self.run_labels.get_terminus().clone();
-        if current_terminus == TerminusLabel::MaxIceCavesShortcut {
-            self.run_labels.set_terminus(TerminusLabel::Invalid);
-        }
     }
 
     fn someone_holding(&self, gamestate: &GameState, item: EntityType) -> bool {
@@ -433,14 +476,14 @@ impl RunState {
         self.is_low_percent = false;
         self.run_labels.rm_label(&Label::Low);
         self.run_labels.rm_label(&Label::No);
-
-        if self.run_labels.terminus_requires_low() {
-            self.run_labels.set_terminus(TerminusLabel::Invalid)
-        }
     }
 
     fn update_starting_resources(&mut self, prev_gamestate: &GameState, gamestate: &GameState) {
         if !self.is_low_percent {
+            return;
+        }
+
+        if self.is_victory(gamestate) {
             return;
         }
 
@@ -472,19 +515,22 @@ impl RunState {
         }
     }
 
-    fn process_victory(&mut self, gamestate: &GameState) {
-        if ![
+    fn is_victory(&mut self, gamestate: &GameState) -> bool {
+        [
             ScreenState::VictoryWalking,
             ScreenState::VictoryEruption,
             ScreenState::VictoryOutside,
         ]
         .contains(&gamestate.screen_state)
-        {
+    }
+
+    fn process_victory(&mut self, gamestate: &GameState) {
+        if !self.is_victory(gamestate) {
             return;
         }
 
         if gamestate.level == 16 {
-            self.fail_hell();
+            self.fail_chain_hell();
         }
 
         self.update_ropes_end_of_run(gamestate);
@@ -505,6 +551,9 @@ impl RunState {
     }
 
     fn update_no_gold(&mut self, gamestate: &GameState) {
+        if self.is_victory(gamestate) {
+            return;
+        }
         if gamestate.total_money > 0 {
             self.run_labels.rm_label(&Label::NoGold);
             self.run_labels.rm_label(&Label::No);
@@ -595,8 +644,10 @@ impl CategoryTracker {
         if gamestate.total_time_ms < prev_gamestate.total_time_ms
             || gamestate.respawn_level != prev_gamestate.respawn_level
         {
-            if gamestate.respawn_level == 8 {
-                self.run_state = RunState::with_run_labels(RunLabels::new_max_ics())
+            if gamestate.respawn_level == 4 {
+                self.run_state = RunState::with_run_labels(RunLabels::new_jungle_shortcut())
+            } else if gamestate.respawn_level == 8 {
+                self.run_state = RunState::with_run_labels(RunLabels::new_ics())
             } else if gamestate.respawn_level == 12 {
                 self.run_state = RunState::with_run_labels(RunLabels::new_temple_shortcut())
             } else {

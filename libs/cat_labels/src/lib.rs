@@ -43,6 +43,9 @@ impl Default for LabelMetadata {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub enum Label {
+    JungleShortcut,
+    IceCavesShortcut,
+    TempleShortcut,
     NoTeleporter,
     NoGold,
     Haunted,
@@ -69,6 +72,27 @@ impl Label {
 
     pub fn to_label_metadata(&self) -> LabelMetadata {
         match self {
+            Label::JungleShortcut => LabelMetadata {
+                name: "Jungle Shortcut",
+                label_type: LabelType::Label(Label::JungleShortcut),
+                percent_priority: Some(0),
+                name_priority: 9,
+                ..Default::default()
+            },
+            Label::TempleShortcut => LabelMetadata {
+                name: "Temple Shortcut",
+                label_type: LabelType::Label(Label::TempleShortcut),
+                percent_priority: Some(0),
+                name_priority: 9,
+                ..Default::default()
+            },
+            Label::IceCavesShortcut => LabelMetadata {
+                name: "Ice Caves Shortcut",
+                label_type: LabelType::Label(Label::IceCavesShortcut),
+                percent_priority: Some(0),
+                name_priority: 9,
+                ..Default::default()
+            },
             Label::NoTeleporter => LabelMetadata {
                 name: "No Teleporter",
                 label_type: LabelType::Label(Label::NoTeleporter),
@@ -151,8 +175,6 @@ impl Label {
 pub enum TerminusLabel {
     Any,
     Hell,
-    TempleShortcut,
-    MaxIceCavesShortcut,
     BigMoney,
     JumboMoney,
     Death,
@@ -172,18 +194,6 @@ impl TerminusLabel {
                 name: "Hell",
                 label_type: LabelType::TerminusLabel(TerminusLabel::Hell),
                 percent_priority: Some(1),
-                ..Default::default()
-            },
-            TerminusLabel::TempleShortcut => LabelMetadata {
-                name: "Temple Shortcut Low",
-                label_type: LabelType::TerminusLabel(TerminusLabel::TempleShortcut),
-                percent_priority: Some(0),
-                ..Default::default()
-            },
-            TerminusLabel::MaxIceCavesShortcut => LabelMetadata {
-                name: "Max Ice Caves Shortcut Low",
-                label_type: LabelType::TerminusLabel(TerminusLabel::MaxIceCavesShortcut),
-                percent_priority: Some(0),
                 ..Default::default()
             },
             TerminusLabel::BigMoney => LabelMetadata {
@@ -237,14 +247,27 @@ impl RunLabels {
         }
     }
 
-    pub fn new_temple_shortcut() -> Self {
-        Self::new(Label::default_labels(), TerminusLabel::TempleShortcut)
+    pub fn new_jungle_shortcut() -> Self {
+        let mut labels = Label::default_labels();
+        labels.insert(Label::JungleShortcut);
+
+        Self::new(labels, TerminusLabel::Any)
     }
 
-    pub fn new_max_ics() -> Self {
+    pub fn new_temple_shortcut() -> Self {
         let mut labels = Label::default_labels();
+        labels.insert(Label::TempleShortcut);
+
+        Self::new(labels, TerminusLabel::Any)
+    }
+
+    pub fn new_ics() -> Self {
+        let mut labels = Label::default_labels();
+        labels.insert(Label::IceCavesShortcut);
+        // Assume you're going for max if you're starting at Ice Caves
         labels.insert(Label::Max);
-        Self::new(labels, TerminusLabel::MaxIceCavesShortcut)
+
+        Self::new(labels, TerminusLabel::Any)
     }
 
     pub fn set_terminus(&mut self, terminus: TerminusLabel) {
@@ -273,14 +296,6 @@ impl RunLabels {
 
     pub fn has_label(&self, label: &Label) -> bool {
         self.labels.contains(label)
-    }
-
-    pub fn terminus_requires_low(&self) -> bool {
-        [
-            TerminusLabel::TempleShortcut,
-            TerminusLabel::MaxIceCavesShortcut,
-        ]
-        .contains(&self.terminus)
     }
 
     fn get_percent(
@@ -321,9 +336,7 @@ impl RunLabels {
     ) -> HashSet<LabelType> {
         // Most Terminus Labels result in only showing themselves
         match self.terminus {
-            TerminusLabel::TempleShortcut
-            | TerminusLabel::MaxIceCavesShortcut
-            | TerminusLabel::BigMoney
+            TerminusLabel::BigMoney
             | TerminusLabel::JumboMoney
             | TerminusLabel::Death
             | TerminusLabel::Invalid => {
@@ -358,6 +371,20 @@ impl RunLabels {
                             if visible.contains(&LabelType::Label(Label::No)) {
                                 visible.remove(&label_metadata.label_type);
                             }
+                            if visible.contains(&LabelType::Label(Label::TempleShortcut)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                            if visible.contains(&LabelType::Label(Label::IceCavesShortcut)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                        }
+                        Label::Pacifist => {
+                            if visible.contains(&LabelType::Label(Label::TempleShortcut)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                            if visible.contains(&LabelType::Label(Label::IceCavesShortcut)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
                         }
                         Label::NoTeleporter => {
                             if visible.contains(&LabelType::Label(Label::Low)) {
@@ -375,9 +402,23 @@ impl RunLabels {
                             if visible.contains(&LabelType::Label(Label::Pacifist)) {
                                 visible.remove(&label_metadata.label_type);
                             }
+                            if visible.contains(&LabelType::Label(Label::TempleShortcut)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                            if visible.contains(&LabelType::Label(Label::IceCavesShortcut)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
                         }
                         Label::Low => {
                             if visible.contains(&LabelType::Label(Label::No)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                        }
+                        Label::Bookskip => {
+                            if visible.contains(&LabelType::Label(Label::TempleShortcut)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                            if visible.contains(&LabelType::Label(Label::IceCavesShortcut)) {
                                 visible.remove(&label_metadata.label_type);
                             }
                         }
@@ -414,6 +455,9 @@ impl RunLabels {
                                 visible.remove(&label_metadata.label_type);
                             }
                             if visible.contains(&LabelType::Label(Label::Eggplant)) {
+                                visible.remove(&label_metadata.label_type);
+                            }
+                            if visible.contains(&LabelType::Label(Label::Shield)) {
                                 visible.remove(&label_metadata.label_type);
                             }
                         }
@@ -504,10 +548,10 @@ mod tests {
             String::from("Temple Shortcut Low%")
         );
 
-        let mut labels = RunLabels::new_max_ics();
+        let mut labels = RunLabels::new_ics();
         assert_eq!(
             labels.get_text(true, &exclude_labels),
-            String::from("Max Ice Caves Shortcut Low%")
+            String::from("Ice Caves Shortcut Max Low%")
         );
     }
 
