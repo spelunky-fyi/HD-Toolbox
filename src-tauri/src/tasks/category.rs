@@ -98,7 +98,6 @@ impl RunState {
         self.update_has_item(gamestate);
         self.update_held_item(gamestate);
         self.update_used_item(prev_gamestate, gamestate);
-        self.update_no_transition(gamestate);
         self.update_visited(gamestate);
         self.update_max(gamestate);
 
@@ -418,19 +417,6 @@ impl RunState {
         }
 
         return false;
-    }
-
-    fn update_no_transition(&mut self, gamestate: &GameState) {
-        if gamestate.screen_state != ScreenState::LevelCompleted {
-            return;
-        }
-
-        if let Some(held_item) = &gamestate.player_held_entity {
-            if held_item.entity_type == EntityType::Player {
-                return;
-            }
-            self.run_labels.rm_label(&Label::No);
-        }
     }
 
     fn fail_chain_hell(&mut self) {
