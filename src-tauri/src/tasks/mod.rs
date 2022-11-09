@@ -2,6 +2,7 @@ pub mod auto_fixer;
 pub mod category;
 pub mod memory_updater;
 pub mod pacifist;
+pub mod session;
 pub mod tracker_task;
 pub mod trackers;
 pub mod web_server;

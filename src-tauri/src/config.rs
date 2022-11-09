@@ -34,6 +34,32 @@ impl Default for CategoryConfig {
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "kebab-case")]
+pub struct SessionConfig {
+    //Session Summary
+    pub enable_session_stats: bool,
+    // Run #
+    // Deaths
+    // Kills
+    // Gold
+    // IGT
+
+    // Run Summary
+    pub enable_run_stats: bool,
+    // Speed IL, Area, Pace
+    // Score IL, Area, Pace
+}
+
+impl Default for SessionConfig {
+    fn default() -> Self {
+        Self {
+            enable_session_stats: true,
+            enable_run_stats: true,
+        }
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all = "kebab-case")]
 pub struct AutoFixerConfig {
     pub auto_fix_slow_look: bool,
     pub auto_fix_characters: bool,

@@ -96,9 +96,11 @@ fn main() -> anyhow::Result<()> {
 
     let mut tracker_pacifist_config = StoreBuilder::new("tracker-pacifist.config".parse()?).build();
     let mut tracker_category_config = StoreBuilder::new("tracker-category.config".parse()?).build();
+    let mut tracker_session_config = StoreBuilder::new("tracker-session.config".parse()?).build();
     let mut tracker_configs = HashMap::new();
     tracker_configs.insert(TrackerType::Pacifist, tracker_pacifist_config.get_watcher());
     tracker_configs.insert(TrackerType::Category, tracker_category_config.get_watcher());
+    tracker_configs.insert(TrackerType::Session, tracker_session_config.get_watcher());
 
     let log_plugin = LoggerBuilder::new()
         .level_for("attohttpc", log::LevelFilter::Warn)
@@ -116,6 +118,7 @@ fn main() -> anyhow::Result<()> {
                     main_config,
                     tracker_pacifist_config,
                     tracker_category_config,
+                    tracker_session_config,
                     specs_config,
                     frozlunky_config,
                     autofix_config,

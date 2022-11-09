@@ -91,7 +91,7 @@ impl Service<Request<Body>> for Trackers {
             }
 
             let name: String = path.strip_prefix("/ws/").unwrap().into();
-            if !["category", "pacifist"].contains(&name.as_ref()) {
+            if !["category", "pacifist", "session"].contains(&name.as_ref()) {
                 return Box::pin(async {
                     Response::builder()
                         .status(StatusCode::NOT_FOUND)
@@ -138,6 +138,7 @@ async fn handle_websocket(
     let tracker_type = match name.as_ref() {
         "category" => TrackerType::Category,
         "pacifist" => TrackerType::Pacifist,
+        "session" => TrackerType::Session,
         _ => panic!("This shouldn't be possible."),
     };
 

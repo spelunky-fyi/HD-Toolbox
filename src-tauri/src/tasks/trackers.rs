@@ -13,12 +13,14 @@ use tokio::time::MissedTickBehavior;
 
 use super::category::{CategoryResponse, CategoryTracker};
 use super::pacifist::{PacifistResponse, PacifistTracker};
+use super::session::{SessionResponse, SessionTracker};
 use super::tracker_task::{TrackerTask, TrackerTaskHandle};
 
 #[derive(Debug, Serialize, Clone, PartialEq, Eq)]
 #[serde(tag = "type", content = "data")]
 pub enum Response {
     Category(CategoryResponse),
+    Session(SessionResponse),
     Pacifist(PacifistResponse),
     Failure(String),
     Empty,
@@ -27,6 +29,7 @@ pub enum Response {
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum TrackerType {
     Category,
+    Session,
     Pacifist,
 }
 
@@ -188,6 +191,12 @@ impl TrackerManager {
             TrackerType::Category => {
                 tauri::async_runtime::spawn(async move {
                     let tracker = CategoryTracker::new(mem_manager);
+                    task.run(tracker).await;
+                });
+            }
+            TrackerType::Session => {
+                tauri::async_runtime::spawn(async move {
+                    let tracker = SessionTracker::new(mem_manager);
                     task.run(tracker).await;
                 });
             }

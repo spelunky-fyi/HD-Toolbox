@@ -7,6 +7,7 @@
   import LayoutGrid from "@smui/layout-grid/src/LayoutGrid.svelte";
   import Switch from "@smui/switch/src/Switch.svelte";
   import Category from "./Category.svelte";
+  import Session from "./Session.svelte";
   import Pacifist from "./Pacifist.svelte";
 </script>
 
@@ -48,6 +49,12 @@
     <Cell span={6}>
       <Pacifist enabled={enabledTrackers} />
     </Cell>
+  </LayoutGrid>
+  <LayoutGrid>
+    <Cell span={6}>
+      <Session enabled={enabledTrackers} />
+    </Cell>
+    <Cell span={6} />
   </LayoutGrid>
   <div>
     {#if $trackersState === TaskState.Pending}
