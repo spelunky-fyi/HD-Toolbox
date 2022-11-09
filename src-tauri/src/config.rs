@@ -32,28 +32,44 @@ impl Default for CategoryConfig {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 pub struct SessionConfig {
     //Session Summary
     pub enable_session_stats: bool,
-    // Run #
-    // Deaths
-    // Kills
-    // Gold
-    // IGT
+    pub show_session_runs: bool,
+    pub show_session_deaths: bool,
+    pub show_session_wins: bool,
+    pub show_session_kills: bool,
+    pub show_session_score: bool,
+    pub show_session_time: bool,
 
     // Run Summary
     pub enable_run_stats: bool,
-    // Speed IL, Area, Pace
-    // Score IL, Area, Pace
+    pub show_run_speed_stats: bool,
+    pub show_run_score_stats: bool,
+    pub show_run_il: bool,
+    pub show_run_area: bool,
+    pub show_run_pace: bool,
 }
 
 impl Default for SessionConfig {
     fn default() -> Self {
         Self {
             enable_session_stats: true,
+            show_session_runs: true,
+            show_session_deaths: false,
+            show_session_wins: false,
+            show_session_kills: false,
+            show_session_score: false,
+            show_session_time: false,
+
             enable_run_stats: true,
+            show_run_speed_stats: true,
+            show_run_score_stats: false,
+            show_run_il: true,
+            show_run_area: true,
+            show_run_pace: true,
         }
     }
 }

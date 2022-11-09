@@ -541,7 +541,6 @@ const ACTIVE_SCENES: &[ScreenState] = &[
     ScreenState::VictoryWalking,
     ScreenState::VictoryEruption,
     ScreenState::VictoryOutside,
-    ScreenState::Tutorial,
     ScreenState::DeathScreen,
 ];
 

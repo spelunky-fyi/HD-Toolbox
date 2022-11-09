@@ -11,7 +11,18 @@
   import {
     configLoaded,
     enableRunStats,
+    showRunScoreStats,
+    showRunSpeedStats,
+    showRunIl,
+    showRunArea,
+    showRunPace,
     enableSessionStats,
+    showSessionRuns,
+    showSessionDeaths,
+    showSessionWins,
+    showSessionKills,
+    showSessionTime,
+    showSessionScore,
   } from "./configs/session";
   import { trackerPort } from "@hdt/config";
 
@@ -64,7 +75,11 @@
         </div>
       </Content>
       <Content>
-        <div>
+        <div
+          class="tracker-config {$enableSessionStats
+            ? ''
+            : 'tracker-config-disabled'}"
+        >
           <h4 style="margin: 2px;">Session Config</h4>
           <hr style="margin: 2px;" />
           <div>
@@ -73,14 +88,98 @@
               <span slot="label">Enable Session Stats</span>
             </FormField>
           </div>
+          <div>
+            <FormField>
+              <Checkbox
+                bind:checked={$showSessionRuns}
+                disabled={!$enableSessionStats}
+              />
+              <span slot="label">Show Runs</span>
+            </FormField>
+            <FormField>
+              <Checkbox
+                bind:checked={$showSessionDeaths}
+                disabled={!$enableSessionStats}
+              />
+              <span slot="label">Show Deaths</span>
+            </FormField>
+            <FormField>
+              <Checkbox
+                bind:checked={$showSessionWins}
+                disabled={!$enableSessionStats}
+              />
+              <span slot="label">Show Wins</span>
+            </FormField>
+            <FormField>
+              <Checkbox
+                bind:checked={$showSessionKills}
+                disabled={!$enableSessionStats}
+              />
+              <span slot="label">Show Kills</span>
+            </FormField>
+            <FormField>
+              <Checkbox
+                bind:checked={$showSessionScore}
+                disabled={!$enableSessionStats}
+              />
+              <span slot="label">Show Score</span>
+            </FormField>
+            <FormField>
+              <Checkbox
+                bind:checked={$showSessionTime}
+                disabled={!$enableSessionStats}
+              />
+              <span slot="label">Show Time</span>
+            </FormField>
+          </div>
         </div>
-        <div>
+        <div
+          class="tracker-config {$enableRunStats
+            ? ''
+            : 'tracker-config-disabled'}"
+        >
           <h4 style="margin: 2px;">Run Config</h4>
           <hr style="margin: 2px;" />
           <div>
             <FormField>
               <Checkbox bind:checked={$enableRunStats} />
               <span slot="label">Enable Run Stats</span>
+            </FormField>
+          </div>
+          <div>
+            <FormField>
+              <Checkbox
+                bind:checked={$showRunSpeedStats}
+                disabled={!$enableRunStats}
+              />
+              <span slot="label">Show Speed Stats</span>
+            </FormField>
+            <FormField>
+              <Checkbox
+                bind:checked={$showRunScoreStats}
+                disabled={!$enableRunStats}
+              />
+              <span slot="label">Show Score Stats</span>
+            </FormField>
+          </div>
+          <div>
+            <FormField>
+              <Checkbox bind:checked={$showRunIl} disabled={!$enableRunStats} />
+              <span slot="label">Show ILs</span>
+            </FormField>
+            <FormField>
+              <Checkbox
+                bind:checked={$showRunArea}
+                disabled={!$enableRunStats}
+              />
+              <span slot="label">Show Area</span>
+            </FormField>
+            <FormField>
+              <Checkbox
+                bind:checked={$showRunPace}
+                disabled={!$enableRunStats}
+              />
+              <span slot="label">Show Pace</span>
             </FormField>
           </div>
         </div>
@@ -97,4 +196,7 @@
 </HelpDialog>
 
 <style>
+  .tracker-config-disabled :global(.mdc-form-field) {
+    color: grey;
+  }
 </style>

@@ -17,8 +17,10 @@
   <div class="wrapper">
     {#if $state === WebSocketState.Pending}
       <span class="output pending">Connecting...</span>
+    {:else if $data.err !== null}
+      <span class="output">{$data.err}</span>
     {:else}
-      <span class="output">{$data}</span>
+      <span class="output">{JSON.stringify($data)}</span>
     {/if}
   </div>
 </main>
@@ -28,7 +30,7 @@
     display: table;
     table-layout: fixed;
     width: 100%;
-    font-size: 4vw;
+    font-size: 1vw;
     font-weight: bold;
   }
 
