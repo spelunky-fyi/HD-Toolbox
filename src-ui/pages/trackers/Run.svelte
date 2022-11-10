@@ -15,12 +15,6 @@
     showRunIl,
     showRunArea,
     showRunPace,
-    showSessionRuns,
-    showSessionDeaths,
-    showSessionWins,
-    showSessionKills,
-    showSessionTime,
-    showSessionScore,
   } from "./configs/session";
   import { trackerPort } from "@hdt/config";
 
@@ -30,9 +24,9 @@
   let width = 1700;
   let height = 120;
 
-  const label = "SessionTracker";
+  const label = "RunTracker";
   const url = derived(trackerPort, ($trackerPort) => {
-    return `http://localhost:${$trackerPort}/session.html`;
+    return `http://localhost:${$trackerPort}/run.html`;
   });
 
   async function openTracker() {
@@ -41,7 +35,7 @@
     if (!window) {
       window = new WebviewWindow(label, {
         url: $url,
-        title: "HD Toolbox - Session Tracker",
+        title: "HD Toolbox - Run Tracker",
         minHeight: height / 2,
         height: height,
         maxHeight: height * 20,
@@ -64,7 +58,7 @@
       <Content style="padding: 0px;">
         <div style="display: flex;">
           <h2 class="mdc-typography--headline6" style="margin: 0;">
-            Session Tracker
+            Run Tracker
           </h2>
           <div style="margin-left: auto;">
             <Button on:click={() => dialogOpen.set(true)}>Help</Button>
@@ -75,40 +69,40 @@
       <Content>
         <div class="tracker-config">
           <div>
-            <FormField>
-              <Checkbox bind:checked={$showSessionRuns} />
-              <span slot="label">Show Runs</span>
-            </FormField>
-            <FormField>
-              <Checkbox bind:checked={$showSessionDeaths} />
-              <span slot="label">Show Deaths</span>
-            </FormField>
-            <FormField>
-              <Checkbox bind:checked={$showSessionWins} />
-              <span slot="label">Show Wins</span>
-            </FormField>
-            <FormField>
-              <Checkbox bind:checked={$showSessionKills} />
-              <span slot="label">Show Kills</span>
-            </FormField>
-            <FormField>
-              <Checkbox bind:checked={$showSessionScore} />
-              <span slot="label">Show Score</span>
-            </FormField>
-            <FormField>
-              <Checkbox bind:checked={$showSessionTime} />
-              <span slot="label">Show Time</span>
-            </FormField>
+            <div>
+              <FormField>
+                <Checkbox bind:checked={$showRunSpeedStats} />
+                <span slot="label">Show Speed Stats</span>
+              </FormField>
+              <FormField>
+                <Checkbox bind:checked={$showRunScoreStats} />
+                <span slot="label">Show Score Stats</span>
+              </FormField>
+            </div>
+            <div>
+              <FormField>
+                <Checkbox bind:checked={$showRunIl} />
+                <span slot="label">Show ILs</span>
+              </FormField>
+              <FormField>
+                <Checkbox bind:checked={$showRunArea} />
+                <span slot="label">Show Area</span>
+              </FormField>
+              <FormField>
+                <Checkbox bind:checked={$showRunPace} />
+                <span slot="label">Show Pace</span>
+              </FormField>
+            </div>
           </div>
-        </div>
-      </Content>
+        </div></Content
+      >
     </Card>
   </div>
 {:else}
   <div>Loading...</div>
 {/if}
 
-<HelpDialog title="Session Tracker" open={dialogOpen} {url} {width} {height}>
+<HelpDialog title="Run Tracker" open={dialogOpen} {url} {width} {height}>
   <h4>Custom CSS</h4>
   <code>text-align: right;</code> - Useful when aligning OBS Scene on right side.
 </HelpDialog>

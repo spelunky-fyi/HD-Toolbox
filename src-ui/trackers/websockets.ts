@@ -14,17 +14,20 @@ export class HDWebSocket {
   stateStore: Writable<WebSocketState>;
   dataStore: Writable<any>;
   ws?: WebSocket;
+  dataMerge?: object;
 
   constructor(
     name: string,
     payloadKey: string,
     stateStore: Writable<WebSocketState>,
-    dataStore: Writable<WebSocketState>
+    dataStore: Writable<WebSocketState>,
+    dataMerge?: object,
   ) {
     this.name = name;
     this.payloadKey = payloadKey;
     this.stateStore = stateStore;
     this.dataStore = dataStore;
+    this.dataMerge = dataMerge
 
     this.connect();
   }
@@ -37,7 +40,7 @@ export class HDWebSocket {
       console.log(data);
       if (data.type == this.payloadKey) {
         this.stateStore.set(WebSocketState.Connected);
-        this.dataStore.set(data.data);
+        this.dataStore.set({ ...data.data, ...this.dataMerge ?? {} });
       } else if (data.type == "Empty") {
         // Do Nothing.
       } else if (data.type == "Failure") {

@@ -59,9 +59,14 @@ const bundles = [
     cssOutput: "bundle.css",
   },
   {
-    input: "src-ui/trackers/session/main.ts",
-    jsOutput: "trackers/build/session/bundle.js",
-    cssOutput: "bundle.css",
+    input: "src-ui/trackers/session/run.ts",
+    jsOutput: "trackers/build/session/run-bundle.js",
+    cssOutput: "run-bundle.css",
+  },
+  {
+    input: "src-ui/trackers/session/session.ts",
+    jsOutput: "trackers/build/session/session-bundle.js",
+    cssOutput: "session-bundle.css",
   },
   {
     input: "src-ui/trackers/pacifist/main.ts",

@@ -36,7 +36,6 @@ impl Default for CategoryConfig {
 #[serde(rename_all = "kebab-case")]
 pub struct SessionConfig {
     //Session Summary
-    pub enable_session_stats: bool,
     pub show_session_runs: bool,
     pub show_session_deaths: bool,
     pub show_session_wins: bool,
@@ -45,7 +44,6 @@ pub struct SessionConfig {
     pub show_session_time: bool,
 
     // Run Summary
-    pub enable_run_stats: bool,
     pub show_run_speed_stats: bool,
     pub show_run_score_stats: bool,
     pub show_run_il: bool,
@@ -56,7 +54,6 @@ pub struct SessionConfig {
 impl Default for SessionConfig {
     fn default() -> Self {
         Self {
-            enable_session_stats: true,
             show_session_runs: true,
             show_session_deaths: false,
             show_session_wins: false,
@@ -64,7 +61,6 @@ impl Default for SessionConfig {
             show_session_score: false,
             show_session_time: false,
 
-            enable_run_stats: true,
             show_run_speed_stats: true,
             show_run_score_stats: false,
             show_run_il: true,

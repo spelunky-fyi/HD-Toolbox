@@ -1,4 +1,4 @@
-import Tracker from "./Main.svelte";
+import Tracker from "./Session.svelte";
 
 const app = new Tracker({
   target: document.body,

@@ -5,21 +5,6 @@ export const state = writable(WebSocketState.Pending);
 export const data = writable(null);
 
 let overide = {
-  config: {
-    "enable-session-stats": true,
-    "show-session-runs": true,
-    "show-session-deaths": true,
-    "show-session-wins": true,
-    "show-session-kills": true,
-    "show-session-score": true,
-    "show-session-time": true,
-    "enable-run-stats": true,
-    "show-run-speed-stats": true,
-    "show-run-score-stats": false,
-    "show-run-il": true,
-    "show-run-area": true,
-    "show-run-pace": false,
-  },
   data: {
     runs: 2,
     deaths: 0,

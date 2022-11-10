@@ -9,6 +9,7 @@
   import Category from "./Category.svelte";
   import Session from "./Session.svelte";
   import Pacifist from "./Pacifist.svelte";
+  import Run from "./Run.svelte";
 </script>
 
 <div>
@@ -54,7 +55,9 @@
     <Cell span={6}>
       <Session enabled={enabledTrackers} />
     </Cell>
-    <Cell span={6} />
+    <Cell span={6}>
+      <Run enabled={enabledTrackers} />
+    </Cell>
   </LayoutGrid>
   <div>
     {#if $trackersState === TaskState.Pending}

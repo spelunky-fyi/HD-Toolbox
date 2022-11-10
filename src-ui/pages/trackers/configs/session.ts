@@ -5,7 +5,6 @@ import { Store } from "tauri-plugin-store-api";
 export const configLoaded = writable(false);
 
 // Defaults
-export const enableSessionStats = writable(true);
 export const showSessionRuns = writable(true);
 export const showSessionDeaths = writable(false);
 export const showSessionWins = writable(false);
@@ -13,7 +12,6 @@ export const showSessionKills = writable(false);
 export const showSessionScore = writable(false);
 export const showSessionTime = writable(false);
 
-export const enableRunStats = writable(true);
 export const showRunSpeedStats = writable(true);
 export const showRunScoreStats = writable(false);
 export const showRunIl = writable(true);
@@ -21,14 +19,13 @@ export const showRunArea = writable(true);
 export const showRunPace = writable(true);
 
 let configMapping = {
-  "enable-session-stats": enableSessionStats,
   "show-session-runs": showSessionRuns,
   "show-session-deaths": showSessionDeaths,
   "show-session-wins": showSessionWins,
   "show-session-kills": showSessionKills,
   "show-session-score": showSessionScore,
   "show-session-time": showSessionTime,
-  "enable-run-stats": enableRunStats,
+
   "show-run-speed-stats": showRunSpeedStats,
   "show-run-score-stats": showRunScoreStats,
   "show-run-il": showRunIl,
