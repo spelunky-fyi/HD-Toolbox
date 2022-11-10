@@ -46,10 +46,10 @@
         title: "HD Toolbox - Session Tracker",
         minHeight: height / 2,
         height: height,
-        maxHeight: height * 2,
+        maxHeight: height * 20,
         minWidth: width / 2,
         width: width,
-        maxWidth: width * 2,
+        maxWidth: width * 20,
         visible: true,
       });
     } else {

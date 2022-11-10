@@ -120,14 +120,13 @@ impl RunState {
 
         self.update_visited(gamestate);
 
-        let mut area_level_idx = (gamestate.level % 4) as usize;
-        if self.visit_mothership {
-            if area_level_idx >= 3 {
+        let area_idx = (gamestate.level as f64 / 4.0).ceil() as usize - 1;
+        let mut area_level_idx = ((gamestate.level - 1) % 4) as usize;
+        if area_idx == 2 && self.visit_mothership && !gamestate.is_mothership {
+            if area_level_idx >= 2 {
                 area_level_idx += 2;
             }
         }
-
-        let area_idx = (gamestate.level as f64 / 4.0).ceil() as usize;
 
         let area = self.areas[area_idx].get_or_insert_with(AreaState::default);
         if area.levels[area_level_idx].is_some() {
@@ -136,11 +135,45 @@ impl RunState {
 
         // End of level, record stats
         area.levels[area_level_idx] = Some(LevelState {
+            completed: !self.died,
             is_worm: gamestate.is_worm,
             is_mothership: gamestate.is_mothership,
-            time: 0,
-            score: 0,
+            time: gamestate.level_time_ms,
+            time_fract: gamestate.level_time_ms_fract,
+            score: gamestate.player_data.level_money as u64,
         });
+
+        self.score += gamestate.player_data.level_money as u64;
+        self.time += gamestate.level_time_ms;
+        self.kills += gamestate.player_data.total_kills as u64;
+
+        if (self.visit_mothership && area_level_idx == 5)
+            || (!gamestate.is_mothership && area_level_idx == 3)
+            || self.died
+        {
+            area.completed = !self.died;
+            area.score_pace = gamestate.total_money as u64;
+            area.time_pace = gamestate.total_time_ms;
+
+            if area.completed {
+                if gamestate.level == 16 {
+                    self.score += 50_000;
+                } else if gamestate.level == 20 {
+                    self.score += 100_000;
+                }
+            }
+
+            let mut fract_time: u64 = 0;
+            for level in &area.levels {
+                if let Some(level) = level {
+                    area.score += level.score;
+                    area.time += level.time;
+                    fract_time += level.time_fract;
+                }
+            }
+            let fract_time: f64 = fract_time as f64 / 1_000_000.0;
+            area.time += fract_time.trunc() as u64;
+        }
     }
 
     fn update_visited(&mut self, gamestate: &GameState) {
@@ -156,11 +189,13 @@ impl RunState {
 
 #[derive(Debug, Serialize, Clone, PartialEq, Eq)]
 struct AreaState {
-    time: u32,
-    time_pace: u32,
+    completed: bool,
 
-    score: u32,
-    score_pace: u32,
+    time: u64,
+    time_pace: u64,
+
+    score: u64,
+    score_pace: u64,
 
     levels: [Option<LevelState>; 6],
 }
@@ -168,10 +203,13 @@ struct AreaState {
 impl Default for AreaState {
     fn default() -> Self {
         Self {
+            completed: false,
+
             time: 0,
             time_pace: 0,
             score: 0,
             score_pace: 0,
+
             levels: [None, None, None, None, None, None],
         }
     }
@@ -179,10 +217,12 @@ impl Default for AreaState {
 
 #[derive(Debug, Serialize, Clone, PartialEq, Eq)]
 struct LevelState {
+    completed: bool,
     is_worm: bool,
     is_mothership: bool,
-    time: u32,
-    score: u32,
+    time: u64,
+    time_fract: u64,
+    score: u64,
 }
 
 pub struct SessionTracker {
@@ -265,7 +305,10 @@ impl TrackerTicker for SessionTracker {
                 err: Some("Multiplayer not supported...".into()),
             }),
             CategoryTrackerPayload::InactiveScreenState(_) => self.active_response(config),
-            CategoryTrackerPayload::Dead => self.active_response(config),
+            CategoryTrackerPayload::Dead(gamestate) => {
+                self.process_game_state(gamestate);
+                self.active_response(config)
+            }
             CategoryTrackerPayload::GameState(gamestate) => {
                 self.process_game_state(gamestate);
                 self.active_response(config)

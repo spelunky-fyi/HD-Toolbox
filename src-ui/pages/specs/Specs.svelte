@@ -143,8 +143,8 @@
     <Cell span={12}>
       <div style="text-align: right; margin-top: -30px; margin-bottom: 20px;">
         <small>
-          The docs below auto-update but you can alway check the most up to date
-          version
+          The docs below auto-update but you can always check the most up to
+          date version
           <a
             href="https://github.com/spelunky-fyi/SpecsHD/blob/main/DOCS.md"
             target="_blank"

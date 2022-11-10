@@ -487,6 +487,8 @@ pub struct GameState {
     pub level: u32,
 
     pub total_time_ms: u64,
+    pub level_time_ms: u64,
+    pub level_time_ms_fract: u64,
 
     pub is_haunted_castle: bool,
     pub moai_spawned: bool,
@@ -523,7 +525,7 @@ pub enum CategoryTrackerPayload {
 
     GameState(GameState),
 
-    Dead,
+    Dead(GameState),
 }
 
 impl Default for CategoryTrackerPayload {
@@ -659,6 +661,7 @@ pub struct PlayerData {
 
     pub held_item: EntityType,
     pub total_kills: u32,
+    pub level_money: u32,
     pub one_is_olmec: bool,
 }
 
@@ -708,6 +711,7 @@ fn get_player_data(process: &Process, addr: usize) -> Result<PlayerData, Failure
 
     Ok(PlayerData {
         health: LE::read_u32(&player_data[0..4]),
+        level_money: LE::read_u32(&player_data[0xc..0xc + 4]),
         bombs: LE::read_u32(&player_data[0x10..0x10 + 4]),
         ropes: LE::read_u32(&player_data[0x14..0x14 + 4]),
         has_item,
@@ -733,9 +737,6 @@ impl CategoryTrackerPayload {
             Cursor::new(process.read_n_bytes(global_state_offset + 0x440684, 4 * 4)?);
 
         let screen_state = process.read_i32(global_state_offset + 0x58)?.into();
-        if screen_state == ScreenState::DeathScreen {
-            return Ok(Self::Dead);
-        }
 
         let play_state = process.read_i32(global_state_offset + 0x5c)?.into();
 
@@ -780,7 +781,7 @@ impl CategoryTrackerPayload {
             get_partial_entity(process, process.read_u32(player_ptr + 0x234)? as usize)?;
 
         if !ACTIVE_SCENES.contains(&screen_state) {
-            return Ok(Self::InactiveScreenState(screen_state));
+            return Ok(Self::InactiveScreenState(screen_state.clone()));
         }
 
         let level = process.read_u32(global_state_offset + 0x4405D4)?;
@@ -798,12 +799,20 @@ impl CategoryTrackerPayload {
         total_time_ms += total_seconds as u64 * 1000;
         total_time_ms += total_ms.trunc() as u64;
 
+        let level_minutes = process.read_u32(global_state_offset + 0x445950)?;
+        let level_seconds = process.read_u32(global_state_offset + 0x445954)?;
+        let level_ms = process.read_f64(global_state_offset + 0x445958)?;
+        let mut level_time_ms: u64 = level_minutes as u64 * 60 * 1000;
+        level_time_ms += level_seconds as u64 * 1000;
+        level_time_ms += level_ms.trunc() as u64;
+        let level_time_ms_fract = (level_ms.fract() * 1_000_000.0) as u64;
+
         let total_money = process.read_u32(global_state_offset + 0x44592C)?;
         let respawn_level = process.read_u32(global_state_offset + 0x44734C)?;
         //let active_entities = get_active_entities(process, global_state_offset)?;
 
-        Ok(Self::GameState(GameState {
-            screen_state,
+        let gamestate = GameState {
+            screen_state: screen_state.clone(),
             play_state,
             level,
 
@@ -815,6 +824,8 @@ impl CategoryTrackerPayload {
             is_worm,
 
             total_time_ms,
+            level_time_ms,
+            level_time_ms_fract,
             total_money,
             respawn_level,
 
@@ -828,7 +839,13 @@ impl CategoryTrackerPayload {
             player_data,
             //active_entities,
             inputs: get_inputs(process, global_state_offset, active_player)?,
-        }))
+        };
+
+        if screen_state == ScreenState::DeathScreen {
+            return Ok(Self::Dead(gamestate));
+        }
+
+        Ok(Self::GameState(gamestate))
     }
 }
 

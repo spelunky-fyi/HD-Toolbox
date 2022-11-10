@@ -541,9 +541,12 @@ impl RunState {
     fn process_death(&mut self, gamestate: &GameState) {
         self.update_ropes_end_of_run(gamestate);
 
-        if !self.run_labels.has_label(&Label::Pacifist) {
-            self.run_labels.set_terminus(TerminusLabel::Death);
+        if self.run_labels.has_label(&Label::Pacifist)
+            && (gamestate.level == 16 || gamestate.level == 20)
+        {
+            return;
         }
+        self.run_labels.set_terminus(TerminusLabel::Death);
     }
 
     fn update_no_gold(&mut self, gamestate: &GameState) {
@@ -691,10 +694,8 @@ impl TrackerTicker for CategoryTracker {
                 category: "Multiplayer not supported...".into(),
             }),
             CategoryTrackerPayload::InactiveScreenState(_) => self.active_response(config),
-            CategoryTrackerPayload::Dead => {
-                if let Some(gamestate) = &self.curr_gamestate {
-                    self.run_state.process_death(gamestate);
-                }
+            CategoryTrackerPayload::Dead(gamestate) => {
+                self.run_state.process_death(&gamestate);
                 self.active_response(config)
             }
             CategoryTrackerPayload::GameState(gamestate) => {
