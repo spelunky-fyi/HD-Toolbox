@@ -17,6 +17,7 @@ export const showRunScoreStats = writable(false);
 export const showRunIl = writable(true);
 export const showRunArea = writable(true);
 export const showRunPace = writable(true);
+export const showRunMs = writable(true);
 
 let configMapping = {
   "show-session-runs": showSessionRuns,
@@ -31,6 +32,7 @@ let configMapping = {
   "show-run-il": showRunIl,
   "show-run-area": showRunArea,
   "show-run-pace": showRunPace,
+  "show-run-ms": showRunMs,
 };
 
 let subscriptions = {};

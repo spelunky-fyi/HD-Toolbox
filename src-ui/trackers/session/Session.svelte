@@ -50,7 +50,7 @@
     display: table;
     table-layout: fixed;
     width: 100%;
-    font-size: 24px;
+    font-size: 32px;
     font-weight: 900;
     overflow: scroll;
   }

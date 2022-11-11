@@ -111,6 +111,10 @@ impl RunState {
             return;
         }
 
+        if gamestate.level == 0 {
+            return;
+        }
+
         if gamestate.screen_state == ScreenState::DeathScreen {
             self.died = true;
         }

@@ -15,14 +15,15 @@
     showRunIl,
     showRunArea,
     showRunPace,
+    showRunMs,
   } from "./configs/session";
   import { trackerPort } from "@hdt/config";
 
   export let enabled;
 
   let dialogOpen = writable(false);
-  let width = 1700;
-  let height = 120;
+  let width = 280;
+  let height = 1320;
 
   const label = "RunTracker";
   const url = derived(trackerPort, ($trackerPort) => {
@@ -38,10 +39,10 @@
         title: "HD Toolbox - Run Tracker",
         minHeight: height / 2,
         height: height,
-        maxHeight: height * 20,
+        maxHeight: height * 2,
         minWidth: width / 2,
         width: width,
-        maxWidth: width * 20,
+        maxWidth: width * 2,
         visible: true,
       });
     } else {
@@ -91,6 +92,12 @@
               <FormField>
                 <Checkbox bind:checked={$showRunPace} />
                 <span slot="label">Show Pace</span>
+              </FormField>
+            </div>
+            <div>
+              <FormField>
+                <Checkbox bind:checked={$showRunMs} />
+                <span slot="label">Show Milliseconds</span>
               </FormField>
             </div>
           </div>

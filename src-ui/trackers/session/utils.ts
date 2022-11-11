@@ -5,7 +5,7 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
-function msToTime(s) {
+function msToTime(s, showMs?: boolean) {
   function pad(n, z) {
     z = z || 2;
     return ("00" + n).slice(-z);
@@ -18,7 +18,11 @@ function msToTime(s) {
   let mins = s % 60;
   let hrs = (s - mins) / 60;
 
-  let out = pad(secs, 2) + "." + pad(ms, 3);
+  let out = "";
+  if (showMs ?? true) {
+    out = "." + pad(ms, 3);
+  }
+  out = pad(secs, 2) + out;
   if (mins !== 0 || hrs !== 0) {
     out = pad(mins, 2) + ":" + out;
   }
@@ -57,8 +61,4 @@ function getBiome(areaIdx, levelIdx, level) {
   }
 }
 
-export {
-  getBiome,
-  msToTime,
-  currencyFormatter,
-}
+export { getBiome, msToTime, currencyFormatter };

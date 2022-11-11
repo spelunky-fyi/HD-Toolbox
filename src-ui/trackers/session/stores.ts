@@ -6,12 +6,12 @@ export const data = writable(null);
 
 let overide = {
   data: {
-    runs: 2,
-    deaths: 0,
-    wins: 1,
-    kills: 38,
-    score: 100000,
-    time: 19265,
+    runs: 9992,
+    deaths: 99909,
+    wins: 199,
+    kills: 3998,
+    score: 10999990000,
+    time: 199999265,
     run_state: {
       visit_mothership: true,
       visit_worm: true,

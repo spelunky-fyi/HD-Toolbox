@@ -49,6 +49,7 @@ pub struct SessionConfig {
     pub show_run_il: bool,
     pub show_run_area: bool,
     pub show_run_pace: bool,
+    pub show_run_ms: bool,
 }
 
 impl Default for SessionConfig {
@@ -66,6 +67,7 @@ impl Default for SessionConfig {
             show_run_il: true,
             show_run_area: true,
             show_run_pace: true,
+            show_run_ms: true,
         }
     }
 }

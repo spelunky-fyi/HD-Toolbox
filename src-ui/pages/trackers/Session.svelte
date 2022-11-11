@@ -10,11 +10,6 @@
 
   import {
     configLoaded,
-    showRunScoreStats,
-    showRunSpeedStats,
-    showRunIl,
-    showRunArea,
-    showRunPace,
     showSessionRuns,
     showSessionDeaths,
     showSessionWins,
@@ -27,8 +22,8 @@
   export let enabled;
 
   let dialogOpen = writable(false);
-  let width = 1700;
-  let height = 120;
+  let width = 1600;
+  let height = 70;
 
   const label = "SessionTracker";
   const url = derived(trackerPort, ($trackerPort) => {
@@ -44,10 +39,10 @@
         title: "HD Toolbox - Session Tracker",
         minHeight: height / 2,
         height: height,
-        maxHeight: height * 20,
+        maxHeight: height * 2,
         minWidth: width / 2,
         width: width,
-        maxWidth: width * 20,
+        maxWidth: width * 2,
         visible: true,
       });
     } else {
