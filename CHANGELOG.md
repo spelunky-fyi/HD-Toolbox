@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.8.0] - 2022-11-10
+
+### Added
+
+- New Session tracker that keeps track of various stats about your play session
+- New Run tracker that can track IL, Area, and Pace for Speed and Score
+
 ## [0.7.2] - 2022-11-07
 
 ### Changed
