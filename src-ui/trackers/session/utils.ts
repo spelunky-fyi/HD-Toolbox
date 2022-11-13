@@ -23,8 +23,14 @@ function msToTime(s, showMs?: boolean) {
     out = "." + pad(ms, 3);
   }
   out = pad(secs, 2) + out;
+
+
   if (mins !== 0 || hrs !== 0) {
-    out = pad(mins, 2) + ":" + out;
+    if (hrs !== 0) {
+      out = pad(mins, 2) + ":" + out;
+    } else {
+      out = mins + ":" + out;
+    }
   }
 
   if (hrs !== 0) {
