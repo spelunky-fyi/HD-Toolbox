@@ -28,9 +28,7 @@ jobs:
           node-version: 16
 
       - name: install Rust stable
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
+        uses: dtolnay/rust-toolchain@stable
 
       - uses: Swatinem/rust-cache@v1
 
