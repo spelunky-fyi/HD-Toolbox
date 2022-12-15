@@ -71,7 +71,7 @@ impl TrackerManager {
             shutdown_tx: None,
             memory_manager,
             tasks: HashMap::new(),
-            configs: configs,
+            configs,
         }
     }
 
@@ -175,7 +175,7 @@ impl TrackerManager {
         let config = self
             .configs
             .get(&tracker_type)
-            .map(|c| c.clone())
+            .cloned()
             .expect("No config found.");
 
         let mut task = TrackerTask::new(config);

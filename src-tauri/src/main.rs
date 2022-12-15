@@ -51,9 +51,8 @@ fn inject_specs(dll: String) -> Result<(), String> {
             Ok(_) => {}
             Err(err) => {
                 warn!("Failed to inject dll: {}", err);
-                return;
             }
-        };
+        }
     });
 
     Ok(())

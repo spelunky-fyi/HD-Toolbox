@@ -89,12 +89,12 @@ impl Process {
         };
         let offsets = Offsets::get_offsets_by_version(&version);
 
-        return Ok(Process {
+        Ok(Process {
             handle: process_handle,
             base_addr,
             version,
             offsets,
-        });
+        })
     }
 
     pub fn traverse_offset(

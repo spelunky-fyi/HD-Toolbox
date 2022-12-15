@@ -279,7 +279,7 @@ impl RunLabels {
     }
 
     pub fn get_terminus(&self) -> &TerminusLabel {
-        return &self.terminus;
+        &self.terminus
     }
 
     pub fn add_label(&mut self, label: Label) {
@@ -489,7 +489,7 @@ impl RunLabels {
         }
 
         let metadatas = self.get_combined();
-        let visible_labels = self.get_visible(&metadatas, hide_early, &exclude_labels);
+        let visible_labels = self.get_visible(&metadatas, hide_early, exclude_labels);
         let percent_label = self.get_percent(&metadatas, &visible_labels);
 
         let mut parts = vec![];
@@ -502,7 +502,7 @@ impl RunLabels {
             if Some(candidate.label_type) == percent_label {
                 parts.push(format!("{}%", candidate.name));
             } else {
-                parts.push(format!("{}", candidate.name));
+                parts.push(candidate.name.to_string());
             }
         }
 
@@ -525,7 +525,7 @@ impl RunLabels {
         combined.push(self.terminus.to_label_metadata());
 
         combined.sort_unstable_by_key(|metadata| Reverse(metadata.name_priority));
-        return combined;
+        combined
     }
 }
 

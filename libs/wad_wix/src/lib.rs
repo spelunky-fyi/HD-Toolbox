@@ -52,10 +52,7 @@ impl Wix {
                 }
 
                 if let Some(name) = name {
-                    out.push(FileGroup {
-                        name: name,
-                        files: files,
-                    })
+                    out.push(FileGroup { name, files })
                 }
 
                 name = Some(parts[1].into());
@@ -76,10 +73,7 @@ impl Wix {
         if let Some(last) = out.last() {
             if let Some(name) = name {
                 if last.name != name {
-                    out.push(FileGroup {
-                        name: name,
-                        files: files,
-                    })
+                    out.push(FileGroup { name, files })
                 }
             }
         }

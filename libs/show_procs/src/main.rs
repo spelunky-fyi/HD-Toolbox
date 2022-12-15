@@ -49,7 +49,7 @@ fn _get_lunky_procs() -> Result<Vec<String>, anyhow::Error> {
         let process_name: String = String::from_utf8_lossy(&process_bytes).into();
 
         if process_name.to_lowercase().contains("spelunky") {
-            procs.push(process_name.into());
+            procs.push(process_name);
         }
 
         if unsafe { Process32Next(process_snap, &mut process) } == 0 {

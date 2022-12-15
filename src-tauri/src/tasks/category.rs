@@ -401,7 +401,7 @@ impl RunState {
             return false;
         }
 
-        return true;
+        true
     }
 
     fn is_ducking(gamestate: &GameState) -> bool {
@@ -416,7 +416,7 @@ impl RunState {
             return true;
         }
 
-        return false;
+        false
     }
 
     fn fail_chain_hell(&mut self) {
@@ -599,7 +599,7 @@ impl CategoryTracker {
             }
         }
 
-        return false;
+        false
     }
 
     fn get_excluded_labels(config: &CategoryConfig) -> HashSet<LabelType> {
@@ -652,9 +652,9 @@ impl CategoryTracker {
             } else {
                 self.run_state = RunState::with_run_labels(RunLabels::default())
             }
-            self.run_state.update(&gamestate, &gamestate);
+            self.run_state.update(gamestate, gamestate);
         } else {
-            self.run_state.update(&prev_gamestate, &gamestate);
+            self.run_state.update(prev_gamestate, gamestate);
         }
     }
 }

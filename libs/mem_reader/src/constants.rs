@@ -14,7 +14,7 @@ pub(crate) static SPELUNKY_1_4_OFFSETS: Offsets = Offsets {
     other_state: 0x138558,
 };
 
-pub(crate) static KALI_ACCEPTS: &'static [u8; 26] = &[
+pub(crate) static KALI_ACCEPTS: &[u8; 26] = &[
     75, 0, 65, 0, 76, 0, 73, 0, 95, 0, 65, 0, 67, 0, 67, 0, 69, 0, 80, 0, 84, 0, 83, 0, 0, 0,
 ];
 
