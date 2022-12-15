@@ -969,10 +969,8 @@ impl Manager {
                     break;
                 }
                 _ = poll_interval.tick() => {
-                    if Instant::now() - self.last_request > Duration::from_secs(10) {
-                        if let Some(_) = self.process.take() {
-                            info!("Closing process due to lack of requests...")
-                        }
+                    if Instant::now() - self.last_request > Duration::from_secs(10) && self.process.take().is_some() {
+                        info!("Closing process due to lack of requests...")
                     }
                 }
                 msg = self.handle_rx.recv() => {
@@ -1166,6 +1164,12 @@ impl Manager {
 
     fn handle_attached(&mut self, response: oneshot::Sender<bool>) {
         let _ = response.send(self.process.is_some());
+    }
+}
+
+impl Default for Manager {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

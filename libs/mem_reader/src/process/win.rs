@@ -1,6 +1,7 @@
 use std::ffi::CString;
 use std::intrinsics::transmute;
 use std::mem::size_of;
+use std::path::Path;
 use std::path::PathBuf;
 
 use byteorder::ByteOrder;
@@ -139,7 +140,7 @@ impl Process {
             base_addr + constants::SPELUNKY_1_47_OFFSETS.kali_accepts,
             26,
         ) {
-            if &bytes == constants::KALI_ACCEPTS {
+            if bytes == constants::KALI_ACCEPTS {
                 return Ok(Version::Spelunky147);
             }
         }
@@ -149,7 +150,7 @@ impl Process {
             base_addr + constants::SPELUNKY_1_4_OFFSETS.kali_accepts,
             26,
         ) {
-            if &bytes == constants::KALI_ACCEPTS {
+            if bytes == constants::KALI_ACCEPTS {
                 return Ok(Version::Spelunky14);
             }
         }
@@ -241,9 +242,7 @@ impl Process {
 
         // Get handles for all modules in process.
         let mut module_handles: [HMODULE; 1024] = [0 as HMODULE; 1024];
-        let hmodule_size: usize = size_of::<HMODULE>()
-            .try_into()
-            .expect("Failed to get size of HMODULE");
+        let hmodule_size: usize = size_of::<HMODULE>();
         let mut bytes_written = 0;
 
         let result = unsafe {
@@ -266,13 +265,13 @@ impl Process {
         let num_modules = bytes_written as usize / hmodule_size;
 
         // Enumerate Modules to find handle for EXE module
-        for idx in 0..num_modules {
+        for m in module_handles.iter().take(num_modules).copied(){
             let mut module_filename = [0; MAX_PATH];
 
             let result = unsafe {
                 GetModuleFileNameExA(
                     process,
-                    module_handles[idx],
+                    m,
                     module_filename.as_mut_ptr(),
                     MAX_PATH as u32,
                 )
@@ -288,7 +287,7 @@ impl Process {
             }
 
             // Found the exe module base address
-            return Ok(module_handles[idx] as usize);
+            return Ok(m as usize);
         }
 
         Err(OpenProcessError::LocateBaseAddrFailed(
@@ -299,9 +298,7 @@ impl Process {
     fn get_kernel32_addr(&self) -> Result<usize, InjectDllError> {
         // Get handles for all modules in process.
         let mut module_handles: [HMODULE; 1024] = [0 as HMODULE; 1024];
-        let hmodule_size: usize = size_of::<HMODULE>()
-            .try_into()
-            .expect("Failed to get size of HMODULE");
+        let hmodule_size: usize = size_of::<HMODULE>();
         let mut bytes_written = 0;
 
         let result = unsafe {
@@ -323,13 +320,13 @@ impl Process {
         let num_modules = bytes_written as usize / hmodule_size;
 
         // Enumerate Modules to find handle for EXE module
-        for idx in 0..num_modules {
+        for m in module_handles.iter().take(num_modules).copied(){
             let mut module_filename = [0; MAX_PATH];
 
             let result = unsafe {
                 GetModuleFileNameExA(
                     self.handle,
-                    module_handles[idx],
+                    m,
                     module_filename.as_mut_ptr(),
                     MAX_PATH as u32,
                 )
@@ -353,7 +350,7 @@ impl Process {
             }
 
             // Found the exe module base address
-            return Ok(module_handles[idx] as usize);
+            return Ok(m as usize);
         }
 
         Err(InjectDllError::CantFindKernel32)
@@ -383,7 +380,7 @@ impl Process {
         Ok(addr as usize)
     }
 
-    pub fn inject_dll(&mut self, dll_path: &PathBuf) -> Result<(), Failure> {
+    pub fn inject_dll(&mut self, dll_path: &Path) -> Result<(), Failure> {
         let dll = CString::new(dll_path.to_string_lossy().as_bytes())
             .map_err(|_| InjectDllError::Failed)?;
         let dll_path_with_bytes = dll.as_bytes_with_nul();
