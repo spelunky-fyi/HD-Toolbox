@@ -36,23 +36,21 @@ fn launch_spelunky_hd() -> Result<String, String> {
 #[tauri::command]
 fn inject_specs(dll: String) -> Result<(), String> {
     debug!("Injecting DLL: {}", dll);
-    thread::spawn(move || {
+    // Nothing consumes this result. We just use it for short-circuiting.
+    thread::spawn(move || -> anyhow::Result<()> {
         let path = PathBuf::from(dll);
 
-        let mut process = match hdt_mem_reader::process::Process::new() {
-            Ok(process) => process,
-            Err(err) => {
-                warn!("Failed to find process: {}", err);
-                return;
-            }
-        };
+        let mut process = hdt_mem_reader::process::Process::new()
+            .map_err(|err| {
+                warn!("Failed to find process: {}", err); err
+            })?;
 
-        match process.inject_dll(&path) {
-            Ok(_) => {}
-            Err(err) => {
-                warn!("Failed to inject dll: {}", err);
-            }
-        }
+        process
+            .inject_dll(&path)
+            .map_err(|err| {
+                warn!("Failed to inject dll: {}", err); err
+            })?;
+        Ok(())
     });
 
     Ok(())
