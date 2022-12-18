@@ -87,11 +87,11 @@ impl Wix {
     ) -> Result<(), WixError> {
         for file_group in &self.0 {
             writer
-                .write(format!("!group {}\r\n", &file_group.name).as_bytes())
+                .write_all(format!("!group {}\r\n", &file_group.name).as_bytes())
                 .await?;
             for index_file in &file_group.files {
                 writer
-                    .write(
+                    .write_all(
                         format!(
                             "{} {} {}\r\n",
                             &index_file.filename, &index_file.offset, &index_file.size
