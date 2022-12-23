@@ -1,8 +1,6 @@
 use tokio::fs::File;
 use tokio::io::{BufReader, BufWriter};
 
-use hdt_wad_wix;
-
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let handle = File::open(

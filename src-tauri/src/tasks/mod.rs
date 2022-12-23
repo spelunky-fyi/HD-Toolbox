@@ -64,7 +64,7 @@ pub async fn start_task(
 
     let mut tasks = state.tasks.lock().expect("Failed to get lock");
 
-    let app_handle = app_handle.clone();
+    let app_handle = app_handle;
 
     match task {
         TaskStart::MemoryUpdater => {

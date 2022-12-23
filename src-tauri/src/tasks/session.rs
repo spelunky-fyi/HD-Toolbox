@@ -59,14 +59,14 @@ impl SessionState {
             self.time += self.run_state.time;
             self.kills += self.run_state.kills;
             self.run_state = RunState::default();
-            self.run_state.update(&gamestate, &gamestate);
+            self.run_state.update(gamestate, gamestate);
         } else {
-            self.run_state.update(&prev_gamestate, &gamestate);
+            self.run_state.update(prev_gamestate, gamestate);
         }
     }
 }
 
-#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Serialize, Clone, PartialEq, Eq, Default)]
 struct RunState {
     visit_mothership: bool,
     visit_worm: bool,
@@ -79,24 +79,6 @@ struct RunState {
     time: u64,
 
     areas: [Option<AreaState>; 5],
-}
-
-impl Default for RunState {
-    fn default() -> Self {
-        Self {
-            visit_mothership: false,
-            visit_worm: false,
-
-            died: false,
-            won: false,
-
-            kills: 0,
-            score: 0,
-            time: 0,
-
-            areas: [None, None, None, None, None],
-        }
-    }
 }
 
 impl RunState {
@@ -126,10 +108,9 @@ impl RunState {
 
         let area_idx = (gamestate.level as f64 / 4.0).ceil() as usize - 1;
         let mut area_level_idx = ((gamestate.level - 1) % 4) as usize;
-        if area_idx == 2 && self.visit_mothership && !gamestate.is_mothership {
-            if area_level_idx >= 2 {
-                area_level_idx += 2;
-            }
+        if area_idx == 2 && self.visit_mothership && !gamestate.is_mothership && area_level_idx >= 2
+        {
+            area_level_idx += 2;
         }
 
         let area = self.areas[area_idx].get_or_insert_with(AreaState::default);
@@ -191,7 +172,7 @@ impl RunState {
     }
 }
 
-#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Serialize, Clone, PartialEq, Eq, Default)]
 struct AreaState {
     completed: bool,
 
@@ -202,21 +183,6 @@ struct AreaState {
     score_pace: u64,
 
     levels: [Option<LevelState>; 6],
-}
-
-impl Default for AreaState {
-    fn default() -> Self {
-        Self {
-            completed: false,
-
-            time: 0,
-            time_pace: 0,
-            score: 0,
-            score_pace: 0,
-
-            levels: [None, None, None, None, None, None],
-        }
-    }
 }
 
 #[derive(Debug, Serialize, Clone, PartialEq, Eq)]
@@ -270,7 +236,7 @@ impl SessionTracker {
             Some(gamestate) => gamestate,
         };
 
-        self.session_state.update(&prev_gamestate, &gamestate);
+        self.session_state.update(prev_gamestate, gamestate);
     }
 }
 

@@ -2,14 +2,9 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "kebab-case")]
+#[derive(Default)]
 pub struct PacifistConfig {
     pub show_kills: bool,
-}
-
-impl Default for PacifistConfig {
-    fn default() -> Self {
-        Self { show_kills: false }
-    }
 }
 
 #[derive(Deserialize, Serialize, Debug)]

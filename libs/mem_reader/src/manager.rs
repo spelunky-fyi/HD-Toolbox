@@ -131,7 +131,7 @@ impl AutoFixerPayload {
             let chars: Vec<u32> = process
                 .read_n_bytes(char_offset, 4 * 16)?
                 .chunks(4)
-                .map(|bytes| LE::read_u32(bytes))
+                .map(LE::read_u32)
                 .collect();
             if chars != config.desired_characters {
                 return Ok(true);
@@ -629,12 +629,10 @@ fn get_partial_entity(process: &Process, addr: usize) -> Result<Option<PartialEn
         .into();
     let bin_x = entity_data
         .read_u32::<LE>()
-        .map_err(|_| ReadMemoryError::Failed)?
-        .into();
+        .map_err(|_| ReadMemoryError::Failed)?;
     let bin_y = entity_data
         .read_u32::<LE>()
-        .map_err(|_| ReadMemoryError::Failed)?
-        .into();
+        .map_err(|_| ReadMemoryError::Failed)?;
     let owner = entity_data
         .read_i32::<LE>()
         .map_err(|_| ReadMemoryError::Failed)?
@@ -750,7 +748,7 @@ impl CategoryTrackerPayload {
                 continue;
             }
 
-            if !player.is_none() {
+            if player.is_some() {
                 return Ok(Self::Multiplayer);
             }
 
@@ -781,7 +779,7 @@ impl CategoryTrackerPayload {
             get_partial_entity(process, process.read_u32(player_ptr + 0x234)? as usize)?;
 
         if !ACTIVE_SCENES.contains(&screen_state) {
-            return Ok(Self::InactiveScreenState(screen_state.clone()));
+            return Ok(Self::InactiveScreenState(screen_state));
         }
 
         let level = process.read_u32(global_state_offset + 0x4405D4)?;
@@ -971,10 +969,8 @@ impl Manager {
                     break;
                 }
                 _ = poll_interval.tick() => {
-                    if Instant::now() - self.last_request > Duration::from_secs(10) {
-                        if let Some(_) = self.process.take() {
-                            info!("Closing process due to lack of requests...")
-                        }
+                    if Instant::now() - self.last_request > Duration::from_secs(10) && self.process.take().is_some() {
+                        info!("Closing process due to lack of requests...")
                     }
                 }
                 msg = self.handle_rx.recv() => {
@@ -1168,6 +1164,12 @@ impl Manager {
 
     fn handle_attached(&mut self, response: oneshot::Sender<bool>) {
         let _ = response.send(self.process.is_some());
+    }
+}
+
+impl Default for Manager {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

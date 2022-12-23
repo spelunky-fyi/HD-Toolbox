@@ -113,7 +113,7 @@ impl Service<Request<Body>> for Trackers {
             let tracker_handle = self.tracker_handle.clone();
             // Spawn a task to handle the websocket connection.
             tauri::async_runtime::spawn(async move {
-                if let Err(e) = handle_websocket(name.into(), tracker_handle, websocket).await {
+                if let Err(e) = handle_websocket(name, tracker_handle, websocket).await {
                     error!("Error in websocket connection: {}", e);
                 }
             });
