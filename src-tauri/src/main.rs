@@ -40,16 +40,15 @@ fn inject_specs(dll: String) -> Result<(), String> {
     thread::spawn(move || -> anyhow::Result<()> {
         let path = PathBuf::from(dll);
 
-        let mut process = hdt_mem_reader::process::Process::new()
-            .map_err(|err| {
-                warn!("Failed to find process: {}", err); err
-            })?;
+        let mut process = hdt_mem_reader::process::Process::new().map_err(|err| {
+            warn!("Failed to find process: {}", err);
+            err
+        })?;
 
-        process
-            .inject_dll(&path)
-            .map_err(|err| {
-                warn!("Failed to inject dll: {}", err); err
-            })?;
+        process.inject_dll(&path).map_err(|err| {
+            warn!("Failed to inject dll: {}", err);
+            err
+        })?;
         Ok(())
     });
 

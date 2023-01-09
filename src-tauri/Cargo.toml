@@ -31,7 +31,7 @@ serde = {version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 static-files = "0.2"
 tauri = {version = "1.2.0", features = ["api-all", "updater"] }
-tauri-plugin-log = {git = "https://github.com/tauri-apps/tauri-plugin-log", branch = "dev"}
+tauri-plugin-log = {git = "https://github.com/tauri-apps/tauri-plugin-log", rev = "b58475bbc410fa78eb69276c62d0b64c91c07914"}
 tauri-plugin-store = {git = "https://github.com/gmjosack/tauri-plugin-store", branch = "tokio-watch"}
 tauri-plugin-window-state = "0.1.0"
 tokio = {version = "1", features = ["full"] }
