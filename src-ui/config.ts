@@ -8,12 +8,14 @@ export const configLoaded = writable(false);
 export const activeTab = writable("Level Viewer");
 export const enabledTrackers = writable(false);
 export const enabledAutoFixer = writable(false);
+export const enabledMusicEngine = writable(false);
 export const trackerPort = writable(4225);
 
 let configMapping = {
   "active-tab": activeTab,
   "enabled-trackers": enabledTrackers,
   "enabled-auto-fixer": enabledAutoFixer,
+  "enabled-music-engine": enabledAutoFixer,
   "tracker-port": trackerPort,
 };
 
@@ -51,6 +53,14 @@ export const autoFixerHeader = derived(enabledAutoFixer, ($config) => {
 });
 
 export const trackersHeader = derived(enabledTrackers, ($config) => {
+  if ($config) {
+    return "Enabled";
+  } else {
+    return "Disabled";
+  }
+});
+
+export const musicEngineHeader = derived(enabledMusicEngine, ($config) => {
   if ($config) {
     return "Enabled";
   } else {

@@ -31,6 +31,7 @@ const imageSrcs = [
   { name: "leaderpics", src: "/images/leaderpics.png" },
   { name: "olmec-smile", src: "/images/olmec-smile.png" },
   { name: "journal", src: "/images/journal.png" },
+  { name: "hedjet", src: "/images/hedjet.png" },
 ];
 export const images = {};
 

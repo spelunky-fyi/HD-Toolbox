@@ -1,6 +1,7 @@
 pub mod auto_fixer;
 pub mod category;
 pub mod memory_updater;
+pub mod music_engine;
 pub mod pacifist;
 pub mod session;
 pub mod tracker_task;
@@ -17,11 +18,14 @@ use hdt_mem_reader::manager::{PayloadRequest, PayloadResponse};
 
 use crate::state::State;
 
+use self::music_engine::MusicEngineResponse;
+
 #[derive(Deserialize, Debug)]
 #[serde(tag = "type")]
 pub enum TaskStart {
     MemoryUpdater,
     AutoFixer,
+    MusicEngine,
     WebServer { port: u16 },
 }
 
@@ -30,6 +34,7 @@ pub enum TaskStart {
 pub enum TaskEnd {
     MemoryUpdater,
     AutoFixer,
+    MusicEngine,
     WebServer,
 }
 
@@ -45,12 +50,14 @@ pub enum WebServerResponse {
 enum TaskUpdate {
     MemoryUpdater(PayloadResponse),
     AutoFixer(PayloadResponse),
+    MusicEngine(MusicEngineResponse),
     WebServer(WebServerResponse),
 }
 
 pub struct Tasks {
     pub memory_updater: Option<oneshot::Sender<()>>,
     pub auto_fixer: Option<oneshot::Sender<()>>,
+    pub music_engine: Option<oneshot::Sender<()>>,
     pub web_server: Option<oneshot::Sender<()>>,
 }
 
@@ -92,6 +99,20 @@ pub async fn start_task(
                 tasks.auto_fixer = Some(shutdown_tx);
             }
         }
+        TaskStart::MusicEngine => {
+            if tasks.music_engine.is_none() {
+                let mem_manager = state.mem_manager.clone();
+                let (mut task, shutdown_tx) = music_engine::MusicEngineTask::new(
+                    mem_manager,
+                    app_handle,
+                    state.music_engine_config_watcher.clone(),
+                );
+                tauri::async_runtime::spawn(async move {
+                    task.run().await;
+                });
+                tasks.music_engine = Some(shutdown_tx);
+            }
+        }
         TaskStart::WebServer { port } => {
             if tasks.web_server.is_none() {
                 let tracker_manager = state.tracker_manager.clone();
@@ -130,6 +151,11 @@ pub async fn stop_task(task: TaskEnd, state: tauri::State<'_, State>) -> Result<
         }
         TaskEnd::WebServer => {
             if let Some(task) = tasks.web_server.take() {
+                let _ = task.send(());
+            }
+        }
+        TaskEnd::MusicEngine => {
+            if let Some(task) = tasks.music_engine.take() {
                 let _ = task.send(());
             }
         }

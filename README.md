@@ -29,6 +29,7 @@ Grab the latest msi installer [here](https://github.com/spelunky-fyi/HD-Toolbox/
 - [x] Memory Shenanigans
   - [x] Character Unlock Manager
   - [x] Slowlook Fix Tool
+- [ ] Custom Music Engine
 
 ## Development
 

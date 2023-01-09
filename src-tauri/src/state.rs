@@ -19,6 +19,7 @@ pub struct State {
     pub tracker_manager: TrackerHandle,
     pub tracker_resources: Arc<HashMap<&'static str, Resource>>,
     pub autofix_config_watcher: watch::Receiver<HashMap<String, JsonValue>>,
+    pub music_engine_config_watcher: watch::Receiver<HashMap<String, JsonValue>>,
 }
 
 impl State {
@@ -26,6 +27,7 @@ impl State {
         mem_manager: ManagerHandle,
         tracker_manager: TrackerHandle,
         autofix_config_watcher: watch::Receiver<HashMap<String, JsonValue>>,
+        music_engine_config_watcher: watch::Receiver<HashMap<String, JsonValue>>,
     ) -> Self {
         State {
             mem_manager,
@@ -35,8 +37,10 @@ impl State {
                 memory_updater: None,
                 auto_fixer: None,
                 web_server: None,
+                music_engine: None,
             })),
             autofix_config_watcher,
+            music_engine_config_watcher,
         }
     }
 }

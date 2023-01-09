@@ -9,6 +9,7 @@
   } from "@smui/top-app-bar";
   import AutoFixerIcon from "./AutoFixerIcon.svelte";
   import TrackersIcon from "./TrackersIcon.svelte";
+  import MusicEngineIcon from "./MusicEngineIcon.svelte";
   import { configLoaded } from "./config";
   import { imagesLoaded } from "./images";
   import { writable } from "svelte/store";
@@ -53,6 +54,7 @@
       <Section align="end" toolbar>
         <div class="icons">
           <TrackersIcon />
+          <MusicEngineIcon />
           <AutoFixerIcon />
         </div>
       </Section>

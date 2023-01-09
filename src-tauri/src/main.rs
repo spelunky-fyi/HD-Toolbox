@@ -83,9 +83,12 @@ async fn run_mem_manager() -> ManagerHandle {
 }
 
 fn main() -> anyhow::Result<()> {
+    // Setup various config stores
     let main_config = StoreBuilder::new(MAIN_CONFIG.parse()?).build();
     let specs_config = StoreBuilder::new("specs.config".parse()?).build();
     let frozlunky_config = StoreBuilder::new("frozlunky.config".parse()?).build();
+    let mut music_engine_config = StoreBuilder::new("music-engine.config".parse()?).build();
+    let music_engine_config_watcher = music_engine_config.get_watcher();
 
     let mut autofix_config = StoreBuilder::new("auto-fixer.config".parse()?).build();
     let autofix_config_watcher = autofix_config.get_watcher();
@@ -117,6 +120,7 @@ fn main() -> anyhow::Result<()> {
                     tracker_session_config,
                     specs_config,
                     frozlunky_config,
+                    music_engine_config,
                     autofix_config,
                 ])
                 .freeze()
@@ -163,6 +167,7 @@ fn main() -> anyhow::Result<()> {
                     memory_manager,
                     tracker_manager,
                     autofix_config_watcher,
+                    music_engine_config_watcher,
                 ));
             });
             Ok(())

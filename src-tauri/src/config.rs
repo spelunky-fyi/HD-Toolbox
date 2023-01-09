@@ -84,3 +84,9 @@ impl Default for AutoFixerConfig {
         }
     }
 }
+
+#[derive(Deserialize, Serialize, Debug, Default)]
+#[serde(rename_all = "kebab-case")]
+pub struct MusicEngineConfig {
+    pub default_playlist: Vec<String>,
+}

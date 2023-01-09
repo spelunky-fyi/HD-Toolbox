@@ -11,6 +11,7 @@
   import { activeTab, selectPage } from "./config";
   import Specs from "./pages/specs/Specs.svelte";
   import Frozlunky from "./pages/frozlunky/Frozlunky.svelte";
+  import MusicEngine from "./pages/music_engine/MusicEngine.svelte";
 
   function launch_spelunky_hd() {
     invoke("launch_spelunky_hd")
@@ -25,6 +26,7 @@
     "Memory Updater": MemoryUpdater,
     Specs: Specs,
     Frozlunky: Frozlunky,
+    "Music Engine": MusicEngine,
   };
 </script>
 

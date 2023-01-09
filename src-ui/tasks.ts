@@ -80,6 +80,9 @@ export class Task {
 export const trackersState = writable(TaskState.Disconnected);
 export const trackersFailMessage = writable("");
 
+export const musicEngineState = writable(TaskState.Disconnected);
+export const musicEngineFailMessage = writable("");
+
 export const autoFixerState = writable(TaskState.Disconnected);
 
 const memoryUpdaterDefault = {

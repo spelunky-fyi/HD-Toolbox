@@ -890,6 +890,23 @@ impl PacifistTrackerPayload {
     }
 }
 
+#[derive(Debug, Serialize, Clone, Default, PartialEq, Eq)]
+pub struct MusicEnginePayload {
+    pub screen: i32,
+}
+
+impl MusicEnginePayload {
+    fn from_process(process: &Process) -> Result<Self, Failure> {
+        let base_addr = process.base_addr;
+        let global_state_offset =
+            process.read_u32(base_addr + process.offsets.global_state)? as usize;
+
+        let screen = process.read_i32(global_state_offset + 0x58)?;
+
+        Ok(Self { screen })
+    }
+}
+
 #[derive(Debug)]
 pub struct AutoFixerPayloadConfig {
     pub auto_fix_slow_look: bool,
@@ -903,6 +920,7 @@ pub enum PayloadRequest {
     AutoFixer(AutoFixerPayloadConfig),
     CategoryTracker,
     PacifistTracker,
+    MusicEngine,
 
     FixSlowLook,
     SetCharacter(usize, u32),
@@ -913,6 +931,7 @@ pub enum PayloadRequest {
 pub enum PayloadResponse {
     MemoryUpdater(MemoryUpdaterPayload),
     AutoFixer(AutoFixerPayload),
+    MusicEngine(MusicEnginePayload),
     CategoryTracker(Box<CategoryTrackerPayload>),
     PacifistTracker(PacifistTrackerPayload),
     Failure(Failure),
@@ -1052,6 +1071,10 @@ impl Manager {
                         Err(err) => PayloadResponse::Failure(err),
                     }
                 }
+                PayloadRequest::MusicEngine => match MusicEnginePayload::from_process(process) {
+                    Ok(payload) => PayloadResponse::MusicEngine(payload),
+                    Err(err) => PayloadResponse::Failure(err),
+                },
                 PayloadRequest::FixSlowLook => {
                     let mut bytes = vec![0; 4];
                     LE::write_u32(&mut bytes, 0x3F800000);
