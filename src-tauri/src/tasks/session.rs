@@ -149,12 +149,10 @@ impl RunState {
             }
 
             let mut fract_time: u64 = 0;
-            for level in &area.levels {
-                if let Some(level) = level {
-                    area.score += level.score;
-                    area.time += level.time;
-                    fract_time += level.time_fract;
-                }
+            for level in area.levels.iter().flatten() {
+                area.score += level.score;
+                area.time += level.time;
+                fract_time += level.time_fract;
             }
             let fract_time: f64 = fract_time as f64 / 1_000_000.0;
             area.time += fract_time.trunc() as u64;
@@ -215,11 +213,11 @@ impl SessionTracker {
     }
 
     fn active_response(&mut self, config: &SessionConfig) -> Response {
-        Response::Session(SessionResponse {
+        Response::Session(Box::new(SessionResponse {
             config: config.clone(),
             data: self.session_state.clone(),
             err: None,
-        })
+        }))
     }
 
     fn process_game_state(&mut self, gamestate: GameState) {
@@ -245,7 +243,7 @@ impl TrackerTicker for SessionTracker {
     type Config = SessionConfig;
 
     async fn startup(&mut self) -> Option<Response> {
-        if let Err(_) = self.memory_handle.connect().await {
+        if (self.memory_handle.connect().await).is_err() {
             return Some(Response::Failure("Failed to connect to process.".into()));
         }
         None
@@ -267,13 +265,13 @@ impl TrackerTicker for SessionTracker {
             _ => panic!("Got unexpected response..."),
         };
 
-        match payload {
+        match *payload {
             CategoryTrackerPayload::NoPlayers(_) => self.active_response(config),
-            CategoryTrackerPayload::Multiplayer => Response::Session(SessionResponse {
+            CategoryTrackerPayload::Multiplayer => Response::Session(Box::new(SessionResponse {
                 config: config.clone(),
                 data: self.session_state.clone(),
                 err: Some("Multiplayer not supported...".into()),
-            }),
+            })),
             CategoryTrackerPayload::InactiveScreenState(_) => self.active_response(config),
             CategoryTrackerPayload::Dead(gamestate) => {
                 self.process_game_state(gamestate);

@@ -85,11 +85,7 @@
         >
           <label class="top-label" for="load-method">Load Method</label>
 
-          <select
-            bind:value={$activeMethod}
-            id="load-method"
-            label="Load Method"
-          >
+          <select bind:value={$activeMethod} id="load-method">
             <option value={LoadMethod.LATEST}>Latest</option>
             <option value={LoadMethod.SPECIFIC_VERSION}>Specific Version</option
             >
@@ -148,6 +144,7 @@
           <a
             href="https://github.com/spelunky-fyi/Frozlunky/blob/main/docs/DOCS.md"
             target="_blank"
+            rel="noreferrer"
           >
             here
           </a>

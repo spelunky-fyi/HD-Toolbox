@@ -30,6 +30,7 @@
         height="36"
         alt="Auto-Fixer Icon"
         on:click={handleClick}
+        on:keypress={handleClick}
       />
       <Tooltip yPos="below">Auto-Fixer</Tooltip>
     </Wrapper>

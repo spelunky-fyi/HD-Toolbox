@@ -351,7 +351,7 @@ impl RunState {
 
         if self.used_low_banned_item(prev_gamestate, gamestate, held_entity) {
             self.fail_low();
-            if &held_entity.entity_type == &EntityType::Teleporter {
+            if held_entity.entity_type == EntityType::Teleporter {
                 self.run_labels.rm_label(&Label::NoTeleporter);
             }
         }
@@ -618,12 +618,12 @@ impl CategoryTracker {
 
     fn active_response(&mut self, config: &CategoryConfig) -> Response {
         let exclude_labels = Self::get_excluded_labels(config);
-        Response::Category(CategoryResponse {
+        Response::Category(Box::new(CategoryResponse {
             category: self
                 .run_state
                 .run_labels
                 .get_text(!self.should_show_modifiers(config), &exclude_labels),
-        })
+        }))
     }
 
     fn process_game_state(&mut self, gamestate: GameState) {
@@ -664,7 +664,7 @@ impl TrackerTicker for CategoryTracker {
     type Config = CategoryConfig;
 
     async fn startup(&mut self) -> Option<Response> {
-        if let Err(_) = self.memory_handle.connect().await {
+        if (self.memory_handle.connect().await).is_err() {
             return Some(Response::Failure("Failed to connect to process.".into()));
         }
         None
@@ -686,13 +686,15 @@ impl TrackerTicker for CategoryTracker {
             _ => panic!("Got unexpected response..."),
         };
 
-        match payload {
-            CategoryTrackerPayload::NoPlayers(_) => Response::Category(CategoryResponse {
-                category: "Waiting for game...".into(),
-            }),
-            CategoryTrackerPayload::Multiplayer => Response::Category(CategoryResponse {
+        match *payload {
+            CategoryTrackerPayload::NoPlayers(_) => {
+                Response::Category(Box::new(CategoryResponse {
+                    category: "Waiting for game...".into(),
+                }))
+            }
+            CategoryTrackerPayload::Multiplayer => Response::Category(Box::new(CategoryResponse {
                 category: "Multiplayer not supported...".into(),
-            }),
+            })),
             CategoryTrackerPayload::InactiveScreenState(_) => self.active_response(config),
             CategoryTrackerPayload::Dead(gamestate) => {
                 self.run_state.process_death(&gamestate);

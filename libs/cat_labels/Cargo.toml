@@ -1,8 +1,11 @@
 [package]
-authors = ["garebear"]
-edition = "2021"
 name = "hdt_cat_labels"
 version = "0.0.0"
+
+edition.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+license.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

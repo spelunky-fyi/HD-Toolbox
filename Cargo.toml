@@ -8,8 +8,14 @@ members = [
   "libs/show_procs",
 ]
 
+[workspace.package]
+edition = "2021"
+license = "Apache 2"
+rust-version = "1.65"
+authors = ["garebear"]
+
 [profile.release]
 codegen-units = 1 # Compile crates one after another so the compiler can optimize better
-lto = true # Enables link to optimizations
-opt-level = "s" # Optimize for binary size
-panic = "abort" # Strip expensive panic clean-up logic
+lto = true        # Enables link to optimizations
+opt-level = "s"   # Optimize for binary size
+panic = "abort"   # Strip expensive panic clean-up logic

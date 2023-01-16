@@ -265,16 +265,11 @@ impl Process {
         let num_modules = bytes_written as usize / hmodule_size;
 
         // Enumerate Modules to find handle for EXE module
-        for m in module_handles.iter().take(num_modules).copied(){
+        for m in module_handles.iter().take(num_modules).copied() {
             let mut module_filename = [0; MAX_PATH];
 
             let result = unsafe {
-                GetModuleFileNameExA(
-                    process,
-                    m,
-                    module_filename.as_mut_ptr(),
-                    MAX_PATH as u32,
-                )
+                GetModuleFileNameExA(process, m, module_filename.as_mut_ptr(), MAX_PATH as u32)
             };
 
             if result == 0 {
@@ -320,7 +315,7 @@ impl Process {
         let num_modules = bytes_written as usize / hmodule_size;
 
         // Enumerate Modules to find handle for EXE module
-        for m in module_handles.iter().take(num_modules).copied(){
+        for m in module_handles.iter().take(num_modules).copied() {
             let mut module_filename = [0; MAX_PATH];
 
             let result = unsafe {
@@ -449,7 +444,7 @@ fn get_load_library_rva() -> Result<usize, InjectDllError> {
     Ok(load_library_export.rva)
 }
 
-pub fn read_n_bytes(
+fn read_n_bytes(
     process: HANDLE,
     addr: usize,
     num_bytes: usize,
@@ -479,11 +474,7 @@ pub fn read_n_bytes(
     Ok(buf)
 }
 
-pub fn write_n_bytes(
-    process: HANDLE,
-    addr: usize,
-    data: Vec<u8>,
-) -> Result<usize, WriteMemoryError> {
+fn write_n_bytes(process: HANDLE, addr: usize, data: Vec<u8>) -> Result<usize, WriteMemoryError> {
     let mut bytes_written = 0;
     let num_bytes = data.len();
 

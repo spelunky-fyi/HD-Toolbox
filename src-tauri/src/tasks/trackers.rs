@@ -19,8 +19,8 @@ use super::tracker_task::{TrackerTask, TrackerTaskHandle};
 #[derive(Debug, Serialize, Clone, PartialEq, Eq)]
 #[serde(tag = "type", content = "data")]
 pub enum Response {
-    Category(CategoryResponse),
-    Session(SessionResponse),
+    Category(Box<CategoryResponse>),
+    Session(Box<SessionResponse>),
     Pacifist(PacifistResponse),
     Failure(String),
     Empty,

@@ -52,7 +52,7 @@ impl MemoryUpdaterTask {
         let mut poll_interval = interval(Duration::from_millis(16));
         poll_interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
 
-        if let Ok(_) = self.memory_handle.connect().await {
+        if (self.memory_handle.connect().await).is_ok() {
             self.connected();
         }
 

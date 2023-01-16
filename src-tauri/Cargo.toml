@@ -1,19 +1,21 @@
 [package]
-authors = ["garebear"]
+name = "hd-toolbox"
+version = "0.8.0"
+
 default-run = "hd-toolbox"
 description = "Toolbox full of tools for Spelunky HD"
+
+# Can't use workspace inheritence as it makes rust analyzer unhappy because of tauri-build
+# failing to understand the workspace inheritence
 edition = "2021"
-license = "Apache 2"
-name = "hd-toolbox"
-repository = ""
-rust-version = "1.57"
-version = "0.8.0"
+authors = ["garebear"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
+
 static-files = "0.2"
-tauri-build = {version = "1.2.0", features = [] }
+tauri-build = { version = "1.2.0", features = [] }
 
 [dependencies]
 anyhow = "1"
@@ -21,21 +23,21 @@ async-trait = "0.1"
 byteorder = "1"
 fern = "0.6"
 futures = "0.3"
-hdt_cat_labels = {path = "../libs/cat_labels"}
-hdt_mem_reader = {path = "../libs/mem_reader"}
-hyper = {version = "0.14", features = ["full"] }
+hdt_cat_labels = { path = "../libs/cat_labels" }
+hdt_mem_reader = { path = "../libs/mem_reader" }
+hyper = { version = "0.14", features = ["full"] }
 hyper-tungstenite = "0.8"
 log = "0.4"
 open = "2.1.2"
-serde = {version = "1.0", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 static-files = "0.2"
-tauri = {version = "1.2.0", features = ["api-all", "updater"] }
-tauri-plugin-log = {git = "https://github.com/tauri-apps/tauri-plugin-log", rev = "b58475bbc410fa78eb69276c62d0b64c91c07914"}
-tauri-plugin-store = {git = "https://github.com/gmjosack/tauri-plugin-store", branch = "tokio-watch"}
+tauri = { version = "1.2.0", features = ["api-all", "updater"] }
+tauri-plugin-log = { git = "https://github.com/tauri-apps/tauri-plugin-log", rev = "b58475bbc410fa78eb69276c62d0b64c91c07914" }
+tauri-plugin-store = { git = "https://github.com/gmjosack/tauri-plugin-store", branch = "tokio-watch" }
 tauri-plugin-window-state = "0.1.0"
-tokio = {version = "1", features = ["full"] }
-winapi = {version = "0.3.9", features = [
+tokio = { version = "1", features = ["full"] }
+winapi = { version = "0.3.9", features = [
   "handleapi",
   "memoryapi",
   "minwinbase",

@@ -150,7 +150,9 @@ async fn handle_websocket(
         select! {
             // Watch for disconnect, discard and messages from client.
             val = websocket.next() => {
-                match val { None => { break }, _ => {} }
+                if val.is_none() {
+                    break;
+                }
             }
             _now = poll_interval.tick() => {
                 let ser_value = {

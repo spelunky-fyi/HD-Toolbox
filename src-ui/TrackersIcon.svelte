@@ -34,6 +34,7 @@
         width="36"
         height="36"
         alt="Auto-Fixer Icon"
+        on:keypress={handleClick}
         on:click={handleClick}
       />
       <Tooltip yPos="below">{toolTipText}</Tooltip>

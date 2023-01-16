@@ -1,19 +1,22 @@
 [package]
-authors = ["garebear"]
 name = "show_procs"
 version = "0.0.0"
-edition = "2021"
+
+edition.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+license.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 anyhow = "1"
-hdt_mem_reader = {path = "../mem_reader"}
+hdt_mem_reader = { path = "../mem_reader" }
 
 
 [target.'cfg(target_os = "windows")'.dependencies]
-winapi = {version = "0.3.9", features = [
+winapi = { version = "0.3.9", features = [
   "handleapi",
   "minwinbase",
   "tlhelp32",
-]}
+] }

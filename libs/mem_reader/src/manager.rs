@@ -913,7 +913,7 @@ pub enum PayloadRequest {
 pub enum PayloadResponse {
     MemoryUpdater(MemoryUpdaterPayload),
     AutoFixer(AutoFixerPayload),
-    CategoryTracker(CategoryTrackerPayload),
+    CategoryTracker(Box<CategoryTrackerPayload>),
     PacifistTracker(PacifistTrackerPayload),
     Failure(Failure),
 
@@ -1042,7 +1042,7 @@ impl Manager {
                 }
                 PayloadRequest::CategoryTracker => {
                     match CategoryTrackerPayload::from_process(process) {
-                        Ok(payload) => PayloadResponse::CategoryTracker(payload),
+                        Ok(payload) => PayloadResponse::CategoryTracker(Box::new(payload)),
                         Err(err) => PayloadResponse::Failure(err),
                     }
                 }

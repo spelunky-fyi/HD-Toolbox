@@ -30,7 +30,7 @@ impl TrackerTicker for PacifistTracker {
     type Config = PacifistConfig;
 
     async fn startup(&mut self) -> Option<Response> {
-        if let Err(_) = self.memory_handle.connect().await {
+        if (self.memory_handle.connect().await).is_err() {
             return Some(Response::Failure("Failed to connect to process.".into()));
         }
         None

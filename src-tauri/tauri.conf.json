@@ -58,8 +58,8 @@
       "all": true,
       "fs": {
         "scope": [
-          "$APP/specs/*",
-          "$APP/frozlunky/*"
+          "$APP/specs/**",
+          "$APP/frozlunky/**"
         ]
       },
       "http": {

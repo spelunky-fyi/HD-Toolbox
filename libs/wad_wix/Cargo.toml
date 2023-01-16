@@ -1,12 +1,15 @@
 [package]
-authors = ["garebear"]
-edition = "2021"
 name = "hdt_wad_wix"
 version = "0.0.0"
+edition.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 anyhow = "1"
 thiserror = "1"
-tokio = {version = "1", features = ["full"]}
+tokio = { version = "1", features = ["full"] }
