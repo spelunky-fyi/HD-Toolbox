@@ -1,0 +1,11 @@
+[package]
+name = "hdt_music_engine"
+version = "0.0.0"
+
+edition.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+rodio = "0.16"

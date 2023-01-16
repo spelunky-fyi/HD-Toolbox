@@ -4,6 +4,7 @@ members = [
   "src-tauri",
   "libs/cat_labels",
   "libs/mem_reader",
+  "libs/music_engine",
   "libs/wad_wix",
   "libs/show_procs",
 ]

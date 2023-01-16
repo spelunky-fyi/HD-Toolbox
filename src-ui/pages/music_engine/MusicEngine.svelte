@@ -1,11 +1,9 @@
 <script type="ts">
   import LayoutGrid, { Cell } from "@smui/layout-grid";
   import Switch from "@smui/switch/src/Switch.svelte";
-  import Button from "@smui/button/src/Button.svelte";
   import Card from "@smui/card/src/Card.svelte";
 
   import { enabledMusicEngine, musicEngineHeader } from "@hdt/config";
-  import { defaultPlaylist } from "./config";
   import { musicEngineState, TaskState } from "@hdt/tasks";
 
   const connectingText = "Looking for running Spelunky.exe...";

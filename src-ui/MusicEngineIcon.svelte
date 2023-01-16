@@ -9,8 +9,6 @@
     musicEngineState,
   } from "./tasks";
 
-  import { get } from "svelte/store";
-
   const toolTipText = "Music Engine";
   const taskName = "MusicEngine";
 
