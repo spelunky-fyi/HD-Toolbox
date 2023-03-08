@@ -45,7 +45,8 @@ impl Default for SessionState {
 
 impl SessionState {
     fn update(&mut self, prev_gamestate: &GameState, gamestate: &GameState) {
-        if gamestate.total_time_ms < prev_gamestate.total_time_ms
+        if (gamestate.total_time_ms < 5000
+            && gamestate.total_time_ms < prev_gamestate.total_time_ms)
             || gamestate.respawn_level != prev_gamestate.respawn_level
         {
             self.runs += 1;

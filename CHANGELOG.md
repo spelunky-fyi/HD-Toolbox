@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.8.1] - 2023-03-07
+
 ### Changed
 
 - Don't 0-pad minutes in run trackers
+
+### Fixed
+
+- Prevent tracker from restarting due to time precision issues
 
 ## [0.8.0] - 2022-11-10
 
