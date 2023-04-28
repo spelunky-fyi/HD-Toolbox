@@ -399,9 +399,6 @@ impl RunLabels {
                             if visible.contains(&LabelType::Label(Label::Shield)) {
                                 visible.remove(&label_metadata.label_type);
                             }
-                            if visible.contains(&LabelType::Label(Label::Pacifist)) {
-                                visible.remove(&label_metadata.label_type);
-                            }
                             if visible.contains(&LabelType::Label(Label::TempleShortcut)) {
                                 visible.remove(&label_metadata.label_type);
                             }
@@ -614,6 +611,21 @@ mod tests {
         assert_eq!(
             labels.get_text(false, &exclude_labels),
             String::from("Max Shield Run")
+        );
+    }
+
+    #[test]
+    fn test_pacifist() {
+        let exclude_labels = HashSet::new();
+
+        let mut labels = RunLabels::default();
+
+        labels.rm_label(&Label::No);
+        labels.rm_label(&Label::Low);
+
+        assert_eq!(
+            labels.get_text(false, &exclude_labels),
+            String::from("No Teleporter No Gold Pacifist Any%")
         );
     }
 
