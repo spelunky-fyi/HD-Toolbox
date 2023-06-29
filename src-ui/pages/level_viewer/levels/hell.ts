@@ -806,8 +806,8 @@ const config: Level = {
       { data: "0hhh000u000000000000" },
       { data: "0hhh00u0u00000000000" },
       { data: "0hhh00uu000000000000" },
-      { data: "0hh00hhhh0uhhu0uhhu0" },
-      { data: "00hh00hhhh0uhhu0uhhu" },
+      { data: "0hh00hhhh0uhhu0uhhu0", notes: "Fourth row goes unused" },
+      { data: "00hh00hhhh0uhhu0uhhu", notes: "Fourth row goes unused" },
     ],
   },
 };
