@@ -1,6 +1,6 @@
 [package]
 name = "hd-toolbox"
-version = "0.8.2"
+version = "0.8.3"
 
 default-run = "hd-toolbox"
 description = "Toolbox full of tools for Spelunky HD"

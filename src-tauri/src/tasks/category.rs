@@ -506,7 +506,13 @@ impl RunState {
             self.run_labels.rm_label(&Label::No);
         }
 
-        if gamestate.player_data.health < 4 || gamestate.player_data.bombs < 4 {
+        if gamestate.player_data.bombs < 4 {
+            self.run_labels.rm_label(&Label::No);
+        }
+
+        if gamestate.player_data.health > 0
+            && gamestate.player_data.health < prev_gamestate.player_data.health
+        {
             self.run_labels.rm_label(&Label::No);
         }
     }
@@ -640,7 +646,8 @@ impl CategoryTracker {
             Some(gamestate) => gamestate,
         };
 
-        if (gamestate.total_time_ms < 5000 && gamestate.total_time_ms < prev_gamestate.total_time_ms)
+        if (gamestate.total_time_ms < 5000
+            && gamestate.total_time_ms < prev_gamestate.total_time_ms)
             || gamestate.respawn_level != prev_gamestate.respawn_level
         {
             if gamestate.respawn_level == 4 {
