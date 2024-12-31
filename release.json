@@ -1,11 +1,11 @@
 {
-  "version": "v0.8.2",
-  "notes": "Show No Teleporter on Pacifist runs.",
-  "pub_date": "2023-04-28T21:30:19Z",
+  "version": "v0.8.3",
+  "notes": "fix chain no%",
+  "pub_date": "2024-12-31T06:33:32Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWG9kNmxySUV0UzJFaUpQdGluS2ptU1A4RDRKQVJBQXA1elNGR1Z1MVY5RmU2ZFJ5amlWdnNOWGNWWFFXak5ocEQyN1VDQWZFOGZBWlZRY1lwMUpxMmc0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgyNzE3MzE0CWZpbGU6SEQgVG9vbGJveF8wLjguMl94NjRfZW4tVVMubXNpLnppcApJUmNaNFQzU0NHLzVkTnIxMDZqb0t4NWpwNmZ5SHNuZzJ6L2lNTlJlRFB0Y3RrRW1hamlLb014ZFExWE5jeVFoUUZTU0JJb2VPZFBZQ0h3TGRKZEtBdz09Cg==",
-      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.8.2/HD.Toolbox_0.8.2_x64_en-US.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWHVDU2hLeitTcUVnUDRNa3dqZExNdk9ZSjl2M1AvV0lDMUxMZnVOOS9JZ01tVVo4MDhYejhVSUhXa0U4aVgydFVJVGxla3kyU0NvZUFlQTl1SjVMYUFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM1NjI2NzU2CWZpbGU6SEQgVG9vbGJveF8wLjguM194NjRfZW4tVVMubXNpLnppcAo2OTZkcUZBZkNJKzcrYW1VZFI3NWN4d3JUZS8yVnI2dUlwV0FQTHE5RU8veHV0ZTlJQW5mUjc3TFhiNTNRM1luZHN3Lzg2dGdwazloc3g1dkdHbmZDQT09Cg==",
+      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.8.3/HD.Toolbox_0.8.3_x64_en-US.msi.zip"
     }
   }
 }
