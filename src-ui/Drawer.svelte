@@ -10,6 +10,7 @@
   import MemoryUpdater from "./pages/memory_updater/MemoryUpdater.svelte";
   import { activeTab, selectPage } from "./config";
   import Specs from "./pages/specs/Specs.svelte";
+  import Web from "./pages/web/Web.svelte";
   import Frozlunky from "./pages/frozlunky/Frozlunky.svelte";
 
   function launch_spelunky_hd() {
@@ -24,6 +25,7 @@
     Trackers: Trackers,
     "Memory Updater": MemoryUpdater,
     Specs: Specs,
+    Web: Web,
     Frozlunky: Frozlunky,
   };
 </script>

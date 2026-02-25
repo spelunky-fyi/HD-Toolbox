@@ -1,19 +1,21 @@
 <script type="ts">
-  import { selectedVersion } from "./config";
+  import type { Writable } from "svelte/store";
+  import type { Release } from "./external-tool-types";
 
-  import { cachedReleases } from "./stores";
+  export let cachedReleases: Writable<Release[]>;
+  export let selectedVersion: Writable<string>;
 </script>
 
 <div>
   <label class="top-label" for="version">Version</label>
   {#if $cachedReleases.length > 0}
-    <select bind:value={$selectedVersion} id="version" label="Version">
+    <select bind:value={$selectedVersion} id="version">
       {#each $cachedReleases as release}
         <option value={release.version}>{release.version}</option>
       {/each}
     </select>
   {:else}
-    <select disabled id="version" label="Version">
+    <select disabled id="version">
       <option>Loading...</option>
     </select>
   {/if}

@@ -34,7 +34,7 @@ fn launch_spelunky_hd() -> Result<String, String> {
 }
 
 #[tauri::command]
-fn inject_specs(dll: String) -> Result<(), String> {
+fn inject_dll(dll: String) -> Result<(), String> {
     debug!("Injecting DLL: {}", dll);
     // Nothing consumes this result. We just use it for short-circuiting.
     thread::spawn(move || -> anyhow::Result<()> {
@@ -85,6 +85,7 @@ async fn run_mem_manager() -> ManagerHandle {
 fn main() -> anyhow::Result<()> {
     let main_config = StoreBuilder::new(MAIN_CONFIG.parse()?).build();
     let specs_config = StoreBuilder::new("specs.config".parse()?).build();
+    let web_config = StoreBuilder::new("web.config".parse()?).build();
     let frozlunky_config = StoreBuilder::new("frozlunky.config".parse()?).build();
 
     let mut autofix_config = StoreBuilder::new("auto-fixer.config".parse()?).build();
@@ -116,6 +117,7 @@ fn main() -> anyhow::Result<()> {
                     tracker_category_config,
                     tracker_session_config,
                     specs_config,
+                    web_config,
                     frozlunky_config,
                     autofix_config,
                 ])
@@ -169,7 +171,7 @@ fn main() -> anyhow::Result<()> {
         })
         .invoke_handler(tauri::generate_handler![
             launch_spelunky_hd,
-            inject_specs,
+            inject_dll,
             launch_frozlunky,
             tasks::start_task,
             tasks::stop_task,

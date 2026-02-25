@@ -1,5 +1,8 @@
 <script type="ts">
-  import { cachedReleases } from "./stores";
+  import type { Writable } from "svelte/store";
+  import type { Release } from "./external-tool-types";
+
+  export let cachedReleases: Writable<Release[]>;
 </script>
 
 {#if $cachedReleases.length > 0}

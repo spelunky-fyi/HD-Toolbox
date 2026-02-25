@@ -59,6 +59,7 @@
       "fs": {
         "scope": [
           "$APP/specs/**",
+          "$APP/web/**",
           "$APP/frozlunky/**"
         ]
       },
