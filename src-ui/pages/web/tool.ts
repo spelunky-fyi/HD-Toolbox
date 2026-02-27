@@ -3,10 +3,10 @@ import type { ExternalToolDefinition } from "@hdt/shared/external-tool-types";
 
 const webDefinition: ExternalToolDefinition = {
   title: "Web HD",
-  releasesUrls: ["https://api.github.com/repos/spelunky-fyi/WebHD/releases"],
+  releasesUrls: ["https://api.github.com/repos/spelunky-fyi/WebHD-DLL/releases"],
   docsUrl:
-    "https://raw.githubusercontent.com/spelunky-fyi/WebHD/main/DOCS.md",
-  docsRepoUrl: "https://github.com/spelunky-fyi/WebHD/blob/main/DOCS.md",
+    "https://raw.githubusercontent.com/spelunky-fyi/WebHD-DLL/main/DOCS.md",
+  docsRepoUrl: "https://github.com/spelunky-fyi/WebHD-DLL/blob/main/DOCS.md",
   cacheDirName: "web",
   assetFileName: "web.dll",
   invokeCommand: "inject_dll",
