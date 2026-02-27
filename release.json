@@ -1,11 +1,11 @@
 {
-  "version": "v0.8.3",
-  "notes": "fix chain no%",
-  "pub_date": "2024-12-31T06:33:32Z",
+  "version": "v0.9.0",
+  "notes": "Add new tab for WebHD",
+  "pub_date": "2026-02-27T23:55:51Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWHVDU2hLeitTcUVnUDRNa3dqZExNdk9ZSjl2M1AvV0lDMUxMZnVOOS9JZ01tVVo4MDhYejhVSUhXa0U4aVgydFVJVGxla3kyU0NvZUFlQTl1SjVMYUFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM1NjI2NzU2CWZpbGU6SEQgVG9vbGJveF8wLjguM194NjRfZW4tVVMubXNpLnppcAo2OTZkcUZBZkNJKzcrYW1VZFI3NWN4d3JUZS8yVnI2dUlwV0FQTHE5RU8veHV0ZTlJQW5mUjc3TFhiNTNRM1luZHN3Lzg2dGdwazloc3g1dkdHbmZDQT09Cg==",
-      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.8.3/HD.Toolbox_0.8.3_x64_en-US.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWHI4N1BzMkROVHN0d3I3aGRIckcxU0VmaVNQRTlxeXkrbWN5NWxSaGlaRHF5VUUyZVBTeTVEWUFYdmk0WHJTd1d4WjZod1hjekYwMTMrZWtpNy83OUFrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzcyMjM1ODE0CWZpbGU6SEQgVG9vbGJveF8wLjkuMF94NjRfZW4tVVMubXNpLnppcApwK0taOE4rM0pMZGFJdXRncHhzTmQwWDQyUkF6NElKNlpuU2RqZXdtUXRNZVdHbHhMMzErWWwxRkovUTJxaUlUWlJwQ29PbndpL2l0MENtUTZJZUFBZz09Cg==",
+      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.9.0/HD.Toolbox_0.9.0_x64_en-US.msi.zip"
     }
   }
 }
