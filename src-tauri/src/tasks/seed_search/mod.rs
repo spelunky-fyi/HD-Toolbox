@@ -32,12 +32,16 @@ use super::TaskUpdate;
 
 static TASK_STATE_SEED_SEARCH: &str = "task-state:SeedSearch";
 
-const SEED_SEARCH_RESOURCE: &str = "resources/seed-search/hd-seed-search.exe";
+const SEED_SEARCH_EXE: &str = "hd-seed-search.exe";
+const SEED_SEARCH_HOOK: &str = "hd-seed-search-hook.dll";
 const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct SeedSearchOptions {
+    /// The folder with hd-seed-search's exe and hook dll, a downloaded release
+    /// or one the user picked
+    pub tool_dir: String,
     pub seed_count: u32,
     /// Empty for the Toolbox's own file
     pub output_csv: String,
@@ -518,11 +522,13 @@ impl SeedSearchTask {
 
         // Where Steam installed it, like the Toolbox's Launch button uses
         let game_dir = steam::spelunky_dir()?;
-        let generator = app_handle
-            .path_resolver()
-            .resolve_resource(SEED_SEARCH_RESOURCE)
-            .filter(|path| path.exists())
-            .context("hd-seed-search.exe is missing from the Toolbox install")?;
+        let tool_dir = Path::new(&options.tool_dir);
+        for name in [SEED_SEARCH_EXE, SEED_SEARCH_HOOK] {
+            if !tool_dir.join(name).exists() {
+                bail!("{} is missing from {}", name, tool_dir.display());
+            }
+        }
+        let generator = tool_dir.join(SEED_SEARCH_EXE);
 
         let work_dir = std::env::temp_dir().join("hd-toolbox-seed-search");
         fs::create_dir_all(&work_dir)?;

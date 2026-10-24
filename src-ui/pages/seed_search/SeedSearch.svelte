@@ -3,10 +3,12 @@
   import { writeText } from "@tauri-apps/api/clipboard";
   import { invoke } from "@tauri-apps/api/tauri";
   import Button from "@smui/button/src/Button.svelte";
+  import ExternalToolSource from "@hdt/shared/ExternalToolSource.svelte";
 
   import ItemList from "./ItemList.svelte";
   import ItemIcon from "./ItemIcon.svelte";
   import { configLoaded, seedCount, outputCsv } from "./config";
+  import { seedSearchTool } from "./tool";
   import {
     presetInfo,
     progress,
@@ -78,33 +80,35 @@
     flagPresets.map((info) => [
       info.id,
       countBy($rows.map((row) => row.flags[info.id]?.state ?? UNKNOWN)),
-    ])
+    ]),
   );
   $: levelCounts = Object.fromEntries(
     flagPresets.map((info) => {
-      const counts = countBy($rows.flatMap((row) => row.flags[info.id]?.levels ?? []));
+      const counts = countBy(
+        $rows.flatMap((row) => row.flags[info.id]?.levels ?? []),
+      );
       return [info.id, [...counts].sort(([a], [b]) => a.localeCompare(b))];
-    })
+    }),
   );
   $: itemCounts = Object.fromEntries(
     listPresets.map((info) => {
       const counts = countBy(
-        $rows.flatMap((row) => [...new Set(row.lists[info.id]?.items ?? [])])
+        $rows.flatMap((row) => [...new Set(row.lists[info.id]?.items ?? [])]),
       );
       return [info.id, [...counts].sort(([a], [b]) => a.localeCompare(b))];
-    })
+    }),
   );
   $: presenceCounts = Object.fromEntries(
     listPresets.map((info) => [
       info.id,
       countBy($rows.map((row) => row.lists[info.id]?.state ?? UNKNOWN)),
-    ])
+    ]),
   );
   $: maxItems = Object.fromEntries(
     listPresets.map((info) => [
       info.id,
       Math.max(0, ...$rows.map((row) => row.lists[info.id]?.items.length ?? 0)),
-    ])
+    ]),
   );
 
   function passes(row: Row) {
@@ -113,7 +117,10 @@
       const want = flagFilter[info.id];
       if (want != null && flag.state !== want) return false;
       const levels = flagLevels[info.id] ?? [];
-      if (levels.length > 0 && !flag.levels.some((level) => levels.includes(level)))
+      if (
+        levels.length > 0 &&
+        !flag.levels.some((level) => levels.includes(level))
+      )
         return false;
     }
     for (const info of listPresets) {
@@ -143,7 +150,7 @@
     groupItems,
     groupMatchAll,
     groupPresence,
-    groupMinCount
+    groupMinCount,
   );
 
   // Picking a seed
@@ -162,11 +169,19 @@
 
   // Display
 
-  function flagText(value: string, state: number) {
-    if (state === YES) return /\d-\d/.test(value) ? value : "Yes";
-    if (state === NO) return "No";
-    if (state === NA) return "N/A";
-    return "-";
+  // The seed properties a seed has, with the levels they're on
+  function hasList(row: Row) {
+    return flagPresets
+      .filter((info) => row.flags[info.id].state === YES)
+      .map((info) => {
+        const levels = row.flags[info.id].levels;
+        return {
+          id: info.id,
+          text: levels.length
+            ? `${info.label} ${levels.join(", ")}`
+            : info.label,
+        };
+      });
   }
 
   function naLabel(info: PresetInfo) {
@@ -175,7 +190,15 @@
 
   // Settings
 
-  $: canStart = !$running && $seedCount > 0;
+  const {
+    launchable,
+    cachedReleases,
+    activeMethod,
+    selectedVersion,
+    selectedFile,
+  } = seedSearchTool;
+
+  $: canStart = !$running && $launchable && $seedCount > 0;
 
   // Where results go without a custom file, shown on hover
   let defaultCsv = "";
@@ -190,10 +213,20 @@
   }
 
   function start() {
-    startSearch({
-      seedCount: Number($seedCount),
-      outputCsv: $outputCsv,
-    });
+    startSearch(
+      {
+        seedCount: Number($seedCount),
+        outputCsv: $outputCsv,
+      },
+      // Downloads hd-seed-search first if this version isn't already
+      () =>
+        seedSearchTool.releases.resolvePath(
+          $cachedReleases,
+          $activeMethod,
+          $selectedVersion,
+          $selectedFile,
+        ),
+    );
   }
 </script>
 
@@ -203,25 +236,36 @@
       <div class="title">
         <h2>Seed Search</h2>
         <span class="dim">
-          Generates levels with the game's own level generation, in a hidden copy
-          of Spelunky HD. Seeded the same as Specs' seeded mode.
+          Generates levels with the game's level generation, with a copy of
+          Spelunky HD. Seeded the same as Specs' seeded mode.
         </span>
       </div>
       <div class="settings">
+        <span class="label">Generator</span>
+        <ExternalToolSource tool={seedSearchTool} compact />
 
+        <span class="label">Results</span>
         <div class="setting">
-          <span class="label">Results</span>
           {#if $outputCsv}
             <span class="path" title={$outputCsv}>{$outputCsv}</span>
-            <Button disabled={$running} on:click={chooseOutputCsv}>Change</Button>
-            <Button disabled={$running} on:click={() => outputCsv.set("")}>Use Default</Button>
+            <Button disabled={$running} on:click={chooseOutputCsv}
+              >Change</Button
+            >
+            <Button disabled={$running} on:click={() => outputCsv.set("")}
+              >Use Default</Button
+            >
           {:else}
-            <span class="path dim" title={defaultCsv}>Using default CSV ({defaultCsv})</span>
-            <Button disabled={$running} on:click={chooseOutputCsv}>Use Custom File...</Button>
+            <span class="path dim" title={defaultCsv}
+              >Default ({defaultCsv})</span
+            >
+            <Button disabled={$running} on:click={chooseOutputCsv}
+              >Use Custom File...</Button
+            >
           {/if}
         </div>
+
+        <label class="label" for="seed-count">Seeds</label>
         <div class="setting">
-          <label class="label" for="seed-count">Search more seeds...</label>
           <input
             id="seed-count"
             type="number"
@@ -231,9 +275,16 @@
             bind:value={$seedCount}
           />
           {#if $running}
-            <Button color="secondary" variant="raised" on:click={stopSearch}>Stop</Button>
+            <Button color="secondary" variant="raised" on:click={stopSearch}
+              >Stop</Button
+            >
           {:else}
-            <Button color="primary" variant="raised" disabled={!canStart} on:click={start}>
+            <Button
+              color="primary"
+              variant="raised"
+              disabled={!canStart}
+              on:click={start}
+            >
               Search!
             </Button>
           {/if}
@@ -242,7 +293,9 @@
               <b>{$progress.state}</b>
               {$progress.checked.toLocaleString()} / {$progress.total.toLocaleString()}
               {#if $progress.seedsPerSecond > 0}
-                <span class="dim">({$progress.seedsPerSecond.toFixed(1)} seeds/sec)</span>
+                <span class="dim"
+                  >({$progress.seedsPerSecond.toFixed(1)} seeds/sec)</span
+                >
               {/if}
             </span>
           {/if}
@@ -266,7 +319,6 @@
             <div class="flag">
               <div class="flag-name">
                 {info.label}
-
               </div>
               <div class="choices">
                 {#each FLAG_CHOICES as [label, state]}
@@ -278,12 +330,15 @@
                         checked={(flagFilter[info.id] ?? null) === state}
                         on:change={() => {
                           flagFilter[info.id] = state;
-                          if (state === NO || state === NA) flagLevels[info.id] = [];
+                          if (state === NO || state === NA)
+                            flagLevels[info.id] = [];
                         }}
                       />
                       {label}
                       {#if state !== null}
-                        <span class="dim">({flagCounts[info.id]?.get(state) ?? 0})</span>
+                        <span class="dim"
+                          >({flagCounts[info.id]?.get(state) ?? 0})</span
+                        >
                       {/if}
                     </label>
                   {/if}
@@ -302,7 +357,10 @@
                           flagLevels[info.id] = event.currentTarget.checked
                             ? [...levels, level]
                             : levels.filter((other) => other !== level);
-                          if (event.currentTarget.checked && flagFilter[info.id] !== YES)
+                          if (
+                            event.currentTarget.checked &&
+                            flagFilter[info.id] !== YES
+                          )
                             flagFilter[info.id] = null;
                         }}
                       />
@@ -319,7 +377,9 @@
           <section>
             <h4>
               {info.label}
-              <span class="dim small">({(groupItems[info.id] ?? []).length} on)</span>
+              <span class="dim small"
+                >({(groupItems[info.id] ?? []).length} on)</span
+              >
             </h4>
             {#if isShop(info)}
               <div class="choices">
@@ -335,7 +395,9 @@
                       />
                       {label}
                       {#if state !== null}
-                        <span class="dim">({presenceCounts[info.id]?.get(state) ?? 0})</span>
+                        <span class="dim"
+                          >({presenceCounts[info.id]?.get(state) ?? 0})</span
+                        >
                       {/if}
                     </label>
                   {/if}
@@ -349,7 +411,10 @@
                   min="0"
                   max={maxItems[info.id]}
                   value={groupMinCount[info.id] ?? 0}
-                  on:input={(event) => (groupMinCount[info.id] = Number(event.currentTarget.value))}
+                  on:input={(event) =>
+                    (groupMinCount[info.id] = Number(
+                      event.currentTarget.value,
+                    ))}
                 />
                 <span>{groupMinCount[info.id] ?? 0} items</span>
               </div>
@@ -373,7 +438,10 @@
                 />
                 Has any
               </label>
-              <button class="small-button" on:click={() => (groupItems[info.id] = [])}>
+              <button
+                class="small-button"
+                on:click={() => (groupItems[info.id] = [])}
+              >
                 Clear
               </button>
             </div>
@@ -403,10 +471,14 @@
       <div class="results">
         <div class="results-header">
           <span>
-            <b>{matching.length.toLocaleString()}</b> of {$rows.length.toLocaleString()} seeds
-            match
+            <b>{matching.length.toLocaleString()}</b> of {$rows.length.toLocaleString()}
+            seeds match
           </span>
-          <Button variant="raised" disabled={matching.length === 0} on:click={pickRandom}>
+          <Button
+            variant="raised"
+            disabled={matching.length === 0}
+            on:click={pickRandom}
+          >
             Pick Random
           </Button>
         </div>
@@ -415,7 +487,9 @@
           <div class="picked">
             <div class="picked-seed">
               <span class="big">{picked.seed}</span>
-              <Button on:click={() => writeText(String(picked.seed))}>Copy</Button>
+              <Button on:click={() => writeText(String(picked.seed))}
+                >Copy</Button
+              >
               <Button on:click={pickRandom}>Reroll</Button>
             </div>
             <table class="picked-details">
@@ -427,10 +501,10 @@
                       value={picked.lists[info.id].state === UNKNOWN
                         ? "n/a"
                         : picked.lists[info.id].state === YES
-                        ? picked.lists[info.id].display
-                        : picked.lists[info.id].state === NA
-                        ? "n/a"
-                        : "none"}
+                          ? picked.lists[info.id].display
+                          : picked.lists[info.id].state === NA
+                            ? "n/a"
+                            : "none"}
                       naLabel={naLabel(info)}
                       highlight={groupItems[info.id] ?? []}
                     />
@@ -440,64 +514,72 @@
               <tr>
                 <td class="dim">Has</td>
                 <td>
-                  {flagPresets
-                    .filter((info) => picked.flags[info.id].state === YES)
-                    .map((info) => {
-                      const levels = picked.flags[info.id].levels;
-                      return levels.length ? `${info.label} (${levels.join(", ")})` : info.label;
-                    })
-                    .join(", ") || "-"}
+                  {#each hasList(picked) as has (has.id)}
+                    <span class="chip" class:on={flagFilter[has.id] === YES}
+                      >{has.text}</span
+                    >
+                  {:else}
+                    <span class="dim">-</span>
+                  {/each}
                 </td>
               </tr>
             </table>
           </div>
         {/if}
 
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Seed</th>
-              {#each listPresets as info}
-                <th>{info.label}</th>
-              {/each}
-              {#each flagPresets as info}
-                <th>{info.label}</th>
-              {/each}
-            </tr>
-          </thead>
-          <tbody>
-            {#each matching.slice(0, MAX_SHOWN) as row (row.seed)}
-              <tr class:selected={row === picked} on:click={() => choose(row)} title="Click to select and copy the seed">
-                <td class="seed">{row.seed}</td>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Seed</th>
                 {#each listPresets as info}
-                  <td>
-                    <ItemList
-                      value={row.lists[info.id].state === YES
-                        ? row.lists[info.id].display
-                        : row.lists[info.id].state === NO
-                        ? "none"
-                        : "n/a"}
-                      naLabel={row.lists[info.id].state === UNKNOWN ? "-" : naLabel(info)}
-                      highlight={groupItems[info.id] ?? []}
-                      size={32}
-                    />
-                  </td>
+                  <th>{info.label}</th>
                 {/each}
-                {#each flagPresets as info}
-                  <td class="flag-{row.flags[info.id].state}">
-                    {flagText(row.flags[info.id].value, row.flags[info.id].state)}
-                  </td>
-                {/each}
+                <th class="has">Has</th>
               </tr>
-            {/each}
-          </tbody>
-        </table>
-        {#if matching.length > MAX_SHOWN}
-          <p class="dim">
-            Showing the first {MAX_SHOWN} of {matching.length.toLocaleString()} matching seeds.
-            Narrow the filters or pick one at random.
-          </p>
-        {/if}
+            </thead>
+            <tbody>
+              {#each matching.slice(0, MAX_SHOWN) as row (row.seed)}
+                <tr
+                  class:selected={row === picked}
+                  on:click={() => choose(row)}
+                  title="Click to select and copy the seed"
+                >
+                  <td class="seed">{row.seed}</td>
+                  {#each listPresets as info}
+                    <td>
+                      <ItemList
+                        value={row.lists[info.id].state === YES
+                          ? row.lists[info.id].display
+                          : row.lists[info.id].state === NO
+                            ? "none"
+                            : "n/a"}
+                        naLabel={row.lists[info.id].state === UNKNOWN
+                          ? "-"
+                          : naLabel(info)}
+                        highlight={groupItems[info.id] ?? []}
+                        size={32}
+                      />
+                    </td>
+                  {/each}
+                  <td class="has">
+                    {#each hasList(row) as has (has.id)}
+                      <span class="chip" class:on={flagFilter[has.id] === YES}
+                        >{has.text}</span
+                      >
+                    {/each}
+                  </td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+          {#if matching.length > MAX_SHOWN}
+            <p class="dim">
+              Showing the first {MAX_SHOWN} of {matching.length.toLocaleString()}
+              matching seeds. Narrow the filters or pick one at random.
+            </p>
+          {/if}
+        </div>
       </div>
     </div>
   </div>
@@ -516,40 +598,51 @@
 
   .top h2 {
     margin: 0;
+    white-space: nowrap;
   }
 
   .title {
     display: flex;
     align-items: baseline;
     gap: 16px;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
   }
 
   .settings {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: center;
+    gap: 8px 16px;
   }
 
   .setting {
     display: flex;
     align-items: center;
     gap: 8px;
+    min-width: 0;
+    min-height: 36px;
   }
 
   .label {
     font-weight: bold;
-    width: 120px;
   }
 
   .path {
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
+  #seed-count {
+    width: 110px;
+    margin: 0;
+    padding: 6px 8px;
+  }
+
   .progress {
     margin-left: 8px;
+    white-space: nowrap;
   }
 
   .failure {
@@ -630,10 +723,22 @@
   }
 
   .results {
+    display: flex;
+    flex-direction: column;
     flex: 1;
     min-width: 0;
+    padding-top: 8px;
+  }
+
+  .results-header {
+    margin-bottom: 8px;
+  }
+
+  .table-wrap {
+    flex: 1;
+    min-height: 0;
     overflow: auto;
-    padding: 8px 0 16px;
+    padding-bottom: 16px;
   }
 
   .picked {
@@ -666,6 +771,7 @@
   .table th {
     position: sticky;
     top: 0;
+    z-index: 1;
     background: var(--mdc-theme-background, #222);
     text-align: left;
     padding: 4px 8px;
@@ -688,21 +794,28 @@
   }
 
   .seed {
-    font-family: monospace;
+    font-variant-numeric: tabular-nums;
   }
 
-  .flag-1 {
+  .table td.has {
+    width: 100%;
+    min-width: 160px;
+    white-space: normal;
+  }
+
+  .chip {
+    display: inline-block;
+    margin: 2px 4px 2px 0;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: smaller;
+    white-space: nowrap;
+    background: rgba(128, 128, 128, 0.2);
+  }
+
+  .chip.on {
     color: #73d973;
-    font-weight: bold;
-  }
-
-  .flag-0 {
-    color: #d97373;
-  }
-
-  .flag-2,
-  .flag--1 {
-    opacity: 0.6;
+    box-shadow: inset 0 0 0 1px #73d973;
   }
 
   .dim {

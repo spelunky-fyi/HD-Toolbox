@@ -13,7 +13,8 @@ export function createExternalTool(definition: ExternalToolDefinition): External
   const releases = createExternalToolReleases({
     releasesUrls: definition.releasesUrls,
     cacheDirName: definition.cacheDirName,
-    assetFileName: definition.assetFileName,
+    assetFileNames: definition.assetFileNames,
+    pathKind: definition.pathKind ?? "file",
     invokeCommand: definition.invokeCommand,
     invokeParamName: definition.invokeParamName,
     cachedReleases,

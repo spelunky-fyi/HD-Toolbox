@@ -151,7 +151,6 @@ dist
 
 public/build/
 trackers/build/
-src-tauri/resources/seed-search/
 
 .DS_Store
 WixTools

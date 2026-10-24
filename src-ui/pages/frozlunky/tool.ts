@@ -12,7 +12,7 @@ const frozlunkyDefinition: ExternalToolDefinition = {
   docsRepoUrl:
     "https://github.com/spelunky-fyi/Frozlunky/blob/main/docs/DOCS.md",
   cacheDirName: "frozlunky",
-  assetFileName: "Frozlunky.exe",
+  assetFileNames: ["Frozlunky.exe"],
   invokeCommand: "launch_frozlunky",
   invokeParamName: "exe",
   configStoreName: "frozlunky.config",

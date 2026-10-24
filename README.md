@@ -6,7 +6,6 @@ Toolbox full of tools for Spelunky HD
 
 Grab the latest msi installer [here](https://github.com/spelunky-fyi/HD-Toolbox/releases/latest)
 
-
 ## Potential Functionality
 
 - [x] Level Viewer
@@ -38,16 +37,9 @@ Run Dev Frontend
 ```console
 # First time install deps
 npm install
-npm run fetch:seed-search
 
 # Run dev server
-npm run dev
-```
-
-Run Tauri Dev
-
-```console
-cargo tauri dev
+npm run tauri dev
 ```
 
 ## Release Build

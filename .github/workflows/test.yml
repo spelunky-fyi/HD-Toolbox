@@ -35,9 +35,6 @@ jobs:
       - name: install app dependencies and build it
         run: npm install && npm run build
 
-      - name: fetch hd-seed-search
-        run: npm run fetch:seed-search
-
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

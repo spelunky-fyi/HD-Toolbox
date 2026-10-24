@@ -8,7 +8,7 @@ const webDefinition: ExternalToolDefinition = {
     "https://raw.githubusercontent.com/spelunky-fyi/WebHD-DLL/main/DOCS.md",
   docsRepoUrl: "https://github.com/spelunky-fyi/WebHD-DLL/blob/main/DOCS.md",
   cacheDirName: "web",
-  assetFileName: "web.dll",
+  assetFileNames: ["web.dll"],
   invokeCommand: "inject_dll",
   invokeParamName: "dll",
   configStoreName: "web.config",

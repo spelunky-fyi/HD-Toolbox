@@ -150,19 +150,24 @@ export async function loadResults(path: string) {
   }
 }
 
-export function startSearch(options: {
-  seedCount: number;
-  outputCsv: string;
-}) {
+// toolDir finds the folder with hd-seed-search, which can mean downloading it
+export async function startSearch(
+  options: {
+    seedCount: number;
+    outputCsv: string;
+  },
+  toolDir: () => Promise<string>
+) {
   failure.set("");
   progress.set(null);
   running.set(true);
-  invoke("start_task", { task: { type: "SeedSearch", options } }).catch(
-    (err) => {
-      failure.set(String(err));
-      running.set(false);
-    }
-  );
+  try {
+    const task = { type: "SeedSearch", options: { ...options, toolDir: await toolDir() } };
+    await invoke("start_task", { task });
+  } catch (err) {
+    failure.set(String(err));
+    running.set(false);
+  }
 }
 
 export function stopSearch() {

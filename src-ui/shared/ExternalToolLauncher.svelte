@@ -3,13 +3,9 @@
   import SvelteMarkdown from "svelte-markdown";
 
   import { onDestroy, onMount } from "svelte";
-  import LatestVersion from "./LatestVersion.svelte";
-  import VersionSelector from "./VersionSelector.svelte";
-  import FileSelector from "./FileSelector.svelte";
-  import { RefreshCwIcon } from "svelte-feather-icons";
+  import ExternalToolSource from "./ExternalToolSource.svelte";
   import Button from "@smui/button/src/Button.svelte";
 
-  import { LoadMethod } from "./external-tool-types";
   import type { ExternalToolInstance } from "./external-tool-types";
 
   export let tool: ExternalToolInstance;
@@ -32,11 +28,6 @@
 
   async function run() {
     try {
-      await releases.cacheReleases();
-    } catch (err) {
-      console.error(`[${definition.title}] cacheReleases failed:`, err);
-    }
-    try {
       await docs.cacheDocs();
     } catch (err) {
       console.error(`[${definition.title}] cacheDocs failed:`, err);
@@ -50,11 +41,6 @@
   onMount(async () => {
     mounted = true;
     await run();
-    try {
-      await releases.loadCachedReleases();
-    } catch (err) {
-      console.error(`[${definition.title}] loadCachedReleases failed:`, err);
-    }
     try {
       await docs.loadDocs();
     } catch (err) {
@@ -95,61 +81,7 @@
       </div>
     </Cell>
     <Cell span={12}>
-      <div>
-        <div
-          style="display: inline-block; padding-right: 5px; margin-top: 5px;"
-        >
-          <label class="top-label" for="load-method">Load Method</label>
-
-          <select bind:value={$activeMethod} id="load-method">
-            <option value={LoadMethod.LATEST}>Latest</option>
-            <option value={LoadMethod.SPECIFIC_VERSION}>Specific Version</option
-            >
-            <option value={LoadMethod.FILE}>File</option>
-          </select>
-        </div>
-        <div style="display: inline-block; padding-right: 5px;">
-          {#if $activeMethod === LoadMethod.LATEST}
-            <LatestVersion {cachedReleases} />
-          {:else if $activeMethod === LoadMethod.SPECIFIC_VERSION}
-            <VersionSelector {cachedReleases} {selectedVersion} />
-          {:else if $activeMethod === LoadMethod.FILE}
-            <FileSelector
-              {selectedFile}
-              filterName={definition.fileFilterLabel}
-              filterExtensions={definition.fileFilterExtensions}
-              chooseLabel={definition.chooseFileLabel}
-            />
-          {/if}
-        </div>
-        {#if $activeMethod != LoadMethod.FILE}
-          <div style="display: inline-block;">
-            <label class="top-label" for="load-method">&nbsp;</label>
-            <Button
-              color="primary"
-              variant="raised"
-              id="refresh-tool"
-              on:click={() => {
-                releases.cacheReleases(true);
-                docs.cacheDocs(true);
-              }}
-            >
-              <RefreshCwIcon />
-            </Button>
-          </div>
-        {/if}
-      </div>
-    </Cell>
-    <Cell span={12}>
-      <div style="margin-top: -15px;">
-        {#if $activeMethod == LoadMethod.LATEST}
-          <i>{definition.helpTexts.latest}</i>
-        {:else if $activeMethod == LoadMethod.SPECIFIC_VERSION}
-          <i>{definition.helpTexts.specificVersion}</i>
-        {:else if $activeMethod == LoadMethod.FILE}
-          <i>{definition.helpTexts.file}</i>
-        {/if}
-      </div>
+      <ExternalToolSource {tool} on:refresh={() => docs.cacheDocs(true)} />
     </Cell>
   </LayoutGrid>
   <hr />
@@ -178,14 +110,5 @@
     display: flex;
     align-items: center;
     height: 64px;
-  }
-
-  .top-label {
-    font-weight: bold;
-    padding-bottom: 2px;
-  }
-  :global(#refresh-tool) {
-    height: 43px;
-    margin-top: 5px;
   }
 </style>
