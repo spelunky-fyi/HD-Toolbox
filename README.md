@@ -6,10 +6,10 @@ Toolbox full of tools for Spelunky HD
 
 Grab the latest msi installer [here](https://github.com/spelunky-fyi/HD-Toolbox/releases/latest)
 
-
 ## Potential Functionality
 
 - [x] Level Viewer
+- [x] Seed Search (offline level generation with [hd-seed-search](https://github.com/spelunky-fyi/hd-seed-search))
 - [x] Game Launcher
 - [x] Overlay + Injector for Science / Practice (Specs HD)
 - [x] Trackers
@@ -39,13 +39,7 @@ Run Dev Frontend
 npm install
 
 # Run dev server
-npm run dev
-```
-
-Run Tauri Dev
-
-```console
-cargo tauri dev
+npm run tauri dev
 ```
 
 ## Release Build

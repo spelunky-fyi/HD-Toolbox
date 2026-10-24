@@ -35,6 +35,7 @@ impl State {
                 memory_updater: None,
                 auto_fixer: None,
                 web_server: None,
+                seed_search: None,
             })),
             autofix_config_watcher,
         }

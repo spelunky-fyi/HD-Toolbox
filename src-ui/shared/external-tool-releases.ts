@@ -19,13 +19,21 @@ const CACHE_TIMEOUT = 10 * 60 * 1000;
 export function createExternalToolReleases(opts: {
   releasesUrls: string[];
   cacheDirName: string;
-  assetFileName: string;
-  invokeCommand: string;
-  invokeParamName: string;
+  assetFileNames: string[];
+  pathKind: "file" | "folder";
+  invokeCommand?: string;
+  invokeParamName?: string;
   cachedReleases: Writable<Release[]>;
 }) {
-  const { releasesUrls, cacheDirName, assetFileName, invokeCommand, invokeParamName, cachedReleases } = opts;
-  const assetExtension = "." + assetFileName.split(".").pop();
+  const {
+    releasesUrls,
+    cacheDirName,
+    assetFileNames,
+    pathKind,
+    invokeCommand,
+    invokeParamName,
+    cachedReleases,
+  } = opts;
 
   async function getCachePath() {
     const cachePath = await join(cacheDirName, "cache");
@@ -51,21 +59,53 @@ export function createExternalToolReleases(opts: {
     return parseInt(contents.trim(), 10);
   }
 
-  async function getAssetDirectoryPath(
+  function findRelease(
     releases: Release[],
     activeMethod: LoadMethod,
     selectedVersion: string
   ) {
     if (activeMethod == LoadMethod.SPECIFIC_VERSION) {
-      return await join(cacheDirName, "releases", selectedVersion);
+      return releases.find((release) => release.version == selectedVersion);
     }
 
     if (activeMethod == LoadMethod.LATEST) {
-      return await join(cacheDirName, "releases", releases[0].version);
+      return releases[0];
     }
   }
 
-  async function getAssetPath(
+  async function checkAssetsExist(assetDirPath: string) {
+    let entries;
+    try {
+      entries = await readDir(assetDirPath, { dir: BaseDirectory.App });
+    } catch (error) {
+      await createDir(assetDirPath, { recursive: true, dir: BaseDirectory.App });
+      return false;
+    }
+
+    const names = entries.map((entry) => entry.name);
+    return assetFileNames.every((name) => names.includes(name));
+  }
+
+  async function downloadAssets(release: Release, assetDirPath: string) {
+    for (const [idx, name] of assetFileNames.entries()) {
+      let response: Response<Uint8Array> = await fetch(
+        release.downloadUrls[idx],
+        { responseType: ResponseType.Binary, method: "GET", headers: { "User-Agent": "HD-Toolbox" } }
+      );
+      if (!response.ok) {
+        throw new Error(
+          `Failed to download ${name} ${release.version}: ${response.status}`
+        );
+      }
+      await writeBinaryFile(await join(assetDirPath, name), response.data, {
+        dir: BaseDirectory.App,
+      });
+    }
+  }
+
+  // The absolute path of the chosen file or folder, downloading the release
+  // first if it isn't already
+  async function resolvePath(
     releases: Release[],
     activeMethod: LoadMethod,
     selectedVersion: string,
@@ -75,66 +115,22 @@ export function createExternalToolReleases(opts: {
       return selectedFile;
     }
 
-    if (activeMethod == LoadMethod.SPECIFIC_VERSION) {
-      return await join(cacheDirName, "releases", selectedVersion, assetFileName);
+    const release = findRelease(releases, activeMethod, selectedVersion);
+    if (!release) {
+      throw new Error(`No release found for ${selectedVersion || "latest"}`);
     }
 
-    if (activeMethod == LoadMethod.LATEST) {
-      return await join(
-        cacheDirName,
-        "releases",
-        releases[0].version,
-        assetFileName
-      );
-    }
-  }
-
-  async function checkAssetExists(assetDirPath: string) {
-    let entries;
-    try {
-      entries = await readDir(assetDirPath, { dir: BaseDirectory.App });
-    } catch (error) {
-      await createDir(assetDirPath, { recursive: true, dir: BaseDirectory.App });
-      return false;
+    const assetDirPath = await join(cacheDirName, "releases", release.version);
+    if (!(await checkAssetsExist(assetDirPath))) {
+      console.log("Assets didn't exist... Downloading!");
+      await downloadAssets(release, assetDirPath);
     }
 
-    for (let entry of entries) {
-      if (entry.name == assetFileName) {
-        return true;
-      }
+    const localDir = await join(await appDir(), assetDirPath);
+    if (pathKind == "folder") {
+      return localDir;
     }
-    return false;
-  }
-
-  async function downloadAsset(
-    releases: Release[],
-    activeMethod: LoadMethod,
-    selectedVersion: string,
-    localAssetPath: string
-  ) {
-    let downloadRelease;
-    if (activeMethod == LoadMethod.SPECIFIC_VERSION) {
-      for (let release of releases) {
-        if (release.version == selectedVersion) {
-          downloadRelease = release;
-          break;
-        }
-      }
-    } else if (activeMethod == LoadMethod.LATEST) {
-      downloadRelease = releases[0];
-    }
-
-    if (!downloadRelease) {
-      return;
-    }
-
-    let response: Response<Uint8Array> = await fetch(
-      downloadRelease.downloadUrl,
-      { responseType: ResponseType.Binary, method: "GET", headers: { "User-Agent": "HD-Toolbox" } }
-    );
-    await writeBinaryFile(localAssetPath, response.data, {
-      dir: BaseDirectory.App,
-    });
+    return await join(localDir, assetFileNames[0]);
   }
 
   async function launch(
@@ -143,33 +139,12 @@ export function createExternalToolReleases(opts: {
     selectedVersion: string,
     selectedFile: string
   ) {
-    let localPath = await getAssetPath(
+    const localPath = await resolvePath(
       releases,
       activeMethod,
       selectedVersion,
       selectedFile
     );
-
-    if (
-      activeMethod == LoadMethod.LATEST ||
-      activeMethod == LoadMethod.SPECIFIC_VERSION
-    ) {
-      const assetDirPath = await getAssetDirectoryPath(
-        releases,
-        activeMethod,
-        selectedVersion
-      );
-      if (!(await checkAssetExists(assetDirPath))) {
-        console.log("Asset didn't exist... Downloading!");
-        await downloadAsset(
-          releases,
-          activeMethod,
-          selectedVersion,
-          localPath
-        );
-      }
-      localPath = await join(await appDir(), localPath);
-    }
 
     invoke(invokeCommand, { [invokeParamName]: localPath })
       .then((msg) => console.log("Success"))
@@ -186,6 +161,21 @@ export function createExternalToolReleases(opts: {
     await writeTextFile(cacheTimestampPath, now.toString(), {
       dir: BaseDirectory.App,
     });
+  }
+
+  // The url of each of assetFileNames in a release's assets, or null if any
+  // are missing
+  function findDownloadUrls(assets: any[]): string[] | null {
+    const urls = assetFileNames.map((name) => {
+      const match =
+        assetFileNames.length == 1
+          ? (asset) => (asset.browser_download_url ?? "").endsWith(
+              "." + name.split(".").pop()
+            )
+          : (asset) => asset.name == name;
+      return assets.find(match)?.browser_download_url;
+    });
+    return urls.every((url) => url) ? urls : null;
   }
 
   async function loadCachedReleases() {
@@ -207,20 +197,14 @@ export function createExternalToolReleases(opts: {
         continue;
       }
 
-      let downloadUrl = null;
-      for (let asset of release.assets ?? []) {
-        if ((asset.browser_download_url ?? "").endsWith(assetExtension)) {
-          downloadUrl = asset.browser_download_url;
-          break;
-        }
-      }
-      if (!downloadUrl) {
+      const downloadUrls = findDownloadUrls(release.assets ?? []);
+      if (!downloadUrls) {
         continue;
       }
 
       releases.push({
         version: release.tag_name,
-        downloadUrl: downloadUrl,
+        downloadUrls,
       });
     }
 
@@ -270,5 +254,5 @@ export function createExternalToolReleases(opts: {
     await loadCachedReleases();
   }
 
-  return { cacheReleases, loadCachedReleases, launch };
+  return { cacheReleases, loadCachedReleases, resolvePath, launch };
 }

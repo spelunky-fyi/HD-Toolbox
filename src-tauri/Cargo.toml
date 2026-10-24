@@ -45,7 +45,9 @@ winapi = { version = "0.3.9", features = [
   "processthreadsapi",
   "psapi",
   "tlhelp32",
+  "winerror",
   "winnt",
+  "winreg",
 ] }
 
 [features]

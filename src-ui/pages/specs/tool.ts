@@ -8,7 +8,7 @@ const specsDefinition: ExternalToolDefinition = {
     "https://raw.githubusercontent.com/spelunky-fyi/SpecsHD/main/DOCS.md",
   docsRepoUrl: "https://github.com/spelunky-fyi/SpecsHD/blob/main/DOCS.md",
   cacheDirName: "specs",
-  assetFileName: "specs.dll",
+  assetFileNames: ["specs.dll"],
   invokeCommand: "inject_dll",
   invokeParamName: "dll",
   configStoreName: "specs.config",

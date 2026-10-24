@@ -7,18 +7,24 @@
   export let filterName: string = "File";
   export let filterExtensions: string[] = ["dll"];
   export let chooseLabel: string = "Choose File";
+  export let directory: boolean = false;
 
   async function chooseFile(_event) {
     const file = (await open({
       multiple: false,
-      filters: [
-        {
-          name: filterName,
-          extensions: filterExtensions,
-        },
-      ],
+      directory,
+      filters: directory
+        ? []
+        : [
+            {
+              name: filterName,
+              extensions: filterExtensions,
+            },
+          ],
     })) as string;
-    selectedFile.set(file);
+    if (file) {
+      selectedFile.set(file);
+    }
   }
 </script>
 
@@ -36,7 +42,7 @@
   {#if $selectedFile}
     <span>{$selectedFile}</span>
   {:else}
-    <span>No file selected...</span>
+    <span>No {directory ? "folder" : "file"} selected...</span>
   {/if}
 </div>
 

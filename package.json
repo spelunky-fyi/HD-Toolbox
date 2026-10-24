@@ -9,7 +9,8 @@
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "prepare": "mkdirp public/build && npm run smui-theme-light && npm run smui-theme-dark",
     "smui-theme-light": "smui-theme compile public/build/smui.css -i src-ui/theme",
-    "smui-theme-dark": "smui-theme compile public/build/smui-dark.css -i src-ui/theme/dark"
+    "smui-theme-dark": "smui-theme compile public/build/smui-dark.css -i src-ui/theme/dark",
+    "tauri": "tauri"
   },
   "devDependencies": {
     "@rollup/plugin-alias": "^3.1.9",
@@ -28,6 +29,7 @@
     "@smui/tooltip": "^6.0.0-beta.16",
     "@smui/top-app-bar": "^6.0.0-beta.16",
     "@tauri-apps/api": "^1.6.0",
+    "@tauri-apps/cli": "^1.6.3",
     "@tsconfig/svelte": "^3.0.0",
     "mkdirp": "^1.0.4",
     "rollup": "^2.75.0",

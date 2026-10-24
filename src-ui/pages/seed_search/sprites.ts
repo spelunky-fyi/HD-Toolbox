@@ -1,0 +1,35 @@
+// Column and row of each item in images/tiles/items.png, 80px cells
+export const SPRITES: Record<string, [number, number]> = {
+  "Rope Pile": [0, 1],
+  "Bomb Bag": [24, 0],
+  "Bomb Box": [1, 1],
+  Spectacles: [20, 1],
+  "Climbing Gloves": [2, 1],
+  "Pitcher's Mitt": [3, 1],
+  "Spring Shoes": [10, 1],
+  "Spike Shoes": [11, 1],
+  "Bomb Paste": [12, 1],
+  Compass: [9, 1],
+  Mattock: [21, 6],
+  Boomerang: [4, 3],
+  Machete: [11, 2],
+  Crysknife: [6, 2],
+  "Web Gun": [17, 1],
+  Shotgun: [15, 1],
+  "Freeze Ray": [17, 3],
+  "Plasma Cannon": [18, 3],
+  Camera: [4, 1],
+  Teleporter: [18, 1],
+  Parachute: [5, 1],
+  Cape: [18, 7],
+  Jetpack: [13, 1],
+  Shield: [7, 2],
+  Kapala: [19, 1],
+  "Udjat Eye": [19, 2],
+  Ankh: [7, 1],
+  Hedjet: [8, 2],
+  "Mystery Box": [0, 10],
+};
+
+export const SHEET_WIDTH = 2048;
+export const CELL = 80;
