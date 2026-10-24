@@ -2,6 +2,7 @@ pub mod auto_fixer;
 pub mod category;
 pub mod memory_updater;
 pub mod pacifist;
+pub mod seed_search;
 pub mod session;
 pub mod tracker_task;
 pub mod trackers;
@@ -17,12 +18,15 @@ use hdt_mem_reader::manager::{PayloadRequest, PayloadResponse};
 
 use crate::state::State;
 
+use seed_search::{SeedSearchOptions, SeedSearchUpdate};
+
 #[derive(Deserialize, Debug)]
 #[serde(tag = "type")]
 pub enum TaskStart {
     MemoryUpdater,
     AutoFixer,
     WebServer { port: u16 },
+    SeedSearch { options: SeedSearchOptions },
 }
 
 #[derive(Deserialize, Debug)]
@@ -31,6 +35,7 @@ pub enum TaskEnd {
     MemoryUpdater,
     AutoFixer,
     WebServer,
+    SeedSearch,
 }
 
 #[derive(Debug, Serialize, Clone, PartialEq, Eq)]
@@ -46,12 +51,14 @@ enum TaskUpdate {
     MemoryUpdater(PayloadResponse),
     AutoFixer(PayloadResponse),
     WebServer(WebServerResponse),
+    SeedSearch(SeedSearchUpdate),
 }
 
 pub struct Tasks {
     pub memory_updater: Option<oneshot::Sender<()>>,
     pub auto_fixer: Option<oneshot::Sender<()>>,
     pub web_server: Option<oneshot::Sender<()>>,
+    pub seed_search: Option<oneshot::Sender<()>>,
 }
 
 #[tauri::command]
@@ -107,6 +114,18 @@ pub async fn start_task(
                 tasks.web_server = Some(shutdown_tx);
             }
         }
+        TaskStart::SeedSearch { options } => {
+            // Unlike the others a search ends by itself, which closes its
+            // channel
+            if tasks.seed_search.as_ref().map_or(true, |tx| tx.is_closed()) {
+                let (mut task, shutdown_tx) =
+                    seed_search::SeedSearchTask::new(app_handle, options);
+                tauri::async_runtime::spawn(async move {
+                    task.run().await;
+                });
+                tasks.seed_search = Some(shutdown_tx);
+            }
+        }
     };
 
     Ok(())
@@ -130,6 +149,11 @@ pub async fn stop_task(task: TaskEnd, state: tauri::State<'_, State>) -> Result<
         }
         TaskEnd::WebServer => {
             if let Some(task) = tasks.web_server.take() {
+                let _ = task.send(());
+            }
+        }
+        TaskEnd::SeedSearch => {
+            if let Some(task) = tasks.seed_search.take() {
                 let _ = task.send(());
             }
         }

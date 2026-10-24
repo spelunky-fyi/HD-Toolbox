@@ -10,6 +10,7 @@ Grab the latest msi installer [here](https://github.com/spelunky-fyi/HD-Toolbox/
 ## Potential Functionality
 
 - [x] Level Viewer
+- [x] Seed Search (offline level generation with [hd-seed-search](https://github.com/spelunky-fyi/hd-seed-search))
 - [x] Game Launcher
 - [x] Overlay + Injector for Science / Practice (Specs HD)
 - [x] Trackers
@@ -37,6 +38,7 @@ Run Dev Frontend
 ```console
 # First time install deps
 npm install
+npm run fetch:seed-search
 
 # Run dev server
 npm run dev

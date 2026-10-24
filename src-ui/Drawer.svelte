@@ -12,6 +12,7 @@
   import Specs from "./pages/specs/Specs.svelte";
   import Web from "./pages/web/Web.svelte";
   import Frozlunky from "./pages/frozlunky/Frozlunky.svelte";
+  import SeedSearch from "./pages/seed_search/SeedSearch.svelte";
 
   function launch_spelunky_hd() {
     invoke("launch_spelunky_hd")
@@ -26,6 +27,7 @@
     "Memory Updater": MemoryUpdater,
     Specs: Specs,
     Web: Web,
+    "Seed Search": SeedSearch,
     Frozlunky: Frozlunky,
   };
 </script>

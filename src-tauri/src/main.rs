@@ -87,6 +87,7 @@ fn main() -> anyhow::Result<()> {
     let specs_config = StoreBuilder::new("specs.config".parse()?).build();
     let web_config = StoreBuilder::new("web.config".parse()?).build();
     let frozlunky_config = StoreBuilder::new("frozlunky.config".parse()?).build();
+    let seed_search_config = StoreBuilder::new("seed-search.config".parse()?).build();
 
     let mut autofix_config = StoreBuilder::new("auto-fixer.config".parse()?).build();
     let autofix_config_watcher = autofix_config.get_watcher();
@@ -119,6 +120,7 @@ fn main() -> anyhow::Result<()> {
                     specs_config,
                     web_config,
                     frozlunky_config,
+                    seed_search_config,
                     autofix_config,
                 ])
                 .freeze()
@@ -177,6 +179,9 @@ fn main() -> anyhow::Result<()> {
             tasks::stop_task,
             tasks::fix_slowlook,
             tasks::set_character,
+            tasks::seed_search::seed_search_presets,
+            tasks::seed_search::load_seed_search_results,
+            tasks::seed_search::default_seed_search_csv,
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

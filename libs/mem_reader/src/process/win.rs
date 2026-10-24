@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::ffi::CString;
 use std::intrinsics::transmute;
 use std::mem::size_of;
@@ -43,6 +44,8 @@ use crate::process::{FindProcessError, OpenProcessError, ReadMemoryError, Versio
 use super::Failure;
 use super::InjectDllError;
 use super::WriteMemoryError;
+
+const SEED_SEARCH_EXE: &str = "hd-seed-search.exe";
 
 pub struct Process {
     handle: HANDLE,
@@ -165,7 +168,9 @@ impl Process {
     }
 
     fn get_spelunky_hd_pid() -> Result<u32, FindProcessError> {
-        let mut pid = None;
+        // (pid, parent pid) of each Spelunky.exe, and every process's name
+        let mut spelunkys = Vec::new();
+        let mut names = HashMap::new();
 
         let process_snap = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) };
 
@@ -201,13 +206,9 @@ impl Process {
         loop {
             let process_name = win_bytes_to_string(&process.szExeFile);
             if process_name == "Spelunky.exe" {
-                if pid.is_some() {
-                    unsafe { CloseHandle(process_snap) };
-                    return Err(FindProcessError::MultipleProcessesFound);
-                }
-
-                pid = Some(process.th32ProcessID);
+                spelunkys.push((process.th32ProcessID, process.th32ParentProcessID));
             }
+            names.insert(process.th32ProcessID, process_name);
 
             if unsafe { Process32Next(process_snap, &mut process) } == 0 {
                 break;
@@ -215,9 +216,15 @@ impl Process {
         }
 
         unsafe { CloseHandle(process_snap) };
-        match pid {
-            Some(pid) => Ok(pid),
-            None => Err(FindProcessError::NoProcessFound),
+
+        // The Seed Search tab runs a hidden copy of the game under hd-seed-search.exe
+        spelunkys.retain(|(_, parent)| {
+            names.get(parent).map(String::as_str) != Some(SEED_SEARCH_EXE)
+        });
+        match spelunkys[..] {
+            [(pid, _)] => Ok(pid),
+            [] => Err(FindProcessError::NoProcessFound),
+            _ => Err(FindProcessError::MultipleProcessesFound),
         }
     }
 

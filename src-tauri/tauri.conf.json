@@ -20,7 +20,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "resources": [],
+      "resources": ["resources/seed-search/*"],
       "externalBin": [],
       "copyright": "",
       "category": "DeveloperTool",
