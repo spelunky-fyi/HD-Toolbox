@@ -1,11 +1,11 @@
 {
-  "version": "v0.9.0",
-  "notes": "Add new tab for WebHD",
-  "pub_date": "2026-02-27T23:55:51Z",
+  "version": "v0.10.0",
+  "notes": "Added support for seed searching (Thanks BronxTaco!)",
+  "pub_date": "2026-10-24T06:50:59Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWHI4N1BzMkROVHN0d3I3aGRIckcxU0VmaVNQRTlxeXkrbWN5NWxSaGlaRHF5VUUyZVBTeTVEWUFYdmk0WHJTd1d4WjZod1hjekYwMTMrZWtpNy83OUFrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzcyMjM1ODE0CWZpbGU6SEQgVG9vbGJveF8wLjkuMF94NjRfZW4tVVMubXNpLnppcApwK0taOE4rM0pMZGFJdXRncHhzTmQwWDQyUkF6NElKNlpuU2RqZXdtUXRNZVdHbHhMMzErWWwxRkovUTJxaUlUWlJwQ29PbndpL2l0MENtUTZJZUFBZz09Cg==",
-      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.9.0/HD.Toolbox_0.9.0_x64_en-US.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWGtmYVZiclV2QkVDR096SVFvYzcvYzBOMHVMblJBbkREaytkSThZSUJDaStFdlkvS2VqRHlVZTFaelZ6aytKQzlma3hHMWtOV0sxSkJsakwzaDNLR1F3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyODI0NTMzCWZpbGU6SEQgVG9vbGJveF8wLjEwLjBfeDY0X2VuLVVTLm1zaS56aXAKMU5wQXYzZENLL2l5ZjkzeFJVaGFudUo0REhpYUlDMmNLZEYvdW5ER2NRaWhFSmNTamV2WjliNVVheUlPcjBxRytXQXBJTHlLbEN4STJrMURSbFRaQ1E9PQo=",
+      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.10.0/HD.Toolbox_0.10.0_x64_en-US.msi.zip"
     }
   }
 }
