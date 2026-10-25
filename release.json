@@ -1,11 +1,11 @@
 {
-  "version": "v0.10.0",
-  "notes": "Added support for seed searching (Thanks BronxTaco!)",
-  "pub_date": "2026-10-24T06:50:59Z",
+  "version": "v0.10.1",
+  "notes": "Fixes for seed search",
+  "pub_date": "2026-10-25T15:45:05Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWGtmYVZiclV2QkVDR096SVFvYzcvYzBOMHVMblJBbkREaytkSThZSUJDaStFdlkvS2VqRHlVZTFaelZ6aytKQzlma3hHMWtOV0sxSkJsakwzaDNLR1F3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyODI0NTMzCWZpbGU6SEQgVG9vbGJveF8wLjEwLjBfeDY0X2VuLVVTLm1zaS56aXAKMU5wQXYzZENLL2l5ZjkzeFJVaGFudUo0REhpYUlDMmNLZEYvdW5ER2NRaWhFSmNTamV2WjliNVVheUlPcjBxRytXQXBJTHlLbEN4STJrMURSbFRaQ1E9PQo=",
-      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.10.0/HD.Toolbox_0.10.0_x64_en-US.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTml3eFZXK1VsWGt6eUxtWlJYcXhaOEZuV2hncS9vZVArbDlURk1SVnhCRi91eW5uUDlHa0NZWmV2ZzQvbE9TWDJneUpudTBYRC9RS01lR2ZpVXJPYWQxVDRjRmFxRGdnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyOTQzMDA5CWZpbGU6SEQgVG9vbGJveF8wLjEwLjFfeDY0X2VuLVVTLm1zaS56aXAKYktPN3hjWWpsSDhNY3NlaTlzdlJCeDJBSzlNSnlKTnF2YnA5c2dFWXluWE9OVXJHa2t2OE5iam1FVW50R2ZBQzdTME1oVG5ZdlQ3VG5kQysyTDczQUE9PQo=",
+      "url": "https://github.com/spelunky-fyi/HD-Toolbox/releases/download/v0.10.1/HD.Toolbox_0.10.1_x64_en-US.msi.zip"
     }
   }
 }
