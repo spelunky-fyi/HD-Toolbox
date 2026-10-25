@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.11.0] - 2026-10-25
+
+### Added
+
+- Seed Search:
+  - Scout a specific seed, generating just that one and showing its results
+  - Filter seeds by digits they contain
+  - Lavafalls filter, listing the temple and hell levels that have them
+  - 1-3 shop kind filter: Normal, Hired Hand, or Roulette shop
+  - Pre-temple bomb count filter, counting bombs in shops, crates, and prize wheels on 1-1 through 3-4
+  - Searching with 0 seeds runs until stopped
+  - Seeds from older searches missing newer values are filled in first on the next search
+
+### Fixed
+
+- Seed Search:
+  - Closing the Toolbox mid-search no longer leaves a hidden Spelunky process running
+  - Long searches no longer slow down over time
+  - Results file keeps one row per seed when seeds are checked again
+
 ## [0.10.0] - 2026-10-23
 
 - Added support for seed searching (Thanks BronxTaco!)
