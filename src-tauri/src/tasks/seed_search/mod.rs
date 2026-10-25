@@ -6,10 +6,11 @@
 //! with extra columns for prize wheel prizes.
 
 mod entity_names;
+mod job;
 pub mod presets;
 mod steam;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::fs::{self, File, OpenOptions};
 use std::io::{BufRead, BufReader, BufWriter, ErrorKind, Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
@@ -35,6 +36,10 @@ static TASK_STATE_SEED_SEARCH: &str = "task-state:SeedSearch";
 const SEED_SEARCH_EXE: &str = "hd-seed-search.exe";
 const SEED_SEARCH_HOOK: &str = "hd-seed-search-hook.dll";
 const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+/// Seeds per run of hd-seed-search, about 15 minutes' worth
+const BATCH_SEEDS: u32 = 20_000;
+/// The first batch of seeds being checked again
+const RESCOUT_FIRST_BATCH: u32 = 100;
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -43,6 +48,9 @@ pub struct SeedSearchOptions {
     /// or one the user picked
     pub tool_dir: String,
     pub seed_count: u32,
+    /// Just this seed instead of seed_count random ones, to scout it
+    #[serde(default)]
+    pub seed: Option<u32>,
     /// Empty for the Toolbox's own file
     pub output_csv: String,
 }
@@ -88,6 +96,9 @@ pub struct Progress {
     pub total: u32,
     pub seeds_per_second: f64,
     pub hits: HashMap<Preset, u32>,
+    /// How many of the first seeds checked are ones already in the csv
+    /// without a value for every preset, being checked again
+    pub rescouting: u32,
     /// Seeds checked since the last update
     pub new_results: Vec<SeedResult>,
 }
@@ -106,6 +117,7 @@ pub struct PresetInfo {
     name: &'static str,
     label: &'static str,
     matchable: bool,
+    kind: &'static str,
 }
 
 #[tauri::command]
@@ -116,6 +128,7 @@ pub fn seed_search_presets() -> Vec<PresetInfo> {
             name: preset.name(),
             label: preset.label(),
             matchable: preset.matchable(),
+            kind: preset.kind(),
         })
         .collect()
 }
@@ -175,6 +188,69 @@ fn load_results(path: &Path) -> Result<Vec<SeedResult>, String> {
             })
         })
         .collect())
+}
+
+/// Seeds in the csv without a value for every preset, such as ones from
+/// before a preset was added, in the order they were first added. A seed's
+/// last row is the one that counts.
+fn incomplete_seeds(results: &[SeedResult]) -> Vec<u32> {
+    let mut order = vec![];
+    let mut complete = HashMap::new();
+    for result in results {
+        let has_all = ALL.iter().all(|preset| result.values.contains_key(preset));
+        if complete.insert(result.seed, has_all).is_none() {
+            order.push(result.seed);
+        }
+    }
+    order.into_iter().filter(|seed| !complete[seed]).collect()
+}
+
+/// Leaves one row per seed, its last, where the seed was first added.
+/// Checking a seed again adds a row for it rather than rewriting the file
+/// each time.
+fn remove_replaced_rows(path: &Path) -> anyhow::Result<()> {
+    let contents = match fs::read_to_string(path) {
+        Ok(contents) => contents,
+        Err(err) if err.kind() == ErrorKind::NotFound => return Ok(()),
+        Err(err) => return Err(err.into()),
+    };
+    let mut lines = contents.lines();
+    let Some(header) = lines.next() else {
+        return Ok(());
+    };
+
+    let rows: Vec<_> = lines.filter(|line| !line.trim().is_empty()).collect();
+    let seed_of = |row: &str| row.split(',').next().and_then(|cell| cell.parse::<u32>().ok());
+    let mut last = HashMap::new();
+    for (idx, row) in rows.iter().enumerate() {
+        if let Some(seed) = seed_of(row) {
+            last.insert(seed, idx);
+        }
+    }
+    if last.len() == rows.iter().filter(|row| seed_of(row).is_some()).count() {
+        return Ok(());
+    }
+
+    // Through a temp file, so a failure leaves it as it was
+    let temp = path.with_extension("csv.tmp");
+    {
+        let mut out = BufWriter::new(File::create(&temp)?);
+        writeln!(out, "{}", header.trim_end())?;
+        let mut written = std::collections::HashSet::new();
+        for row in &rows {
+            match seed_of(row) {
+                Some(seed) if written.insert(seed) => {
+                    writeln!(out, "{}", rows[last[&seed]].trim_end())?
+                }
+                Some(_) => {}
+                // Not a seed's row, so it's kept as it is
+                None => writeln!(out, "{}", row.trim_end())?,
+            }
+        }
+        out.flush()?;
+    }
+    fs::rename(&temp, path)?;
+    Ok(())
 }
 
 fn displayed(
@@ -311,7 +387,7 @@ impl CsvOutput {
 
             let missing: Vec<_> = ALL
                 .iter()
-                .filter(|&&preset| !columns.contains(&Column::Preset(preset)))
+                .filter(|&&preset| preset.in_specs() && !columns.contains(&Column::Preset(preset)))
                 .map(|preset| preset.name())
                 .collect();
             if !missing.is_empty() {
@@ -322,8 +398,8 @@ impl CsvOutput {
                 );
             }
 
-            // Files from SpecsHD or older Toolboxes don't have the prize
-            // wheel columns yet
+            // Files from SpecsHD or older Toolboxes don't have the Toolbox's
+            // own columns (prize wheels, lavafalls) yet
             let new: Vec<_> = all_columns()
                 .into_iter()
                 .filter(|column| !columns.contains(column))
@@ -427,6 +503,9 @@ struct Search {
     csv: CsvOutput,
     progress: Progress,
     first_seed_at: Option<Instant>,
+    /// Seeds checked that still don't have a value for every preset, which
+    /// an older hd-seed-search can't fill in
+    incomplete: u32,
 }
 
 impl Search {
@@ -454,6 +533,9 @@ impl Search {
                 .filter_map(|&preset| Some((preset, prize(preset, &levels)?)))
                 .collect();
 
+            if values.len() < self.presets.len() {
+                self.incomplete += 1;
+            }
             self.csv.write(generated.seed, &values, &prizes)?;
             self.progress.new_results.push(SeedResult {
                 seed: generated.seed,
@@ -466,10 +548,12 @@ impl Search {
             self.first_seed_at.get_or_insert_with(Instant::now);
         }
 
+        // From the first seed, which comes after the game's startup, so the
+        // rate is the seeds since it. A single seed (a scout) has no rate.
         if let Some(first_seed_at) = self.first_seed_at {
             let seconds = first_seed_at.elapsed().as_secs_f64();
-            if seconds > 0.0 {
-                self.progress.seeds_per_second = f64::from(self.progress.checked) / seconds;
+            if seconds > 0.0 && self.progress.checked > 1 {
+                self.progress.seeds_per_second = f64::from(self.progress.checked - 1) / seconds;
             }
         }
         Ok(())
@@ -513,7 +597,6 @@ impl SeedSearchTask {
     }
 
     async fn search(&mut self) -> anyhow::Result<()> {
-        let app_handle = self.app_handle.clone();
         let options = &self.options;
 
         // Everything is searched for, and the Toolbox filters what's shown
@@ -530,35 +613,155 @@ impl SeedSearchTask {
         }
         let generator = tool_dir.join(SEED_SEARCH_EXE);
 
-        let work_dir = std::env::temp_dir().join("hd-toolbox-seed-search");
+        // A folder of its own, so nothing left over from another search (or
+        // another Toolbox) can write to the files this one reads
+        let started = SystemTime::now().duration_since(UNIX_EPOCH)?.as_millis();
+        let work_root = std::env::temp_dir().join("hd-toolbox-seed-search");
+        // Left behind by searches the Toolbox was closed during. One that's
+        // still running has its files open, so they stay.
+        if let Ok(entries) = fs::read_dir(&work_root) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_dir() {
+                    fs::remove_dir_all(&path).ok();
+                } else {
+                    fs::remove_file(&path).ok();
+                }
+            }
+        }
+        let work_dir = work_root.join(format!("{}-{}", std::process::id(), started));
         fs::create_dir_all(&work_dir)?;
-        let seeds_path = work_dir.join("seeds.txt");
-        let out_path = work_dir.join("levels.jsonl");
-        let log_path = work_dir.join("levels.jsonl.log");
-        let seeds: Vec<_> = random_seeds(options.seed_count)
-            .iter()
-            .map(u32::to_string)
-            .collect();
-        fs::write(&seeds_path, seeds.join("\n") + "\n")?;
-        // Don't read the last search's output
-        fs::remove_file(&out_path).ok();
+        // Seeds checked again get a second row, which this removes. Before as
+        // well as after, in case the Toolbox was closed before it finished.
+        let csv_path = results_csv(&self.app_handle, &options.output_csv)?;
+        let tidy = move || {
+            if let Err(err) = remove_replaced_rows(&csv_path) {
+                error!("Couldn't tidy {}: {:#}", csv_path.display(), err);
+            }
+        };
+        tidy();
+        let result = self.search_in(&work_dir, game_dir, generator, levels, presets).await;
+        fs::remove_dir_all(&work_dir).ok();
+        tidy();
+        result
+    }
+
+    async fn search_in(
+        &mut self,
+        work_dir: &Path,
+        game_dir: PathBuf,
+        generator: PathBuf,
+        levels: u32,
+        presets: Vec<Preset>,
+    ) -> anyhow::Result<()> {
+        let app_handle = self.app_handle.clone();
+        let options = &self.options;
+        // 0 seeds searches until it's stopped
+        let total = match options.seed {
+            Some(_) => 1,
+            None => options.seed_count,
+        };
+        let scout = options.seed;
+        let csv_path = results_csv(&app_handle, &options.output_csv)?;
+
+        // Seeds already in the csv that are missing values go first, then
+        // new ones. They count towards the number of seeds.
+        let mut rescout = VecDeque::new();
+        if scout.is_none() {
+            let existing = load_results(&csv_path).map_err(anyhow::Error::msg)?;
+            rescout.extend(incomplete_seeds(&existing));
+            if total > 0 {
+                rescout.truncate(total as usize);
+            }
+        }
 
         let mut search = Search {
-            csv: CsvOutput::open(&results_csv(&app_handle, &options.output_csv)?)?,
+            csv: CsvOutput::open(&csv_path)?,
             progress: Progress {
                 state: SearchState::Starting,
                 checked: 0,
-                total: options.seed_count,
+                total,
                 seeds_per_second: 0.0,
                 hits: presets.iter().map(|&preset| (preset, 0)).collect(),
+                rescouting: rescout.len() as u32,
                 new_results: vec![],
             },
             presets,
             first_seed_at: None,
+            incomplete: 0,
         };
         emit(&app_handle, SeedSearchUpdate::SeedSearch(search.take_progress()?));
 
-        let mut child = Command::new(&generator)
+        // In batches, each a run of hd-seed-search, so a search can go on
+        // indefinitely. Starting the game for each takes a couple of seconds.
+        let mut queued: u32 = 0;
+        for batch in 0.. {
+            let room = if total == 0 { BATCH_SEEDS } else { BATCH_SEEDS.min(total - queued) };
+            let rescouting = !rescout.is_empty();
+            let seeds: Vec<_> = match scout {
+                Some(seed) if queued == 0 => vec![seed],
+                Some(_) => vec![],
+                // A small first batch, to find out quickly if this
+                // hd-seed-search can fill them in
+                None if rescouting => {
+                    let size = if queued == 0 { RESCOUT_FIRST_BATCH } else { room };
+                    rescout.drain(..rescout.len().min(size as usize)).collect()
+                }
+                None => random_seeds(room),
+            };
+            if seeds.is_empty() {
+                break;
+            }
+            queued += seeds.len() as u32;
+
+            let incomplete_before = search.incomplete;
+            let stopped = self
+                .run_batch(&mut search, work_dir, batch, &seeds, &game_dir, &generator, levels)
+                .await?;
+
+            // An older hd-seed-search leaves them as they were, so the rest
+            // aren't checked again
+            if rescouting && search.incomplete - incomplete_before == seeds.len() as u32 {
+                log::warn!(
+                    "hd-seed-search didn't fill in the seeds being checked again, so \
+                     skipping the other {}",
+                    rescout.len()
+                );
+                rescout.clear();
+                search.progress.rescouting = queued;
+            }
+            if stopped {
+                search.progress.state = SearchState::Stopped;
+                emit(&app_handle, SeedSearchUpdate::SeedSearch(search.take_progress()?));
+                return Ok(());
+            }
+        }
+        search.progress.state = SearchState::Finished;
+        emit(&app_handle, SeedSearchUpdate::SeedSearch(search.take_progress()?));
+        Ok(())
+    }
+
+    /// Generates and checks one batch of seeds. Returns whether the search
+    /// was stopped.
+    #[allow(clippy::too_many_arguments)]
+    async fn run_batch(
+        &mut self,
+        search: &mut Search,
+        work_dir: &Path,
+        batch: u32,
+        seeds: &[u32],
+        game_dir: &Path,
+        generator: &Path,
+        levels: u32,
+    ) -> anyhow::Result<bool> {
+        let app_handle = self.app_handle.clone();
+        let seeds_path = work_dir.join(format!("seeds-{}.txt", batch));
+        let out_path = work_dir.join(format!("levels-{}.jsonl", batch));
+        let log_path = work_dir.join(format!("levels-{}.jsonl.log", batch));
+        let lines: Vec<_> = seeds.iter().map(u32::to_string).collect();
+        fs::write(&seeds_path, lines.join("\n") + "\n")?;
+
+        let mut child = Command::new(generator)
             .arg(&seeds_path)
             .arg(&out_path)
             .arg(levels.to_string())
@@ -570,8 +773,19 @@ impl SeedSearchTask {
             .kill_on_drop(true)
             .spawn()
             .context("Couldn't start hd-seed-search.exe")?;
+        // Best effort: without the job the search still works, hd-seed-search
+        // just isn't killed if the Toolbox is closed some other way than Stop
+        let job = job::KillOnClose::new()
+            .and_then(|job| {
+                if let Some(handle) = child.raw_handle() {
+                    job.add(handle as _)?;
+                }
+                Ok(job)
+            })
+            .map_err(|err| log::warn!("{err:#}, so hd-seed-search won't be killed if the Toolbox is closed unexpectedly"))
+            .ok();
 
-        let mut reader = OutputReader::new(out_path);
+        let mut reader = OutputReader::new(out_path.clone());
         let mut tick = interval(Duration::from_millis(250));
         tick.set_missed_tick_behavior(MissedTickBehavior::Skip);
 
@@ -598,9 +812,17 @@ impl SeedSearchTask {
         }
 
         search.add_lines(reader.read_lines()?)?;
-        search.progress.state = match status {
-            None => SearchState::Stopped,
-            Some(status) if status.success() => SearchState::Finished,
+        match status {
+            None => Ok(true),
+            Some(status) if status.success() => {
+                // Done with this batch's files. A stopped one's game may
+                // still have them open, and the next search clears them.
+                drop(job);
+                fs::remove_file(&seeds_path).ok();
+                fs::remove_file(&out_path).ok();
+                fs::remove_file(&log_path).ok();
+                Ok(false)
+            }
             Some(status) => {
                 let mut stderr = String::new();
                 if let Some(mut pipe) = child.stderr.take() {
@@ -614,9 +836,7 @@ impl SeedSearchTask {
                     log_tail(&log_path)
                 );
             }
-        };
-        emit(&app_handle, SeedSearchUpdate::SeedSearch(search.take_progress()?));
-        Ok(())
+        }
     }
 }
 
@@ -673,17 +893,35 @@ mod tests {
             [
                 "seed,1-1 crate contents,1-2 shop items,1-3 shop items,mines eggy,\
                  jungle worm,ice caves worm,low% bm,altar+moai,path anubis,\
-                 1-2 prize wheel,1-3 prize wheel",
-                "7,none,,Prize Wheel,,,,,,,,Jetpack",
+                 lavafalls,pre-temple bombs,1-2 prize wheel,1-3 prize wheel",
+                "7,none,,Prize Wheel,,,,,,,,,,Jetpack",
             ]
         );
     }
 
     #[test]
+    fn adds_lavafalls_to_an_older_toolbox_csv() {
+        let path = temp_csv(
+            "older",
+            Some(
+                "seed,1-1 crate contents,1-2 shop items,1-3 shop items,mines eggy,\
+                 jungle worm,ice caves worm,low% bm,altar+moai,path anubis,\
+                 1-2 prize wheel,1-3 prize wheel\n\
+                 5,none,Bomb Bag,Prize Wheel,false,true,true,false,n/a,n/a,,Cape\n",
+            ),
+        );
+        let written = write_row(&path, 6, &[(Preset::Lavafalls, "4-2;5-1")], &[]);
+        let lines: Vec<_> = written.lines().collect();
+        assert!(lines[0].ends_with(",1-2 prize wheel,1-3 prize wheel,lavafalls,pre-temple bombs"));
+        assert_eq!(lines[1], "5,none,Bomb Bag,Prize Wheel,false,true,true,false,n/a,n/a,,Cape,,");
+        assert_eq!(lines[2], "6,,,,,,,,,,,,4-2;5-1,");
+    }
+
+    #[test]
     fn appends_in_an_existing_csvs_column_order() {
         // SpecsHD's own file has its columns in the order the presets were
-        // added, and no newline after the last row. It gets the prize wheel
-        // columns added.
+        // added, and no newline after the last row. It gets the Toolbox's
+        // own columns added.
         let path = temp_csv(
             "existing",
             Some(
@@ -700,9 +938,11 @@ mod tests {
         );
         let lines: Vec<_> = written.lines().collect();
         assert_eq!(lines.len(), 3);
-        assert!(lines[0].ends_with(",path anubis,1-2 prize wheel,1-3 prize wheel"));
-        assert_eq!(lines[1], "1,none,none,false,false,false,false,n/a,n/a,n/a,,");
-        assert_eq!(lines[2], "2,,,,true,,,Jetpack,,,,");
+        assert!(lines[0].ends_with(
+            ",path anubis,lavafalls,pre-temple bombs,1-2 prize wheel,1-3 prize wheel"
+        ));
+        assert_eq!(lines[1], "1,none,none,false,false,false,false,n/a,n/a,n/a,,,,");
+        assert_eq!(lines[2], "2,,,,true,,,Jetpack,,,,,,");
     }
 
     #[test]
@@ -723,6 +963,40 @@ mod tests {
         assert_eq!(results[0].display[&Preset::Shop13], "Prize:Cape");
         assert_eq!(results[0].display[&Preset::Shop12], "Bomb Bag");
     }
+    #[test]
+    fn finds_seeds_missing_values_by_their_last_row() {
+        let full: HashMap<_, _> = ALL.iter().map(|&preset| (preset, "x".to_string())).collect();
+        let mut partial = full.clone();
+        partial.remove(&Preset::Lavafalls);
+        let result = |seed, values: &HashMap<Preset, String>| SeedResult {
+            seed,
+            values: values.clone(),
+            display: HashMap::new(),
+        };
+        let results = [
+            result(3, &partial),
+            result(1, &full),
+            result(2, &partial),
+            // Checked again since, so it's complete now
+            result(3, &full),
+            result(4, &partial),
+            result(2, &partial),
+        ];
+        assert_eq!(incomplete_seeds(&results), [2, 4]);
+    }
+
+    #[test]
+    fn keeps_each_seeds_last_row() {
+        let path = temp_csv(
+            "replaced",
+            Some("seed,lavafalls\n5,\n6,4-1\n5,none\n7,\n6,5-2\n"),
+        );
+        remove_replaced_rows(&path).unwrap();
+        let tidied = fs::read_to_string(&path).unwrap();
+        fs::remove_file(&path).ok();
+        assert_eq!(tidied.replace("\r\n", "\n"), "seed,lavafalls\n5,none\n6,5-2\n7,\n");
+    }
+
     #[test]
     fn rejects_a_csv_without_every_column() {
         let path = temp_csv("missing", Some("seed,1-1 crate contents\n"));

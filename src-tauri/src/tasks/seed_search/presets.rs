@@ -34,7 +34,20 @@ pub struct Level {
     pub moai: bool,
     pub black_market: Option<BlackMarket>,
     pub anubis: Vec<bool>,
+    /// How many lavafalls there are, from hd-seed-search 0.2.0
+    #[serde(default)]
+    pub lavafalls: Option<u32>,
+    #[serde(default)]
+    pub city_of_gold: bool,
+    /// Hired hands for sale, from hd-seed-search 0.2.0
+    #[serde(default)]
+    pub hired_hands: Option<u32>,
+    #[serde(default)]
+    pub rooms: Vec<u32>,
 }
+
+/// The hired hand shop room, and the same facing the other way
+const HIRED_HAND_SHOP_ROOMS: [u32; 2] = [106, 10106];
 
 /// One line of hd-seed-search's output
 #[derive(Deserialize, Debug)]
@@ -54,10 +67,12 @@ pub enum Preset {
     LowPercentBm,
     AltarMoai,
     PathAnubis,
+    Lavafalls,
+    PreTempleBombs,
 }
 
-/// In SpecsHD's order
-pub const ALL: [Preset; 9] = [
+/// In SpecsHD's order, then the Toolbox's own
+pub const ALL: [Preset; 11] = [
     Preset::Crates11,
     Preset::Shop12,
     Preset::Shop13,
@@ -67,7 +82,19 @@ pub const ALL: [Preset; 9] = [
     Preset::LowPercentBm,
     Preset::AltarMoai,
     Preset::PathAnubis,
+    Preset::Lavafalls,
+    Preset::PreTempleBombs,
 ];
+
+/// The levels before the temple, 1-1 to 3-4
+const PRE_TEMPLE_LEVELS: std::ops::RangeInclusive<u32> = 1..=12;
+const BOMB_BAG: u32 = 501;
+const BOMB_BOX: u32 = 502;
+
+/// The temple and hell levels lavafalls are looked for on. 4-3 is the City of
+/// Gold.
+const LAVAFALL_LEVELS: [u32; 6] = [13, 14, 15, 17, 18, 19];
+const CITY_OF_GOLD_LEVEL: u32 = 15;
 
 impl Preset {
     /// Its column in seed_search.csv
@@ -82,6 +109,24 @@ impl Preset {
             Preset::LowPercentBm => "low% bm",
             Preset::AltarMoai => "altar+moai",
             Preset::PathAnubis => "path anubis",
+            Preset::Lavafalls => "lavafalls",
+            Preset::PreTempleBombs => "pre-temple bombs",
+        }
+    }
+
+    /// Whether SpecsHD's seed search has it. A csv has to have a column for
+    /// each of these, and the Toolbox adds the others.
+    pub fn in_specs(self) -> bool {
+        !matches!(self, Preset::Lavafalls | Preset::PreTempleBombs)
+    }
+
+    /// How the Toolbox shows and filters it: "flag" for a yes or no (with
+    /// levels), "list" for the items somewhere, "count" for a number
+    pub fn kind(self) -> &'static str {
+        match self {
+            Preset::PreTempleBombs => "count",
+            _ if self.matchable() => "flag",
+            _ => "list",
         }
     }
 
@@ -97,6 +142,8 @@ impl Preset {
             Preset::LowPercentBm => "Low% BM",
             Preset::AltarMoai => "Altar + Moai",
             Preset::PathAnubis => "Path Anubis",
+            Preset::Lavafalls => "Lavafalls",
+            Preset::PreTempleBombs => "Pre-Temple Bombs",
         }
     }
 
@@ -112,12 +159,18 @@ impl Preset {
             Preset::LowPercentBm => 7,
             Preset::AltarMoai => 11,
             Preset::PathAnubis => 13,
+            Preset::Lavafalls => 19,
+            Preset::PreTempleBombs => 12,
         }
     }
 
-    /// The others list what's there rather than looking for something
+    /// The others list what's there or count something rather than looking
+    /// for something
     pub fn matchable(self) -> bool {
-        !matches!(self, Preset::Crates11 | Preset::Shop12 | Preset::Shop13)
+        !matches!(
+            self,
+            Preset::Crates11 | Preset::Shop12 | Preset::Shop13 | Preset::PreTempleBombs
+        )
     }
 
     /// In SpecsHD's seed search, when this is also being searched for and
@@ -131,7 +184,7 @@ impl Preset {
     }
 
     pub fn is_match(self, value: &str) -> bool {
-        self.matchable() && value != "false" && value != "n/a"
+        self.matchable() && value != "false" && value != "n/a" && value != "none"
     }
 }
 
@@ -190,7 +243,18 @@ pub fn evaluate(preset: Preset, levels: &Levels, searching: &[Preset]) -> Option
         Preset::Shop12 => Some(names(&levels.get(2)?.shop)),
         Preset::Shop13 => {
             let lvl = levels.get(3)?;
-            Some(if lvl.shopkeeper { names(&lvl.shop) } else { "n/a".into() })
+            if !lvl.shopkeeper {
+                return Some("n/a".into());
+            }
+            // A hired hand shop sells no items, which SpecsHD lists as none.
+            // "HH Shop:<hired hands>", with a generator that counts them.
+            let hh_shop = lvl.rooms.iter().any(|room| HIRED_HAND_SHOP_ROOMS.contains(room));
+            Some(match lvl.hired_hands {
+                Some(hired_hands) if hh_shop && hired_hands > 0 => {
+                    format!("HH Shop:{}", hired_hands)
+                }
+                _ => names(&lvl.shop),
+            })
         }
 
         // Mystery Box for sale and a Kali altar on the same level
@@ -241,6 +305,39 @@ pub fn evaluate(preset: Preset, levels: &Levels, searching: &[Preset]) -> Option
             } else {
                 flag(anubis.iter().any(|&path_room| path_room))
             })
+        }
+
+        // The levels with at least one. Older hd-seed-search releases don't
+        // count them or make 4-3 the City of Gold, so there's no value.
+        Preset::Lavafalls => {
+            let mut matched = vec![];
+            for (level, lvl) in levels.all(LAVAFALL_LEVELS)? {
+                if level == CITY_OF_GOLD_LEVEL && !lvl.city_of_gold {
+                    return None;
+                }
+                if lvl.lavafalls? > 0 {
+                    matched.push(level_name(level));
+                }
+            }
+            Some(if matched.is_empty() { "none".into() } else { matched.join(";") })
+        }
+
+        // The bombs in every shop item, prize wheel prize and crate before the
+        // temple, 3 for a bomb bag and 12 for a bomb box
+        Preset::PreTempleBombs => {
+            let bombs: u32 = levels
+                .all(PRE_TEMPLE_LEVELS)?
+                .iter()
+                .flat_map(|(_, lvl)| {
+                    lvl.shop.iter().chain(&lvl.crates).chain(&lvl.prize_wheel_item)
+                })
+                .map(|&item| match item {
+                    BOMB_BAG => 3,
+                    BOMB_BOX => 12,
+                    _ => 0,
+                })
+                .sum();
+            Some(bombs.to_string())
         }
     }
 }
@@ -350,6 +447,81 @@ mod tests {
         assert_eq!(super::prize(Preset::Shop12, &levels), None);
     }
 
+    // A level with this many lavafalls, as hd-seed-search 0.2.0 writes
+    fn lavafall_level(level: u32, lavafalls: Option<u32>) -> Level {
+        let mut lvl = parse(SEED_769403128).0.remove(&1).unwrap();
+        lvl.level = level;
+        lvl.lavafalls = lavafalls;
+        lvl.city_of_gold = level == CITY_OF_GOLD_LEVEL;
+        lvl
+    }
+
+    #[test]
+    fn lavafalls_lists_their_levels() {
+        let counts = [(13, 0), (14, 2), (15, 1), (16, 5), (17, 0), (18, 0), (19, 1)];
+        let levels =
+            Levels::new(counts.iter().map(|&(level, n)| lavafall_level(level, Some(n))).collect());
+        // 4-4 isn't looked at
+        let value = evaluate(Preset::Lavafalls, &levels, &ALL).unwrap();
+        assert_eq!(value, "4-2;4-3;5-3");
+        assert!(Preset::Lavafalls.is_match(&value));
+
+        let none = Levels::new(LAVAFALL_LEVELS.iter().map(|&l| lavafall_level(l, Some(0))).collect());
+        let value = evaluate(Preset::Lavafalls, &none, &ALL).unwrap();
+        assert_eq!(value, "none");
+        assert!(!Preset::Lavafalls.is_match(&value));
+    }
+
+    #[test]
+    fn lavafalls_need_a_generator_that_counts_them() {
+        // hd-seed-search 0.1.0 has no lavafall counts or City of Gold
+        let old = Levels::new(LAVAFALL_LEVELS.iter().map(|&l| lavafall_level(l, None)).collect());
+        assert_eq!(evaluate(Preset::Lavafalls, &old, &ALL), None);
+
+        let mut levels: Vec<_> = LAVAFALL_LEVELS.iter().map(|&l| lavafall_level(l, Some(1))).collect();
+        levels[2].city_of_gold = false;
+        assert_eq!(evaluate(Preset::Lavafalls, &Levels::new(levels), &ALL), None);
+    }
+
+    #[test]
+    fn pre_temple_bombs_counts_shops_and_crates_up_to_3_4() {
+        let level = |level: u32, shop: Vec<u32>, crates: Vec<u32>| {
+            let mut lvl = lavafall_level(level, None);
+            lvl.shop = shop;
+            lvl.crates = crates;
+            lvl
+        };
+        let mut levels: Vec<_> = (1..=13).map(|l| level(l, vec![], vec![])).collect();
+        levels[0] = level(1, vec![], vec![BOMB_BAG]);
+        // Other items, and bombs in both a shop and a crate
+        levels[1] = level(2, vec![BOMB_BAG, BOMB_BOX, 516, BOMB_BAG], vec![]);
+        levels[11] = level(12, vec![BOMB_BOX], vec![BOMB_BAG]);
+        // A prize wheel's prize counts too
+        levels[4].prize_wheel_item = Some(BOMB_BOX);
+        levels[5].prize_wheel_item = Some(516);
+        // 4-1 isn't counted
+        levels[12] = level(13, vec![BOMB_BOX], vec![]);
+        let levels = Levels::new(levels);
+        assert_eq!(evaluate(Preset::PreTempleBombs, &levels, &ALL).unwrap(), "48");
+        assert!(!Preset::PreTempleBombs.is_match("48"));
+        assert_eq!(Preset::PreTempleBombs.kind(), "count");
+    }
+
+    #[test]
+    fn hired_hand_shop_on_1_3() {
+        let mut levels = parse(SEED_769403128);
+        let lvl = levels.0.get_mut(&3).unwrap();
+        lvl.shopkeeper = true;
+        lvl.shop = vec![];
+        lvl.rooms = vec![2, 1, 0, 0, 10106];
+        lvl.hired_hands = Some(2);
+        assert_eq!(evaluate(Preset::Shop13, &levels, &ALL).unwrap(), "HH Shop:2");
+
+        // An older generator doesn't count them, so it's none like SpecsHD
+        levels.0.get_mut(&3).unwrap().hired_hands = None;
+        assert_eq!(evaluate(Preset::Shop13, &levels, &ALL).unwrap(), "none");
+    }
+
     #[test]
     fn missing_levels() {
         let levels = Levels::new(vec![]);
@@ -391,13 +563,17 @@ mod tests {
             };
             let seed = generated.seed;
             let levels = Levels::new(generated.levels);
-            for preset in ALL {
+            for preset in ALL.into_iter().filter(|preset| preset.in_specs()) {
                 let column = header.iter().position(|name| *name == preset.name()).unwrap();
                 let expected = row.get(column).copied().unwrap_or("");
                 if expected.is_empty() {
                     continue;
                 }
-                let actual = evaluate(preset, &levels, &ALL).unwrap();
+                let mut actual = evaluate(preset, &levels, &ALL).unwrap();
+                // SpecsHD has a hired hand shop as none
+                if actual.starts_with("HH Shop:") {
+                    actual = "none".into();
+                }
                 assert_eq!(items(&actual), items(expected), "seed {seed} {}", preset.name());
                 checked += 1;
             }
