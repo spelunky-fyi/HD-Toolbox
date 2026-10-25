@@ -6,6 +6,7 @@
 //! with extra columns for prize wheel prizes.
 
 mod entity_names;
+mod job;
 pub mod presets;
 mod steam;
 
@@ -513,7 +514,6 @@ impl SeedSearchTask {
     }
 
     async fn search(&mut self) -> anyhow::Result<()> {
-        let app_handle = self.app_handle.clone();
         let options = &self.options;
 
         // Everything is searched for, and the Toolbox filters what's shown
@@ -530,8 +530,39 @@ impl SeedSearchTask {
         }
         let generator = tool_dir.join(SEED_SEARCH_EXE);
 
-        let work_dir = std::env::temp_dir().join("hd-toolbox-seed-search");
+        // A folder of its own, so nothing left over from another search (or
+        // another Toolbox) can write to the files this one reads
+        let started = SystemTime::now().duration_since(UNIX_EPOCH)?.as_millis();
+        let work_root = std::env::temp_dir().join("hd-toolbox-seed-search");
+        // Left behind by searches the Toolbox was closed during. One that's
+        // still running has its files open, so they stay.
+        if let Ok(entries) = fs::read_dir(&work_root) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_dir() {
+                    fs::remove_dir_all(&path).ok();
+                } else {
+                    fs::remove_file(&path).ok();
+                }
+            }
+        }
+        let work_dir = work_root.join(format!("{}-{}", std::process::id(), started));
         fs::create_dir_all(&work_dir)?;
+        let result = self.search_in(&work_dir, game_dir, generator, levels, presets).await;
+        fs::remove_dir_all(&work_dir).ok();
+        result
+    }
+
+    async fn search_in(
+        &mut self,
+        work_dir: &Path,
+        game_dir: PathBuf,
+        generator: PathBuf,
+        levels: u32,
+        presets: Vec<Preset>,
+    ) -> anyhow::Result<()> {
+        let app_handle = self.app_handle.clone();
+        let options = &self.options;
         let seeds_path = work_dir.join("seeds.txt");
         let out_path = work_dir.join("levels.jsonl");
         let log_path = work_dir.join("levels.jsonl.log");
@@ -540,8 +571,6 @@ impl SeedSearchTask {
             .map(u32::to_string)
             .collect();
         fs::write(&seeds_path, seeds.join("\n") + "\n")?;
-        // Don't read the last search's output
-        fs::remove_file(&out_path).ok();
 
         let mut search = Search {
             csv: CsvOutput::open(&results_csv(&app_handle, &options.output_csv)?)?,
@@ -570,6 +599,10 @@ impl SeedSearchTask {
             .kill_on_drop(true)
             .spawn()
             .context("Couldn't start hd-seed-search.exe")?;
+        let job = job::KillOnClose::new()?;
+        if let Some(handle) = child.raw_handle() {
+            job.add(handle as _)?;
+        }
 
         let mut reader = OutputReader::new(out_path);
         let mut tick = interval(Duration::from_millis(250));

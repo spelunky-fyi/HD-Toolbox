@@ -69,47 +69,56 @@
     groupMinCount = {};
   }
 
-  // Counts over every seed, like SeedApp
-  function countBy<T>(keys: T[]) {
-    const counts = new Map<T, number>();
-    for (const key of keys) counts.set(key, (counts.get(key) ?? 0) + 1);
-    return counts;
+  // Counts over every seed, like SeedApp. One pass over the rows, since there
+  // can be hundreds of thousands of them.
+  function add<T>(counts: Map<T, number>, key: T) {
+    counts.set(key, (counts.get(key) ?? 0) + 1);
   }
 
-  $: flagCounts = Object.fromEntries(
-    flagPresets.map((info) => [
-      info.id,
-      countBy($rows.map((row) => row.flags[info.id]?.state ?? UNKNOWN)),
-    ]),
-  );
-  $: levelCounts = Object.fromEntries(
-    flagPresets.map((info) => {
-      const counts = countBy(
-        $rows.flatMap((row) => row.flags[info.id]?.levels ?? []),
+  function byPreset<T>(presets: PresetInfo[], make: () => T): Record<string, T> {
+    return Object.fromEntries(presets.map((info) => [info.id, make()]));
+  }
+
+  function countRows(all: Row[], flags: PresetInfo[], lists: PresetInfo[]) {
+    const flagCounts = byPreset(flags, () => new Map<number, number>());
+    const levels = byPreset(flags, () => new Map<string, number>());
+    const items = byPreset(lists, () => new Map<string, number>());
+    const presenceCounts = byPreset(lists, () => new Map<number, number>());
+    const maxItems = byPreset(lists, () => 0);
+
+    for (const row of all) {
+      for (const info of flags) {
+        const flag = row.flags[info.id];
+        add(flagCounts[info.id], flag?.state ?? UNKNOWN);
+        for (const level of flag?.levels ?? []) add(levels[info.id], level);
+      }
+      for (const info of lists) {
+        const list = row.lists[info.id];
+        add(presenceCounts[info.id], list?.state ?? UNKNOWN);
+        const listItems = list?.items ?? [];
+        for (const item of new Set(listItems)) add(items[info.id], item);
+        maxItems[info.id] = Math.max(maxItems[info.id], listItems.length);
+      }
+    }
+
+    const sorted = (counts: Record<string, Map<string, number>>) =>
+      Object.fromEntries(
+        Object.entries(counts).map(([id, map]) => [
+          id,
+          [...map].sort(([a], [b]) => a.localeCompare(b)),
+        ]),
       );
-      return [info.id, [...counts].sort(([a], [b]) => a.localeCompare(b))];
-    }),
-  );
-  $: itemCounts = Object.fromEntries(
-    listPresets.map((info) => {
-      const counts = countBy(
-        $rows.flatMap((row) => [...new Set(row.lists[info.id]?.items ?? [])]),
-      );
-      return [info.id, [...counts].sort(([a], [b]) => a.localeCompare(b))];
-    }),
-  );
-  $: presenceCounts = Object.fromEntries(
-    listPresets.map((info) => [
-      info.id,
-      countBy($rows.map((row) => row.lists[info.id]?.state ?? UNKNOWN)),
-    ]),
-  );
-  $: maxItems = Object.fromEntries(
-    listPresets.map((info) => [
-      info.id,
-      Math.max(0, ...$rows.map((row) => row.lists[info.id]?.items.length ?? 0)),
-    ]),
-  );
+    return {
+      flagCounts,
+      levelCounts: sorted(levels),
+      itemCounts: sorted(items),
+      presenceCounts,
+      maxItems,
+    };
+  }
+
+  $: ({ flagCounts, levelCounts, itemCounts, presenceCounts, maxItems } =
+    countRows($rows, flagPresets, listPresets));
 
   function passes(row: Row) {
     for (const info of flagPresets) {

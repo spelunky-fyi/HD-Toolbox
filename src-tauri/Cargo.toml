@@ -39,6 +39,7 @@ tauri-plugin-window-state = "0.1.0"
 tokio = { version = "1", features = ["full"] }
 winapi = { version = "0.3.9", features = [
   "handleapi",
+  "jobapi2",
   "memoryapi",
   "minwinbase",
   "ntdef",

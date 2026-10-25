@@ -96,25 +96,78 @@ export const running = writable(false);
 export const loadedFrom = writable<string | null>(null);
 
 const bySeed = new Map<number, Row>();
+// bySeed's rows sorted by seed, as last published to rows
+let sorted: Row[] = [];
+// Rows not in sorted yet, and whether a seed already in it was replaced
+let added: Row[] = [];
+let replaced = false;
 let pending: SeedResult[] = [];
 
-function addResults(results: SeedResult[]) {
+// Publishing reruns the page's counts and filters over every row, so a busy
+// search only does it this often
+const PUBLISH_MS = 1000;
+let publishTimer: ReturnType<typeof setTimeout> | null = null;
+
+function publish() {
+  publishTimer = null;
+  if (replaced) {
+    sorted = [...bySeed.values()].sort((a, b) => a.seed - b.seed);
+  } else {
+    added.sort((a, b) => a.seed - b.seed);
+    const merged: Row[] = new Array(sorted.length + added.length);
+    let i = 0;
+    let j = 0;
+    for (let k = 0; k < merged.length; k++) {
+      merged[k] =
+        j >= added.length || (i < sorted.length && sorted[i].seed < added[j].seed)
+          ? sorted[i++]
+          : added[j++];
+    }
+    sorted = merged;
+  }
+  added = [];
+  replaced = false;
+  rows.set(sorted);
+}
+
+function addResults(results: SeedResult[], now = false) {
   const info = get(presetInfo);
   if (info.length === 0) {
     pending.push(...results);
     return;
   }
   for (const result of results) {
-    bySeed.set(result.seed, toRow(result, info));
+    const row = toRow(result, info);
+    if (bySeed.has(result.seed)) {
+      replaced = true;
+    } else {
+      added.push(row);
+    }
+    bySeed.set(result.seed, row);
   }
-  rows.set([...bySeed.values()].sort((a, b) => a.seed - b.seed));
+  if (now) {
+    if (publishTimer) clearTimeout(publishTimer);
+    publish();
+  } else if (!publishTimer) {
+    publishTimer = setTimeout(publish, PUBLISH_MS);
+  }
+}
+
+function clearResults() {
+  if (publishTimer) clearTimeout(publishTimer);
+  publishTimer = null;
+  bySeed.clear();
+  sorted = [];
+  added = [];
+  replaced = false;
+  rows.set([]);
 }
 
 invoke<PresetInfo[]>("seed_search_presets").then((info) => {
   presetInfo.set(info);
   const waiting = pending;
   pending = [];
-  addResults(waiting);
+  addResults(waiting, true);
 });
 
 listen("task-state:SeedSearch", (event) => {
@@ -127,10 +180,11 @@ listen("task-state:SeedSearch", (event) => {
 
   const latest: Progress = update.data;
   progress.set(latest);
+  const done = latest.state === "Finished" || latest.state === "Stopped";
   if (latest.newResults.length > 0) {
-    addResults(latest.newResults);
+    addResults(latest.newResults, done);
   }
-  if (latest.state === "Finished" || latest.state === "Stopped") {
+  if (done) {
     running.set(false);
   }
 });
@@ -141,10 +195,9 @@ export async function loadResults(path: string) {
     return;
   }
   loadedFrom.set(path);
-  bySeed.clear();
-  rows.set([]);
+  clearResults();
   try {
-    addResults(await invoke<SeedResult[]>("load_seed_search_results", { path }));
+    addResults(await invoke<SeedResult[]>("load_seed_search_results", { path }), true);
   } catch (err) {
     failure.set(String(err));
   }
