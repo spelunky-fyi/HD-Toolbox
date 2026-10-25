@@ -76,9 +76,12 @@
   // Seeds with these digits somewhere in them
   let seedFilter = "";
   $: seedDigits = seedFilter.replace(/\D/g, "");
+  // Set by scouting to show exactly that seed, until the seed filter is edited
+  let seedExact: number | null = null;
 
   function resetFilters() {
     seedFilter = "";
+    seedExact = null;
     flagFilter = {};
     flagLevels = {};
     groupItems = {};
@@ -175,7 +178,11 @@
   );
 
   function passes(row: Row) {
-    if (seedDigits && !String(row.seed).includes(seedDigits)) return false;
+    if (seedExact !== null) {
+      if (row.seed !== seedExact) return false;
+    } else if (seedDigits && !String(row.seed).includes(seedDigits)) {
+      return false;
+    }
     for (const info of flagPresets) {
       const flag = row.flags[info.id];
       const want = flagFilter[info.id];
@@ -218,6 +225,7 @@
   $: matching = filterRows(
     $rows,
     seedDigits,
+    seedExact,
     flagFilter,
     flagLevels,
     groupItems,
@@ -282,9 +290,12 @@
   } = seedSearchTool;
 
   // 0 searches until stopped
+  // An empty box binds to null, which isn't a request to search until stopped
   $: canStart =
     !$running &&
     $launchable &&
+    $seedCount != null &&
+    String($seedCount).trim() !== "" &&
     Number.isInteger(Number($seedCount)) &&
     Number($seedCount) >= 0;
 
@@ -324,6 +335,7 @@
     // Show just this seed
     resetFilters();
     seedFilter = String(scoutValue);
+    seedExact = scoutValue;
     scouting = scoutValue;
     start(scoutValue);
   }
@@ -468,6 +480,7 @@
             inputmode="numeric"
             placeholder="Has these digits, e.g. 45654"
             bind:value={seedFilter}
+            on:input={() => (seedExact = null)}
           />
         </section>
 
@@ -558,27 +571,7 @@
                 >({(groupItems[info.id] ?? []).length} on)</span
               >
             </h4>
-            {#if SHOP_KIND_PRESETS.includes(info.id)}
-              <div class="choices">
-                <span class="dim">Shop:</span>
-                {#each SHOP_KIND_CHOICES as [label, kind]}
-                  <label>
-                    <input
-                      type="radio"
-                      name="shop-kind-{info.id}"
-                      checked={(shopKindFilter[info.id] ?? null) === kind}
-                      on:change={() => (shopKindFilter[info.id] = kind)}
-                    />
-                    {label}
-                    {#if kind !== null}
-                      <span class="dim"
-                        >({shopKindCounts[info.id]?.get(kind) ?? 0})</span
-                      >
-                    {/if}
-                  </label>
-                {/each}
-              </div>
-            {:else if isShop(info)}
+            {#if isShop(info)}
               <div class="choices">
                 <span class="dim">Shop:</span>
                 {#each SHOP_CHOICES as [label, state]}
@@ -600,6 +593,27 @@
                   {/if}
                 {/each}
               </div>
+              {#if SHOP_KIND_PRESETS.includes(info.id)}
+                <div class="choices">
+                  <span class="dim">Kind:</span>
+                  {#each SHOP_KIND_CHOICES as [label, kind]}
+                    <label>
+                      <input
+                        type="radio"
+                        name="shop-kind-{info.id}"
+                        checked={(shopKindFilter[info.id] ?? null) === kind}
+                        on:change={() => (shopKindFilter[info.id] = kind)}
+                      />
+                      {label}
+                      {#if kind !== null}
+                        <span class="dim"
+                          >({shopKindCounts[info.id]?.get(kind) ?? 0})</span
+                        >
+                      {/if}
+                    </label>
+                  {/each}
+                </div>
+              {/if}
             {:else if maxItems[info.id] > 0}
               <div class="choices">
                 <span class="dim">At least</span>

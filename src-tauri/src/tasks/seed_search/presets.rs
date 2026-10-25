@@ -323,7 +323,7 @@ pub fn evaluate(preset: Preset, levels: &Levels, searching: &[Preset]) -> Option
         }
 
         // The bombs in every shop item, prize wheel prize and crate before the
-        // temple, 3 for a bomb bag and 10 for a bomb box
+        // temple, 3 for a bomb bag and 12 for a bomb box
         Preset::PreTempleBombs => {
             let bombs: u32 = levels
                 .all(PRE_TEMPLE_LEVELS)?
@@ -333,7 +333,7 @@ pub fn evaluate(preset: Preset, levels: &Levels, searching: &[Preset]) -> Option
                 })
                 .map(|&item| match item {
                     BOMB_BAG => 3,
-                    BOMB_BOX => 10,
+                    BOMB_BOX => 12,
                     _ => 0,
                 })
                 .sum();
@@ -502,8 +502,8 @@ mod tests {
         // 4-1 isn't counted
         levels[12] = level(13, vec![BOMB_BOX], vec![]);
         let levels = Levels::new(levels);
-        assert_eq!(evaluate(Preset::PreTempleBombs, &levels, &ALL).unwrap(), "42");
-        assert!(!Preset::PreTempleBombs.is_match("42"));
+        assert_eq!(evaluate(Preset::PreTempleBombs, &levels, &ALL).unwrap(), "48");
+        assert!(!Preset::PreTempleBombs.is_match("48"));
         assert_eq!(Preset::PreTempleBombs.kind(), "count");
     }
 

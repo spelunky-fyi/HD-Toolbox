@@ -773,10 +773,17 @@ impl SeedSearchTask {
             .kill_on_drop(true)
             .spawn()
             .context("Couldn't start hd-seed-search.exe")?;
-        let job = job::KillOnClose::new()?;
-        if let Some(handle) = child.raw_handle() {
-            job.add(handle as _)?;
-        }
+        // Best effort: without the job the search still works, hd-seed-search
+        // just isn't killed if the Toolbox is closed some other way than Stop
+        let job = job::KillOnClose::new()
+            .and_then(|job| {
+                if let Some(handle) = child.raw_handle() {
+                    job.add(handle as _)?;
+                }
+                Ok(job)
+            })
+            .map_err(|err| log::warn!("{err:#}, so hd-seed-search won't be killed if the Toolbox is closed unexpectedly"))
+            .ok();
 
         let mut reader = OutputReader::new(out_path.clone());
         let mut tick = interval(Duration::from_millis(250));
