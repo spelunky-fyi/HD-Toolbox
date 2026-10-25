@@ -5,6 +5,7 @@
 
   import ItemIcon from "./ItemIcon.svelte";
   import { SPRITES } from "./sprites";
+  import { hiredHands, itemLabel } from "./search";
 
   export let value: string;
   export let size = 40;
@@ -23,10 +24,21 @@
     {#each items as entry}
       {@const prize = entry.startsWith("Prize:")}
       {@const item = prize ? entry.slice("Prize:".length) : entry}
+      {@const hired = hiredHands(item)}
       {#if prize}
         <span class="name">Prize Wheel:</span>
       {/if}
-      {#if SPRITES[item]}
+      {#if hired !== null}
+        <!-- A hired hand shop, a hired hand for each one in it -->
+        {#each Array(Math.min(Math.max(hired, 1), 3)) as _}
+          <ItemIcon
+            {item}
+            {size}
+            highlight={highlight.includes(item)}
+            title={itemLabel(item)}
+          />
+        {/each}
+      {:else if SPRITES[item]}
         <ItemIcon
           {item}
           {size}
@@ -34,7 +46,9 @@
           title={prize ? `Prize Wheel: ${item}` : item}
         />
       {:else}
-        <span class="name" class:highlight={highlight.includes(item)}>{item}</span>
+        <span class="name" class:highlight={highlight.includes(item)}
+          >{itemLabel(item)}</span
+        >
       {/if}
     {/each}
   </span>

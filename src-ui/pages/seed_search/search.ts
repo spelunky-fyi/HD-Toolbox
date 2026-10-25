@@ -9,6 +9,9 @@ export interface PresetInfo {
   name: string;
   label: string;
   matchable: boolean;
+  // "flag" is yes or no (with levels), "list" the items somewhere, "count" a
+  // number
+  kind: "flag" | "list" | "count";
 }
 
 export interface SeedResult {
@@ -25,6 +28,8 @@ export interface Progress {
   total: number;
   seedsPerSecond: number;
   hits: Record<string, number>;
+  // How many of the first seeds are ones already in the csv missing values
+  rescouting: number;
   newResults: SeedResult[];
 }
 
@@ -39,30 +44,73 @@ export interface Row {
   // Per matchable preset
   flags: Record<string, { state: number; levels: string[]; value: string }>;
   // Per list preset (crates and shops)
-  lists: Record<string, { state: number; items: string[]; display: string }>;
+  lists: Record<
+    string,
+    { state: number; items: string[]; display: string; shopKind: ShopKind | null }
+  >;
+  // Per count preset, null when the seed doesn't have one yet
+  counts: Record<string, number | null>;
 }
 
 const LEVEL = /^\d+-\d+$/;
+const HH_SHOP = /^HH Shop:(\d+)$/;
+
+// What sort of shop a shop preset's value is: a hired hand shop, a prize
+// wheel (roulette) shop, or a normal one with items for sale
+export type ShopKind = "normal" | "hh" | "roulette";
+
+function shopKind(value: string | undefined, display: string): ShopKind | null {
+  if (!value || value === "n/a" || value === "none") return null;
+  const entries = display.split(";");
+  if (entries.some((entry) => HH_SHOP.test(entry))) return "hh";
+  if (entries.some((entry) => entry === "Prize Wheel" || entry.startsWith("Prize:")))
+    return "roulette";
+  return "normal";
+}
+
+// The hired hands in a hired hand shop's "HH Shop:<count>", or null for
+// anything else
+export function hiredHands(item: string): number | null {
+  const hhShop = HH_SHOP.exec(item);
+  return hhShop ? Number(hhShop[1]) : null;
+}
+
+// How an item in a list value reads
+export function itemLabel(item: string) {
+  const count = hiredHands(item);
+  if (count !== null) {
+    return `HH Shop (${count} hired hand${count === 1 ? "" : "s"})`;
+  }
+  return item;
+}
 
 function flagState(value: string | undefined) {
   if (!value) return UNKNOWN;
   if (value === "n/a") return NA;
-  if (value === "false") return NO;
+  // A list of levels is "none" without any, like lavafalls
+  if (value === "false" || value === "none") return NO;
   return YES;
 }
 
-function listState(value: string | undefined) {
+// The shop presets. A shop always has something for sale, so "none" is no
+// shop, which is how SpecsHD's 1-2 column has it.
+const SHOP_PRESETS = ["Shop12", "Shop13"];
+
+function listState(value: string | undefined, shop: boolean) {
   if (!value) return UNKNOWN;
   if (value === "n/a") return NA;
-  if (value === "none") return NO;
+  if (value === "none") return shop ? NA : NO;
   return YES;
 }
 
 function toRow(result: SeedResult, info: PresetInfo[]): Row {
-  const row: Row = { seed: result.seed, flags: {}, lists: {} };
+  const row: Row = { seed: result.seed, flags: {}, lists: {}, counts: {} };
   for (const preset of info) {
     const value = result.values[preset.id];
-    if (preset.matchable) {
+    if (preset.kind === "count") {
+      const count = Number(value);
+      row.counts[preset.id] = value && Number.isFinite(count) ? count : null;
+    } else if (preset.kind === "flag") {
       row.flags[preset.id] = {
         state: flagState(value),
         levels: (value ?? "").split(";").filter((part) => LEVEL.test(part)),
@@ -70,7 +118,7 @@ function toRow(result: SeedResult, info: PresetInfo[]): Row {
       };
     } else {
       const display = result.display[preset.id] ?? value ?? "";
-      const state = listState(value);
+      const state = listState(value, SHOP_PRESETS.includes(preset.id));
       row.lists[preset.id] = {
         state,
         // A prize wheel's prize counts as one of its items
@@ -81,6 +129,7 @@ function toRow(result: SeedResult, info: PresetInfo[]): Row {
                 .map((item) => (item.startsWith("Prize:") ? item.slice(6) : item))
             : [],
         display,
+        shopKind: shopKind(value, display),
       };
     }
   }
@@ -181,7 +230,8 @@ listen("task-state:SeedSearch", (event) => {
   const latest: Progress = update.data;
   progress.set(latest);
   const done = latest.state === "Finished" || latest.state === "Stopped";
-  if (latest.newResults.length > 0) {
+  // When it's done, everything is shown before running goes false
+  if (latest.newResults.length > 0 || done) {
     addResults(latest.newResults, done);
   }
   if (done) {
@@ -208,6 +258,8 @@ export async function startSearch(
   options: {
     seedCount: number;
     outputCsv: string;
+    // Just this seed, to scout it
+    seed?: number;
   },
   toolDir: () => Promise<string>
 ) {
